@@ -41,13 +41,13 @@ const [newUnlock, setNewUnlock] = useState<number | null>(null);
   const [sliderValue, setSliderValue] = useState(0);
 
   useEffect(() => {
-    getUnlockedDifficulties().then(setUnlockedDifficulties);
+    getUnlockedDifficulties("preflop").then(setUnlockedDifficulties);
     startNewHand(1);
   }, []);
 
   const progressDifficulty = hand?.difficulty ?? difficulty;
   useEffect(() => {
-    getHandProgress(progressDifficulty).then(setProgress);
+    getHandProgress(progressDifficulty, "preflop").then(setProgress);
   }, [progressDifficulty]);
 
   async function startNewHand(diff?: number) {
@@ -58,7 +58,7 @@ const [newUnlock, setNewUnlock] = useState<number | null>(null);
     setPointsScored(null);
     setNewUnlock(null);
     setSliderValue(0);
-    const result = await getOrCreateHand(d);
+    const result = await getOrCreateHand(d, "preflop");
     setHand({ ...result, difficulty: d });
     setLoading(false);
   }

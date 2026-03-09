@@ -51,7 +51,16 @@ async function checkAndUnlock(userId: string, difficulty: number, handModule: st
   }
 }
 
-export async function getOrCreateHand(difficulty: number = 1, handModule: string = "preflop") {
+type HandResult = {
+  handId: string;
+  heroCards: { rank: string; suit: string }[];
+  villainRange: number;
+  flopCards: { rank: string; suit: string }[] | undefined;
+  turnCard: { rank: string; suit: string } | undefined;
+  riverCard: { rank: string; suit: string } | undefined;
+};
+
+export async function getOrCreateHand(difficulty: number, handModule: string): Promise<HandResult> {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Not authenticated");
 
@@ -181,7 +190,7 @@ export async function submitGuess(handId: string, guess: number) {
   };
 }
 
-export async function getUnlockedDifficulties(handModule: string = "preflop"): Promise<number[]> {
+export async function getUnlockedDifficulties(handModule: string): Promise<number[]> {
   const session = await auth();
   if (!session?.user?.id) return [1];
 
@@ -195,7 +204,7 @@ export async function getUnlockedDifficulties(handModule: string = "preflop"): P
   return Array.from(unlocked).sort((a, b) => a - b);
 }
 
-export async function getHandProgress(difficulty: number, handModule: string = "preflop"): Promise<{ count: number; total: number }> {
+export async function getHandProgress(difficulty: number, handModule: string): Promise<{ count: number; total: number }> {
   const session = await auth();
   if (!session?.user?.id) return { count: 0, total: 0 };
 
