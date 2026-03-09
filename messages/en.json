@@ -1,0 +1,33 @@
+{
+  "nav": {
+    "train": "Train",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register"
+  },
+  "train": {
+    "dealing": "Dealing...",
+    "calculating": "Calculating...",
+    "perfect": "Perfect! +3",
+    "close": "Close! +1",
+    "miss": "Miss! +0",
+    "actualEquity": "Actual equity",
+    "nextHand": "Next hand",
+    "unlocked": "New difficulty unlocked",
+    "maxLevel": "Max level reached",
+    "buildingWindow": "Building window: {count}/100 hands",
+    "handsToActivate": "Play {count} more hands to activate the rolling score window",
+    "last100": "Last 100 hands",
+    "whatIsYourEquity": "What is your equity?",
+    "submit": "Submit",
+    "readyToUnlock": "Ready to unlock {name}!",
+    "ptsNeeded": "{pts} more pts needed to unlock {name}"
+  },
+  "difficulty": {
+    "1": "Beginner",
+    "2": "Intermediate",
+    "3": "Advanced",
+    "4": "Pro",
+    "locked": "Complete previous level to unlock"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "nav": {
+    "train": "Training",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "register": "Registrieren"
+  },
+  "train": {
+    "dealing": "Karten werden ausgeteilt...",
+    "calculating": "Wird berechnet...",
+    "perfect": "Volltreffer! +3",
+    "close": "Nah dran! +1",
+    "miss": "Daneben! +0",
+    "actualEquity": "Tatsächliche Equity",
+    "nextHand": "Nächste Hand",
+    "unlocked": "Neue Schwierigkeitsstufe freigeschaltet",
+    "maxLevel": "Höchste Stufe erreicht",
+    "buildingWindow": "Aufbau: {count}/100 Hände",
+    "handsToActivate": "Noch {count} Hände bis zum rollierenden Fenster",
+    "last100": "Letzte 100 Hände",
+    "whatIsYourEquity": "Wie hoch ist deine Equity?",
+    "submit": "Bestätigen",
+    "readyToUnlock": "{name} kann jetzt freigeschaltet werden!",
+    "ptsNeeded": "Noch {pts} Punkte zum Freischalten von {name}"
+  },
+  "difficulty": {
+    "1": "Anfänger",
+    "2": "Fortgeschritten",
+    "3": "Experte",
+    "4": "Pro",
+    "locked": "Vorherige Stufe abschließen zum Freischalten"
+  }
+}
