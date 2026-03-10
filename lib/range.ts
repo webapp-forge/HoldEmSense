@@ -2,20 +2,25 @@ import { Card } from "./deck";
 
 // Alle 169 Starthand-Typen, sortiert von stark nach schwach
 // s = suited, o = offsuit, p = pair
+// Sorted by win% at a 10-player table (Wikipedia / Sklansky, ranks 1–169)
 export const HAND_RANKINGS: string[] = [
-  "AA","KK","QQ","JJ","TT","99","88","AKs","77","AQs","AJs","KQs","AKo",
-  "ATs","66","AQo","KJs","55","A9s","KTs","QJs","AJo","44","A8s","KQo",
-  "KJo","QTs","A7s","K9s","JTs","ATo","33","A6s","A5s","K8s","QJo","A4s","Q9s",
-  "K7s","A3s","JTo","22","K6s","A2s","K5s","KTo","QTo","J9s","K4s","Q8s","K3s",
-  "T9s","K2s","J8s","Q7s","K9o","T8s","Q6s","J9o","Q5s","97s","J7s","Q4s",
-  "T9o","Q3s","96s","J6s","Q2s","T7s","K8o","J5s","86s","Q9o","J4s","T6s",
-  "75s","J3s","95s","K7o","J2s","T5s","64s","T4s","K6o","85s","T3s","53s",
-  "74s","T2s","K5o","J8o","Q8o","63s","43s","K4o","54s","98s","93s","T8o","K3o",
-  "62s","52s","97o","K2o","J7o","Q7o","76s","87s","42s","32s","A9o","96o",
-  "94s","92s","86o","Q6o","A8o","65s","T7o","75o","J6o","A7o","54o","Q5o","64o","A6o",
-  "84s","83s","82s","J5o","85o","Q4o","A5o","T6o","53o","A4o","Q3o","74o","J4o","A3o","63o",
-  "73s","72s","Q2o","43o","A2o","J3o","T5o","J2o","T4o","52o","T3o","42o","T2o","32o",
-  "98o","95o","94o","93o","92o","87o","84o","83o","82o","76o","65o","73o","72o","62o",
+  "AA","KK","QQ","AKs","JJ","AQs","KQs","AJs","KJs","TT",
+  "AKo","ATs","QJs","KTs","QTs","JTs","99","AQo","A9s","KQo",
+  "88","K9s","T9s","A8s","Q9s","J9s","AJo","A5s","77","A7s",
+  "KJo","A4s","A3s","A6s","QJo","66","K8s","T8s","A2s","98s",
+  "J8s","ATo","Q8s","K7s","KTo","55","JTo","87s","QTo","44",
+  "22","33","K6s","97s","K5s","76s","T7s","K4s","K2s","K3s",
+  "Q7s","86s","65s","J7s","54s","Q6s","75s","96s","Q5s","64s",
+  "Q4s","Q3s","T9o","T6s","Q2s","A9o","53s","85s","J6s","J9o",
+  "K9o","J5s","Q9o","43s","74s","J4s","J3s","95s","J2s","63s",
+  "A8o","52s","T5s","84s","T4s","T3s","42s","T2s","98o","T8o",
+  "A5o","A7o","73s","A4o","32s","94s","93s","J8o","A3o","62s",
+  "92s","K8o","A6o","87o","Q8o","83s","A2o","82s","97o","72s",
+  "76o","K7o","65o","T7o","K6o","86o","54o","K5o","J7o","75o",
+  "Q7o","K4o","K3o","96o","K2o","64o","Q6o","53o","85o","T6o",
+  "Q5o","43o","Q4o","Q3o","74o","Q2o","J6o","63o","J5o","95o",
+  "52o","J4o","J3o","42o","J2o","84o","T5o","T4o","32o","T3o",
+  "73o","T2o","62o","94o","93o","92o","83o","82o","72o",
 ];
 
 // Wie viele Kombos hat ein Handtyp?

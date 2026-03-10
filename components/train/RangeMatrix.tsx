@@ -57,11 +57,11 @@ export default function RangeMatrix({ villainRange, heroCards }: Props) {
             const isSuited = row < col;
 
             let bg: string;
-            if (isHero)       bg = "bg-lime-400";
-            else if (inRange) bg = isPair ? "bg-blue-500" : isSuited ? "bg-blue-700" : "bg-blue-900";
+            if (isHero)       bg = "bg-white";
+            else if (inRange) bg = isPair ? "bg-lime-400" : isSuited ? "bg-lime-600" : "bg-lime-800";
             else              bg = "bg-gray-800";
 
-            const textColor = isHero ? "text-gray-900" : inRange ? "text-blue-200" : "text-gray-600";
+            const textColor = isHero || isPair && inRange ? "text-gray-900" : inRange ? "text-lime-100" : "text-gray-600";
             return (
               <div
                 key={key}
@@ -78,17 +78,17 @@ export default function RangeMatrix({ villainRange, heroCards }: Props) {
       {/* Legend */}
       <div className="flex gap-3 mt-3 flex-wrap">
         <span className="flex items-center gap-1.5 text-gray-400 text-xs">
-          <span className="inline-block w-2.5 h-2.5 rounded-sm bg-blue-500" /> Pairs
+          <span className="inline-block w-2.5 h-2.5 rounded-sm bg-lime-400" /> Pairs
         </span>
         <span className="flex items-center gap-1.5 text-gray-400 text-xs">
-          <span className="inline-block w-2.5 h-2.5 rounded-sm bg-blue-700" /> Suited
+          <span className="inline-block w-2.5 h-2.5 rounded-sm bg-lime-600" /> Suited
         </span>
         <span className="flex items-center gap-1.5 text-gray-400 text-xs">
-          <span className="inline-block w-2.5 h-2.5 rounded-sm bg-blue-900" /> Offsuit
+          <span className="inline-block w-2.5 h-2.5 rounded-sm bg-lime-800" /> Offsuit
         </span>
         {heroKey && (
           <span className="flex items-center gap-1.5 text-gray-400 text-xs">
-            <span className="inline-block w-2.5 h-2.5 rounded-sm bg-lime-400" /> Your hand ({heroKey})
+            <span className="inline-block w-2.5 h-2.5 rounded-sm bg-white" /> Your hand ({heroKey})
           </span>
         )}
       </div>
