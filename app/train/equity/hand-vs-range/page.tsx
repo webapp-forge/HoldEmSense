@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { getOrCreateHand, submitGuess, getUnlockedDifficulties, getHandProgress } from "../../../../lib/actions/training";
 import { useTranslations } from "next-intl";
 import CardComponent from "../../../../components/Card";
+import TrainPageLayout from "../../../../components/train/TrainPageLayout";
+import RangeMatrix from "../../../../components/train/RangeMatrix";
 
 const CLASS_STEPS: Record<number, number> = { 1: 20, 2: 10, 3: 5, 4: 2 };
 
@@ -88,6 +90,10 @@ const [newUnlock, setNewUnlock] = useState<number | null>(null);
   if (loading || !hand) return <div className="text-gray-400">{t("dealing")}</div>;
 
   return (
+    <TrainPageLayout
+      info={<RangeMatrix villainRange={hand.villainRange} heroCards={hand.heroCards} />}
+      explanation={<p>Estimate your hand&apos;s equity against the villain&apos;s preflop range. Use the difficulty levels to train with more precise equity classes.</p>}
+    >
     <div className="flex flex-col gap-6 max-w-2xl">
       <div>
         <h2 className="text-xl font-bold">Hand vs Range</h2>
@@ -287,5 +293,6 @@ const [newUnlock, setNewUnlock] = useState<number | null>(null);
         </div>
       )}
     </div>
+    </TrainPageLayout>
   );
 }

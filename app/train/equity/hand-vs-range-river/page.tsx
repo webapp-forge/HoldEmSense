@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { getOrCreateHand, submitGuess, getUnlockedDifficulties, getHandProgress } from "../../../../lib/actions/training";
 import { useTranslations } from "next-intl";
 import CardComponent from "../../../../components/Card";
+import TrainPageLayout from "../../../../components/train/TrainPageLayout";
+import RangeMatrix from "../../../../components/train/RangeMatrix";
 
 const MODULE = "river";
 
@@ -97,6 +99,10 @@ export default function HandVsRangeRiverPage() {
   if (loading || !hand) return <div className="text-gray-400">{t("dealing")}</div>;
 
   return (
+    <TrainPageLayout
+      info={<RangeMatrix villainRange={hand.villainRange} heroCards={hand.heroCards} />}
+      explanation={<p>Estimate your hand&apos;s equity on the river. No more cards to come – this is the true showdown strength.</p>}
+    >
     <div className="flex flex-col gap-6 max-w-2xl">
       <div>
         <h2 className="text-xl font-bold">River: Hand vs Range</h2>
@@ -323,5 +329,6 @@ export default function HandVsRangeRiverPage() {
         </div>
       )}
     </div>
+    </TrainPageLayout>
   );
 }
