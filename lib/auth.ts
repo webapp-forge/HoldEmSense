@@ -26,7 +26,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                 if (!valid) return null;
 
-                return { id: user.id, email: user.email, name: user.username };
+                return { id: user.id, email: user.email, name: user.username, isPremium: user.isPremium };
             },
         }),
     ],
@@ -36,11 +36,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     callbacks: {
         jwt({ token, user }) {
-            if (user) token.id = user.id;
+            if (user) {
+                token.id = user.id;
+                token.isPremium = (user as any).isPremium as boolean;
+            }
             return token;
         },
         session({ session, token }) {
             session.user.id = token.id as string;
+            (session.user as any).isPremium = token.isPremium as boolean;
             return session;
         },
     },

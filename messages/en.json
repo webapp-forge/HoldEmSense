@@ -5,6 +5,70 @@
     "logout": "Logout",
     "register": "Register"
   },
+  "home": {
+    "tagline": "Train your poker intuition — think in ranges, not exact numbers.",
+    "guestTitle": "Try as a Guest",
+    "guestSubtitle": "No sign-up needed",
+    "guestFeat1": "Preflop Hand vs Range",
+    "guestFeat2": "Flop Hand vs Range",
+    "guestFeat3": "Beginner difficulty",
+    "guestNote": "Progress not saved",
+    "guestCta": "Start training",
+    "freeTitle": "Register for Free",
+    "freeSubtitle": "Always free",
+    "freeFeat1": "Everything in Guest",
+    "freeFeat2": "Turn & River training",
+    "freeFeat3": "Pot Odds training",
+    "freeFeat4": "Intermediate difficulty",
+    "freeFeat5": "Progress saved across sessions",
+    "freeCta": "Create free account",
+    "proTitle": "Pro",
+    "proSubtitle": "Full access · 10€/month",
+    "proFeat1": "Everything in Free",
+    "proFeat2": "Advanced & Expert difficulty",
+    "proFeat3": "Leak Training",
+    "proFeatNote": "Spaced repetition for hands you missed — fix your weak spots systematically.",
+    "proCta": "Get Pro",
+    "alreadyHaveAccount": "Already have an account?",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in"
+  },
+  "login": {
+    "title": "Login",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Login",
+    "noAccount": "No account?",
+    "register": "Register"
+  },
+  "register": {
+    "title": "Register",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Register",
+    "alreadyHaveAccount": "Already have an account?",
+    "login": "Login"
+  },
+  "registerToUnlock": {
+    "subtitle": "Registered feature",
+    "body1": "Turn and River training, as well as Pot Odds, are available for registered users. Registration is free.",
+    "body2": "With a free account you also unlock Intermediate difficulty and your progress is saved across sessions.",
+    "registerCta": "Register for free",
+    "signIn": "Sign in"
+  },
+  "leakInfo": {
+    "title": "Equity Leaks",
+    "proFeature": "Pro feature",
+    "body1": "The Leak Trainer analyzes your past hands and automatically schedules the ones you struggled with for review — using spaced repetition, similar to how flashcard apps like Anki work.",
+    "body2": "Every hand you get wrong during training becomes a <leak>leak</leak>. The system brings it back after 1 hour, then 24 hours, then 7 days. Get it right three times in a row and the leak is fixed.",
+    "guestNote": "Leak Training is available for Pro members. Register for free to unlock Turn & River training, or go Pro for full access.",
+    "registeredNote": "Upgrade your account to Pro to unlock Leak Training, Advanced and Expert difficulty levels, and all future modules.",
+    "registerCta": "Register for free",
+    "learnProCta": "Learn about Pro",
+    "upgradeProCta": "Upgrade to Pro"
+  },
   "train": {
     "dealing": "Dealing...",
     "calculating": "Calculating...",
@@ -49,7 +113,7 @@
     "1": "Beginner",
     "2": "Intermediate",
     "3": "Advanced",
-    "4": "Pro",
+    "4": "Expert",
     "locked": "Complete previous level to unlock"
   }
 }

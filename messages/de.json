@@ -5,6 +5,70 @@
     "logout": "Abmelden",
     "register": "Registrieren"
   },
+  "home": {
+    "tagline": "Trainiere dein Poker-Gefühl — denk in Ranges, nicht in genauen Zahlen.",
+    "guestTitle": "Als Gast ausprobieren",
+    "guestSubtitle": "Keine Anmeldung nötig",
+    "guestFeat1": "Preflop Hand vs Range",
+    "guestFeat2": "Flop Hand vs Range",
+    "guestFeat3": "Anfänger-Schwierigkeitsgrad",
+    "guestNote": "Kein Fortschritt gespeichert",
+    "guestCta": "Training starten",
+    "freeTitle": "Kostenlos registrieren",
+    "freeSubtitle": "Immer kostenlos",
+    "freeFeat1": "Alles aus Gast",
+    "freeFeat2": "Turn & River Training",
+    "freeFeat3": "Pot Odds Training",
+    "freeFeat4": "Mittlerer Schwierigkeitsgrad",
+    "freeFeat5": "Fortschritt über Sessions gespeichert",
+    "freeCta": "Kostenloses Konto erstellen",
+    "proTitle": "Pro",
+    "proSubtitle": "Vollzugang · 10€/Monat",
+    "proFeat1": "Alles aus Kostenlos",
+    "proFeat2": "Fortgeschritten & Profi-Schwierigkeitsgrad",
+    "proFeat3": "Leak Training",
+    "proFeatNote": "Spaced Repetition für verpasste Hände — schwache Stellen systematisch beheben.",
+    "proCta": "Pro holen",
+    "alreadyHaveAccount": "Schon ein Konto?",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "signIn": "Anmelden"
+  },
+  "login": {
+    "title": "Anmelden",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "submit": "Anmelden",
+    "noAccount": "Noch kein Konto?",
+    "register": "Registrieren"
+  },
+  "register": {
+    "title": "Registrieren",
+    "email": "E-Mail",
+    "username": "Benutzername",
+    "password": "Passwort",
+    "submit": "Registrieren",
+    "alreadyHaveAccount": "Schon ein Konto?",
+    "login": "Anmelden"
+  },
+  "registerToUnlock": {
+    "subtitle": "Funktion für Registrierte",
+    "body1": "Turn- und River-Training sowie Pot Odds sind für registrierte Nutzer verfügbar. Die Registrierung ist kostenlos.",
+    "body2": "Mit einem kostenlosen Konto schaltest du auch den mittleren Schwierigkeitsgrad frei und dein Fortschritt wird gespeichert.",
+    "registerCta": "Kostenlos registrieren",
+    "signIn": "Anmelden"
+  },
+  "leakInfo": {
+    "title": "Equity Leaks",
+    "proFeature": "Pro-Funktion",
+    "body1": "Der Leak Trainer analysiert deine vergangenen Hände und plant automatisch die ein, mit denen du Probleme hattest — per Spaced Repetition, ähnlich wie Karteikarten-Apps wie Anki.",
+    "body2": "Jede Hand, die du beim Training falsch beantwortest, wird zu einem <leak>Leak</leak>. Das System bringt sie nach 1 Stunde, dann 24 Stunden, dann 7 Tagen zurück. Dreimal hintereinander richtig und der Leak ist behoben.",
+    "guestNote": "Leak Training ist für Pro-Mitglieder verfügbar. Registriere dich kostenlos für Turn & River Training oder hol dir Pro für vollen Zugang.",
+    "registeredNote": "Upgrade auf Pro um Leak Training, Fortgeschritten & Profi-Schwierigkeitsgrade und alle zukünftigen Module freizuschalten.",
+    "registerCta": "Kostenlos registrieren",
+    "learnProCta": "Mehr über Pro",
+    "upgradeProCta": "Auf Pro upgraden"
+  },
   "train": {
     "dealing": "Karten werden ausgeteilt...",
     "calculating": "Wird berechnet...",
@@ -47,9 +111,9 @@
   },
   "difficulty": {
     "1": "Anfänger",
-    "2": "Fortgeschritten",
-    "3": "Experte",
-    "4": "Pro",
+    "2": "Mittel",
+    "3": "Fortgeschritten",
+    "4": "Experte",
     "locked": "Vorherige Stufe abschließen zum Freischalten"
   }
 }

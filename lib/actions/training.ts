@@ -5,6 +5,7 @@ import { drawCards } from "../deck";
 import { calculateEquity } from "../equity";
 import { auth } from "../auth";
 import { drawHeroCards, getProfileForModule } from "../heroProfiles";
+import { cookies } from "next/headers";
 
 const CLASS_COUNTS: Record<number, number> = { 1: 5, 2: 10, 3: 20, 4: 50 };
 
@@ -62,10 +63,17 @@ type HandResult = {
 
 export async function getOrCreateHand(difficulty: number, handModule: string): Promise<HandResult> {
   const session = await auth();
-  if (!session?.user?.id) throw new Error("Not authenticated");
+  const userId = session?.user?.id ?? null;
+  const guestId = userId ? null : ((await cookies()).get("guestId")?.value ?? null);
+
+  if (!userId && !guestId) throw new Error("No identity");
+
+  const where = userId
+    ? { userId, difficulty, module: handModule, pointsScored: null }
+    : { guestId, difficulty, module: handModule, pointsScored: null };
 
   const existing = await prisma.trainingHand.findFirst({
-    where: { userId: session.user.id, difficulty, module: handModule, pointsScored: null },
+    where,
     orderBy: { createdAt: "desc" },
   });
 
@@ -109,7 +117,8 @@ export async function getOrCreateHand(difficulty: number, handModule: string): P
 
   const hand = await prisma.trainingHand.create({
     data: {
-      userId: session.user.id,
+      userId: userId ?? undefined,
+      ...(guestId && { guestId } as any),
       module: handModule,
       heroCard1Rank: heroCards[0].rank,
       heroCard1Suit: heroCards[0].suit,
@@ -141,11 +150,16 @@ export async function getOrCreateHand(difficulty: number, handModule: string): P
 
 export async function submitGuess(handId: string, guess: number) {
   const session = await auth();
-  if (!session?.user?.id) throw new Error("Not authenticated");
+  const userId = session?.user?.id ?? null;
+  const guestId = userId ? null : ((await cookies()).get("guestId")?.value ?? null);
 
   const hand = await prisma.trainingHand.findUnique({ where: { id: handId } });
   if (!hand) throw new Error("Hand not found");
-  if (hand.userId !== session.user.id) throw new Error("Unauthorized");
+
+  const isOwner = userId
+    ? hand.userId === userId
+    : guestId && hand.guestId === guestId;
+  if (!isOwner) throw new Error("Unauthorized");
 
   const heroCards = [
     { rank: hand.heroCard1Rank, suit: hand.heroCard1Suit },
@@ -168,7 +182,7 @@ export async function submitGuess(handId: string, guess: number) {
   const points = scoreGuess(guess, equity, hand.difficulty);
 
   const repetitionUpdate =
-    points === 0
+    points < 3
       ? { repetitionStage: 1, repetitionAvailableAt: new Date(Date.now() + 60 * 60 * 1000) }
       : {};
 
@@ -177,10 +191,15 @@ export async function submitGuess(handId: string, guess: number) {
     data: { actualEquity: equity, pointsScored: points, ...repetitionUpdate },
   });
 
-  const unlockedDifficulty = await checkAndUnlock(session.user.id, hand.difficulty, hand.module);
+  // Guests have no progress tracking
+  if (!userId) {
+    return { equity, pointsScored: points, unlockedDifficulty: null, progress: null };
+  }
+
+  const unlockedDifficulty = await checkAndUnlock(userId, hand.difficulty, hand.module);
 
   const recentHands = await prisma.trainingHand.findMany({
-    where: { userId: session.user.id, difficulty: hand.difficulty, module: hand.module, pointsScored: { not: null } },
+    where: { userId, difficulty: hand.difficulty, module: hand.module, pointsScored: { not: null } },
     orderBy: { createdAt: "desc" },
     take: 100,
     select: { pointsScored: true },
@@ -214,6 +233,18 @@ const STAGE_NEXT_AVAILABLE_MS: Record<number, number> = {
   2: 24 * 60 * 60 * 1000,      // 24h
   3: 7 * 24 * 60 * 60 * 1000,  // 7d
 };
+
+export async function getOpenLeakCount(): Promise<number> {
+  const session = await auth();
+  if (!session?.user?.id) return 0;
+  return prisma.trainingHand.count({
+    where: {
+      userId: session.user.id,
+      repetitionStage: { in: [1, 2, 3] },
+      repetitionAvailableAt: { lte: new Date() },
+    },
+  });
+}
 
 export async function getNextRepetitionHand(): Promise<HandResult & { stage: number; difficulty: number; module: string } | null> {
   const session = await auth();

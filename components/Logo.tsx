@@ -1,4 +1,4 @@
-export default function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+export default function Logo({ size = "md", stacked = false }: { size?: "sm" | "md" | "lg"; stacked?: boolean }) {
   const sizes = {
     sm: { icon: 36, text: "text-lg" },
     md: { icon: 48, text: "text-2xl" },
@@ -7,7 +7,7 @@ export default function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const s = sizes[size];
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={stacked ? "flex flex-col items-center gap-3" : "flex items-center gap-2"}>
       <svg width={s.icon} height={s.icon} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         {/* Card background */}
         <rect x="2" y="2" width="28" height="28" rx="4" fill="#1f2937" stroke="#4d7c0f" strokeWidth="1.5"/>
