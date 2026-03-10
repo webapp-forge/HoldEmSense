@@ -167,9 +167,14 @@ export async function submitGuess(handId: string, guess: number) {
   const equity = calculateEquity(heroCards, hand.villainRange, communityCards, simulations);
   const points = scoreGuess(guess, equity, hand.difficulty);
 
+  const repetitionUpdate =
+    points === 0
+      ? { repetitionStage: 1, repetitionAvailableAt: new Date(Date.now() + 60 * 60 * 1000) }
+      : {};
+
   await prisma.trainingHand.update({
     where: { id: handId },
-    data: { actualEquity: equity, pointsScored: points },
+    data: { actualEquity: equity, pointsScored: points, ...repetitionUpdate },
   });
 
   const unlockedDifficulty = await checkAndUnlock(session.user.id, hand.difficulty, hand.module);
@@ -202,6 +207,100 @@ export async function getUnlockedDifficulties(handModule: string): Promise<numbe
 
   const unlocked = new Set([1, ...progress.map((p) => p.difficulty)]);
   return Array.from(unlocked).sort((a, b) => a - b);
+}
+
+const STAGE_NEXT_AVAILABLE_MS: Record<number, number> = {
+  1: 60 * 60 * 1000,           // 1h
+  2: 24 * 60 * 60 * 1000,      // 24h
+  3: 7 * 24 * 60 * 60 * 1000,  // 7d
+};
+
+export async function getNextRepetitionHand(): Promise<HandResult & { stage: number; difficulty: number; module: string } | null> {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Not authenticated");
+
+  const hand = await prisma.trainingHand.findFirst({
+    where: {
+      userId: session.user.id,
+      repetitionStage: { in: [1, 2, 3] },
+      repetitionAvailableAt: { lte: new Date() },
+    },
+    orderBy: { repetitionAvailableAt: "asc" },
+  });
+
+  if (!hand) return null;
+
+  const flopCards = hand.flopCard1Rank
+    ? [
+        { rank: hand.flopCard1Rank, suit: hand.flopCard1Suit! },
+        { rank: hand.flopCard2Rank!, suit: hand.flopCard2Suit! },
+        { rank: hand.flopCard3Rank!, suit: hand.flopCard3Suit! },
+      ]
+    : undefined;
+  const turnCard = hand.turnCardRank ? { rank: hand.turnCardRank, suit: hand.turnCardSuit! } : undefined;
+  const riverCard = hand.riverCardRank ? { rank: hand.riverCardRank, suit: hand.riverCardSuit! } : undefined;
+
+  return {
+    handId: hand.id,
+    heroCards: [
+      { rank: hand.heroCard1Rank, suit: hand.heroCard1Suit },
+      { rank: hand.heroCard2Rank, suit: hand.heroCard2Suit },
+    ],
+    villainRange: hand.villainRange,
+    flopCards,
+    turnCard,
+    riverCard,
+    stage: hand.repetitionStage!,
+    difficulty: hand.difficulty,
+    module: hand.module,
+  };
+}
+
+export async function submitRepetitionGuess(handId: string, guess: number) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Not authenticated");
+
+  const hand = await prisma.trainingHand.findUnique({ where: { id: handId } });
+  if (!hand) throw new Error("Hand not found");
+  if (hand.userId !== session.user.id) throw new Error("Unauthorized");
+  if (!hand.repetitionStage || hand.repetitionStage < 1 || hand.repetitionStage > 3)
+    throw new Error("Hand not in repetition");
+
+  const stage = hand.repetitionStage;
+  const equity = hand.actualEquity!;
+  const points = scoreGuess(guess, equity, hand.difficulty);
+  const correct = points === 3; // Only a perfect hit advances the stage
+
+  let newStage: number;
+  let newAvailableAt: Date | null;
+
+  if (correct) {
+    newStage = stage + 1; // 2, 3, or 4 (done)
+    newAvailableAt = newStage <= 3 ? new Date(Date.now() + STAGE_NEXT_AVAILABLE_MS[newStage]) : null;
+  } else {
+    newStage = Math.max(stage - 1, 1);
+    newAvailableAt = new Date(Date.now() + STAGE_NEXT_AVAILABLE_MS[newStage]);
+  }
+
+  await prisma.trainingHand.update({
+    where: { id: handId },
+    data: { repetitionStage: newStage, repetitionAvailableAt: newAvailableAt },
+  });
+
+  return { equity, pointsScored: points, correct, newStage };
+}
+
+export async function getRepetitionCount(): Promise<number> {
+  const session = await auth();
+  if (!session?.user?.id) return 0;
+
+  return prisma.trainingHand.count({
+    where: {
+      userId: session.user.id,
+      repetitionStage: { in: [1, 2, 3] },
+      repetitionAvailableAt: { lte: new Date() },
+    },
+  });
 }
 
 export async function getHandProgress(difficulty: number, handModule: string): Promise<{ count: number; total: number }> {

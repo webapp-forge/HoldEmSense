@@ -23,6 +23,28 @@
     "readyToUnlock": "Ready to unlock {name}!",
     "ptsNeeded": "{pts} more pts needed to unlock {name}"
   },
+  "sidebar": {
+    "equityTraining": "Equity Training",
+    "weaknessTraining": "Fix your leaks",
+    "handVsRange": "Hand vs Range",
+    "flopHandVsRange": "Flop: Hand vs Range",
+    "turnHandVsRange": "Turn: Hand vs Range",
+    "riverHandVsRange": "River: Hand vs Range",
+    "handVsRangePotOdds": "Hand vs Range + Pot Odds",
+    "equityLeaks": "Equity Leaks"
+  },
+  "leakFixing": {
+    "noLeaks": "No leaks to review right now. Keep training and come back later!",
+    "stage": "Stage {stage}/3",
+    "fixed": "Leak fixed!",
+    "advanced": "Advanced to stage {stage}.",
+    "droppedTo": "Dropped back to stage {stage}.",
+    "stayedAt": "Staying at stage {stage}.",
+    "retryIn1h": "Try again in 1 hour.",
+    "nextIn24h": "Next try in 24 hours.",
+    "nextIn7d": "Next session in 7 days.",
+    "nextHand": "Next leak"
+  },
   "difficulty": {
     "1": "Beginner",
     "2": "Intermediate",

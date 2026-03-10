@@ -23,6 +23,28 @@
     "readyToUnlock": "{name} kann jetzt freigeschaltet werden!",
     "ptsNeeded": "Noch {pts} Punkte zum Freischalten von {name}"
   },
+  "sidebar": {
+    "equityTraining": "Equity Training",
+    "weaknessTraining": "Fix your leaks",
+    "handVsRange": "Hand vs Range",
+    "flopHandVsRange": "Flop: Hand vs Range",
+    "turnHandVsRange": "Turn: Hand vs Range",
+    "riverHandVsRange": "River: Hand vs Range",
+    "handVsRangePotOdds": "Hand vs Range + Pot Odds",
+    "equityLeaks": "Equity Leaks"
+  },
+  "leakFixing": {
+    "noLeaks": "Gerade keine Leaks zu wiederholen. Weiter trainieren und später wiederkommen!",
+    "stage": "Stufe {stage}/3",
+    "fixed": "Leak behoben!",
+    "advanced": "Aufgestiegen zu Stufe {stage}.",
+    "droppedTo": "Zurück auf Stufe {stage}.",
+    "stayedAt": "Bleibt auf Stufe {stage}.",
+    "retryIn1h": "Nächster Versuch in 1 Stunde.",
+    "nextIn24h": "Nächster Versuch in 24 Stunden.",
+    "nextIn7d": "Nächste Session in 7 Tagen.",
+    "nextHand": "Nächster Leak"
+  },
   "difficulty": {
     "1": "Anfänger",
     "2": "Fortgeschritten",

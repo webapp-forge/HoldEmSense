@@ -1,0 +1,2 @@
+ALTER TABLE `TrainingHand` ADD COLUMN `repetitionStage` INT NULL;
+ALTER TABLE `TrainingHand` ADD COLUMN `repetitionAvailableAt` DATETIME(3) NULL;
