@@ -10,5 +10,6 @@ export default async function HandVsRangeTurnPage() {
     return <RegisterToUnlock title={t("turnHandVsRange")} />;
   }
   const role = (session.user as any).isPremium ? "premium" : "registered";
-  return <HandVsRangeTurnTraining role={role} />;
+  const isAdmin = !!(session.user as any).isAdmin;
+  return <HandVsRangeTurnTraining role={role} isAdmin={isAdmin} />;
 }

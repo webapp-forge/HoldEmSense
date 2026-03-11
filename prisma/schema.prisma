@@ -13,6 +13,7 @@ model User {
   username      String          @unique
   passwordHash  String
   isPremium     Boolean         @default(false)
+  isAdmin       Boolean         @default(false)
   createdAt     DateTime        @default(now())
   trainingHands TrainingHand[]
   progress      UserProgress[]
@@ -24,21 +25,23 @@ model TrainingHand {
   user          User?    @relation(fields: [userId], references: [id])
   guestId       String?
   module        String   @default("preflop")
-  heroCard1Rank String
-  heroCard1Suit String
-  heroCard2Rank String
-  heroCard2Suit String
-  flopCard1Rank String?                           
-  flopCard1Suit String?                           
-  flopCard2Rank String?                           
-  flopCard2Suit String?                           
-  flopCard3Rank String?                           
+  heroCard1Rank String?
+  heroCard1Suit String?
+  heroCard2Rank String?
+  heroCard2Suit String?
+  flopCard1Rank String?
+  flopCard1Suit String?
+  flopCard2Rank String?
+  flopCard2Suit String?
+  flopCard3Rank String?
   flopCard3Suit String?
   turnCardRank  String?
   turnCardSuit  String?
   riverCardRank String?
   riverCardSuit String?
-  villainRange  Int
+  villainRange  Int?
+  potSize       Int?
+  betSize       Int?
   difficulty    Int
   pointsScored  Int?
   actualEquity         Float?
@@ -46,6 +49,12 @@ model TrainingHand {
   repetitionAvailableAt DateTime?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+}
+
+model AppConfig {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 model UserProgress {

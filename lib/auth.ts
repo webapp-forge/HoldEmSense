@@ -26,7 +26,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                 if (!valid) return null;
 
-                return { id: user.id, email: user.email, name: user.username, isPremium: user.isPremium };
+                return { id: user.id, email: user.email, name: user.username, isPremium: user.isPremium, isAdmin: user.isAdmin };
             },
         }),
     ],
@@ -39,12 +39,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             if (user) {
                 token.id = user.id;
                 token.isPremium = (user as any).isPremium as boolean;
+                token.isAdmin = (user as any).isAdmin as boolean;
             }
             return token;
         },
         session({ session, token }) {
             session.user.id = token.id as string;
             (session.user as any).isPremium = token.isPremium as boolean;
+            (session.user as any).isAdmin = token.isAdmin as boolean;
             return session;
         },
     },

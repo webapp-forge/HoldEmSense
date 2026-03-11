@@ -18,6 +18,7 @@ const equityLinks: { key: string; href: string; minRole: Role }[] = [
   { key: "flopHandVsRange", href: "/train/equity/hand-vs-range-flop", minRole: "guest" },
   { key: "turnHandVsRange", href: "/train/equity/hand-vs-range-turn", minRole: "registered" },
   { key: "riverHandVsRange", href: "/train/equity/hand-vs-range-river", minRole: "registered" },
+  { key: "potOdds", href: "/train/equity/pot-odds", minRole: "guest" },
 ];
 
 const leakLinks: { key: string; href: string; minRole: Role }[] = [

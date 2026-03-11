@@ -10,5 +10,6 @@ export default async function HandVsRangeRiverPage() {
     return <RegisterToUnlock title={t("riverHandVsRange")} />;
   }
   const role = (session.user as any).isPremium ? "premium" : "registered";
-  return <HandVsRangeRiverTraining role={role} />;
+  const isAdmin = !!(session.user as any).isAdmin;
+  return <HandVsRangeRiverTraining role={role} isAdmin={isAdmin} />;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getOrCreateHand, submitGuess, getUnlockedDifficulties, getHandProgress } from "../../../../lib/actions/training";
+import { getOrCreateHand, submitGuess, getUnlockedDifficulties, getHandProgress, getCorrectAnswer } from "../../../../lib/actions/training";
 import { useTranslations } from "next-intl";
 import CardComponent from "../../../../components/Card";
 import TrainPageLayout from "../../../../components/train/TrainPageLayout";
@@ -35,7 +35,7 @@ type HandState = {
   difficulty: number;
 };
 
-export default function HandVsRangeFlopTraining({ role }: { role: Role }) {
+export default function HandVsRangeFlopTraining({ role, isAdmin }: { role: Role; isAdmin: boolean }) {
   const t = useTranslations("train");
   const td = useTranslations("difficulty");
   const [difficulty, setDifficulty] = useState(1);
@@ -44,7 +44,7 @@ export default function HandVsRangeFlopTraining({ role }: { role: Role }) {
   const [guessed, setGuessed] = useState<number | null>(null);
   const [actualEquity, setActualEquity] = useState<number | null>(null);
   const [pointsScored, setPointsScored] = useState<number | null>(null);
-  const [progress, setProgress] = useState<{ count: number; total: number } | null>(null);
+  const [progress, setProgress] = useState<{ count: number; total: number; windowSize: number; unlockThreshold: number; maxPoints: number } | null>(null);
   const [newUnlock, setNewUnlock] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [calculating, setCalculating] = useState(false);
@@ -57,7 +57,12 @@ export default function HandVsRangeFlopTraining({ role }: { role: Role }) {
 
   const progressDifficulty = hand?.difficulty ?? difficulty;
   useEffect(() => {
-    getHandProgress(progressDifficulty, MODULE).then(setProgress);
+    getHandProgress(progressDifficulty, MODULE).then(async (p) => {
+      setProgress(p);
+      if (p.count >= p.windowSize && p.total >= p.unlockThreshold) {
+        getUnlockedDifficulties(MODULE).then(setUnlockedDifficulties);
+      }
+    });
   }, [progressDifficulty]);
 
   async function startNewHand(diff?: number) {
@@ -83,11 +88,10 @@ export default function HandVsRangeFlopTraining({ role }: { role: Role }) {
     setProgress(result.progress);
     setCalculating(false);
 
-    if (result.unlockedDifficulty) {
-      const newDiff = result.unlockedDifficulty;
-      setNewUnlock(newDiff);
-      setUnlockedDifficulties((prev) => [...prev, newDiff].sort());
-    }
+    const refreshed = await getUnlockedDifficulties(MODULE);
+    const newlyUnlocked = refreshed.find((d) => !unlockedDifficulties.includes(d));
+    if (newlyUnlocked) setNewUnlock(newlyUnlocked);
+    setUnlockedDifficulties(refreshed);
   }
 
   const equityClasses = getEquityClasses(difficulty);
@@ -137,48 +141,48 @@ export default function HandVsRangeFlopTraining({ role }: { role: Role }) {
       {/* Progress */}
       {progress !== null && (
         <div className="text-sm text-gray-400">
-          {progress.count < 100 ? (
+          {progress.count < progress.windowSize ? (
             <>
               <div className="flex justify-between mb-1">
-                <span>{t("buildingWindow", { count: progress.count })}</span>
+                <span>{t("buildingWindow", { count: progress.count, window: progress.windowSize })}</span>
                 <span>{progress.total} pts</span>
               </div>
               <div className="w-full bg-gray-700 rounded-full h-1.5">
                 <div
                   className="bg-gray-500 h-1.5 rounded-full transition-all duration-500"
-                  style={{ width: `${(progress.count / 100) * 100}%` }}
+                  style={{ width: `${(progress.count / progress.windowSize) * 100}%` }}
                 />
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                {t("handsToActivate", { count: 100 - progress.count })}
+                {t("handsToActivate", { count: progress.windowSize - progress.count })}
               </p>
             </>
           ) : (
             <>
               <div className="flex justify-between mb-1">
-                <span>{t("last100")}</span>
-                <span className={progress.total >= 250 ? "text-lime-400 font-medium" : ""}>
-                  {progress.total}/300 pts
+                <span>{t("last100", { window: progress.windowSize })}</span>
+                <span className={progress.total >= progress.unlockThreshold ? "text-lime-400 font-medium" : ""}>
+                  {progress.total}/{progress.maxPoints} pts
                 </span>
               </div>
               <div className="relative w-full bg-gray-700 rounded-full h-1.5">
                 <div
                   className="bg-lime-600 h-1.5 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(100, (progress.total / 300) * 100)}%` }}
+                  style={{ width: `${Math.min(100, (progress.total / progress.maxPoints) * 100)}%` }}
                 />
                 {!unlockedDifficulties.includes(difficulty + 1) && difficulty < 4 && (
                   <div
                     className="absolute top-1/2 -translate-y-1/2 w-0.5 h-3 bg-white opacity-40 rounded-full"
-                    style={{ left: `${(250 / 300) * 100}%` }}
+                    style={{ left: `${(progress.unlockThreshold / progress.maxPoints) * 100}%` }}
                   />
                 )}
               </div>
               <p className="text-xs text-gray-500 mt-1">
                 {difficulty >= 4 || unlockedDifficulties.includes(difficulty + 1)
                   ? null
-                  : progress.total >= 250
+                  : progress.total >= progress.unlockThreshold
                   ? t("readyToUnlock", { name: td(String(difficulty + 1)) })
-                  : t("ptsNeeded", { pts: 250 - progress.total, name: td(String(difficulty + 1)) })
+                  : t("ptsNeeded", { pts: progress.unlockThreshold - progress.total, name: td(String(difficulty + 1)) })
                 }
               </p>
             </>
@@ -205,6 +209,16 @@ export default function HandVsRangeFlopTraining({ role }: { role: Role }) {
           ))}
         </div>
       </div>
+
+      {/* Cheat button (admin only) */}
+      {isAdmin && guessed === null && !calculating && (
+        <button
+          onClick={async () => { const idx = await getCorrectAnswer(hand.handId); handleGuess(idx); }}
+          className="self-start px-3 py-1.5 bg-red-800 hover:bg-red-700 rounded text-xs font-medium text-red-200"
+        >
+          Guess Right
+        </button>
+      )}
 
       {/* Equity guess */}
       <div>

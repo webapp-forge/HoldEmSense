@@ -6,6 +6,7 @@ import { calculateEquity } from "../equity";
 import { auth } from "../auth";
 import { drawHeroCards, getProfileForModule } from "../heroProfiles";
 import { cookies } from "next/headers";
+import { getAppConfig } from "../config";
 
 const CLASS_COUNTS: Record<number, number> = { 1: 5, 2: 10, 3: 20, 4: 50 };
 
@@ -14,6 +15,7 @@ const PROGRESS_MODULE: Record<string, string> = {
   flop: "hand-vs-range-flop",
   turn: "hand-vs-range-turn",
   river: "hand-vs-range-river",
+  "pot-odds": "pot-odds",
 };
 
 function scoreGuess(guessIndex: number, actualEquity: number, difficulty: number): number {
@@ -28,17 +30,19 @@ function scoreGuess(guessIndex: number, actualEquity: number, difficulty: number
 async function checkAndUnlock(userId: string, difficulty: number, handModule: string): Promise<number | null> {
   if (difficulty >= 4) return null;
 
+  const { progressWindowSize, unlockThreshold } = await getAppConfig();
+
   const hands = await prisma.trainingHand.findMany({
     where: { userId, difficulty, module: handModule, pointsScored: { not: null } },
     orderBy: { createdAt: "desc" },
-    take: 100,
+    take: progressWindowSize,
     select: { pointsScored: true },
   });
 
-  if (hands.length < 100) return null;
+  if (hands.length < progressWindowSize) return null;
 
   const total = hands.reduce((sum, h) => sum + (h.pointsScored ?? 0), 0);
-  if (total < 250) return null;
+  if (total < unlockThreshold) return null;
 
   const progressModule = PROGRESS_MODULE[handModule] ?? handModule;
   const nextDifficulty = difficulty + 1;
@@ -46,10 +50,10 @@ async function checkAndUnlock(userId: string, difficulty: number, handModule: st
     await prisma.userProgress.create({
       data: { userId, module: progressModule, difficulty: nextDifficulty },
     });
-    return nextDifficulty;
   } catch {
-    return null; // Already unlocked
+    // Already unlocked — that's fine, still return so client can sync state
   }
+  return nextDifficulty;
 }
 
 type HandResult = {
@@ -191,15 +195,17 @@ export async function submitGuess(handId: string, guess: number) {
     data: { actualEquity: equity, pointsScored: points, ...repetitionUpdate },
   });
 
+  const { progressWindowSize, unlockThreshold, maxProgressPoints } = await getAppConfig();
+
   if (!userId) {
     const guestHands = await prisma.trainingHand.findMany({
       where: { guestId, difficulty: hand.difficulty, module: hand.module, pointsScored: { not: null } },
       orderBy: { createdAt: "desc" },
-      take: 100,
+      take: progressWindowSize,
       select: { pointsScored: true },
     });
     const guestTotal = guestHands.reduce((sum, h) => sum + (h.pointsScored ?? 0), 0);
-    return { equity, pointsScored: points, unlockedDifficulty: null, progress: { count: guestHands.length, total: guestTotal } };
+    return { equity, pointsScored: points, unlockedDifficulty: null, progress: { count: guestHands.length, total: guestTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints } };
   }
 
   const unlockedDifficulty = await checkAndUnlock(userId, hand.difficulty, hand.module);
@@ -207,7 +213,7 @@ export async function submitGuess(handId: string, guess: number) {
   const recentHands = await prisma.trainingHand.findMany({
     where: { userId, difficulty: hand.difficulty, module: hand.module, pointsScored: { not: null } },
     orderBy: { createdAt: "desc" },
-    take: 100,
+    take: progressWindowSize,
     select: { pointsScored: true },
   });
   const progressTotal = recentHands.reduce((sum, h) => sum + (h.pointsScored ?? 0), 0);
@@ -216,7 +222,7 @@ export async function submitGuess(handId: string, guess: number) {
     equity,
     pointsScored: points,
     unlockedDifficulty,
-    progress: { count: recentHands.length, total: progressTotal },
+    progress: { count: recentHands.length, total: progressTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints },
   };
 }
 
@@ -340,12 +346,14 @@ export async function getRepetitionCount(): Promise<number> {
   });
 }
 
-export async function getHandProgress(difficulty: number, handModule: string): Promise<{ count: number; total: number }> {
+export async function getHandProgress(difficulty: number, handModule: string): Promise<{ count: number; total: number; windowSize: number; unlockThreshold: number; maxPoints: number }> {
   const session = await auth();
   const userId = session?.user?.id ?? null;
   const guestId = userId ? null : ((await cookies()).get("guestId")?.value ?? null);
 
-  if (!userId && !guestId) return { count: 0, total: 0 };
+  const { progressWindowSize, unlockThreshold, maxProgressPoints } = await getAppConfig();
+
+  if (!userId && !guestId) return { count: 0, total: 0, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints };
 
   const where = userId
     ? { userId, difficulty, module: handModule, pointsScored: { not: null } }
@@ -354,10 +362,155 @@ export async function getHandProgress(difficulty: number, handModule: string): P
   const hands = await prisma.trainingHand.findMany({
     where,
     orderBy: { createdAt: "desc" },
-    take: 100,
+    take: progressWindowSize,
     select: { pointsScored: true },
   });
 
   const total = hands.reduce((sum, h) => sum + (h.pointsScored ?? 0), 0);
-  return { count: hands.length, total };
+
+  // If logged in and threshold already met, apply unlock in case config changed since last play
+  if (userId && hands.length >= progressWindowSize && total >= unlockThreshold) {
+    await checkAndUnlock(userId, difficulty, handModule);
+  }
+
+  return { count: hands.length, total, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints };
+}
+
+function generatePotOddsScenario(difficulty: number): { potSize: number; betSize: number } {
+  if (difficulty === 1) {
+    const pots = [40, 60, 80, 100];
+    const fractions = [0.25, 0.5, 0.75, 1.0];
+    const pot = pots[Math.floor(Math.random() * pots.length)];
+    const fraction = fractions[Math.floor(Math.random() * fractions.length)];
+    return { potSize: pot, betSize: Math.round((pot * fraction) / 5) * 5 || 5 };
+  }
+  if (difficulty === 2) {
+    const pots = [40, 50, 60, 70, 80, 90, 100, 120];
+    const fractions = [0.25, 0.33, 0.5, 0.67, 0.75, 1.0, 1.5, 2.0];
+    const pot = pots[Math.floor(Math.random() * pots.length)];
+    const fraction = fractions[Math.floor(Math.random() * fractions.length)];
+    return { potSize: pot, betSize: Math.round((pot * fraction) / 5) * 5 || 5 };
+  }
+  // Advanced/Pro: random amounts, no rounding
+  const pot = Math.floor(Math.random() * 140) + 20;
+  const fraction = 0.1 + Math.random() * 2.4; // 10% to 250% of pot
+  return { potSize: pot, betSize: Math.max(1, Math.round(pot * fraction)) };
+}
+
+export async function getOrCreatePotOddsHand(difficulty: number): Promise<{ handId: string; potSize: number; betSize: number }> {
+  const session = await auth();
+  const userId = session?.user?.id ?? null;
+  const guestId = userId ? null : ((await cookies()).get("guestId")?.value ?? null);
+  if (!userId && !guestId) throw new Error("No identity");
+
+  const where = userId
+    ? { userId, difficulty, module: "pot-odds", pointsScored: null }
+    : { guestId, difficulty, module: "pot-odds", pointsScored: null };
+
+  const existing = await prisma.trainingHand.findFirst({
+    where,
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (existing?.potSize && existing?.betSize) {
+    return { handId: existing.id, potSize: existing.potSize, betSize: existing.betSize };
+  }
+
+  const { potSize, betSize } = generatePotOddsScenario(difficulty);
+
+  const hand = await prisma.trainingHand.create({
+    data: {
+      userId: userId ?? undefined,
+      ...(guestId && { guestId } as any),
+      module: "pot-odds",
+      difficulty,
+      potSize,
+      betSize,
+    },
+  });
+
+  return { handId: hand.id, potSize, betSize };
+}
+
+export async function submitPotOddsGuess(handId: string, guessIndex: number): Promise<{
+  requiredEquity: number;
+  pointsScored: number;
+  unlockedDifficulty: number | null;
+  progress: { count: number; total: number; windowSize: number; unlockThreshold: number; maxPoints: number };
+}> {
+  const session = await auth();
+  const userId = session?.user?.id ?? null;
+  const guestId = userId ? null : ((await cookies()).get("guestId")?.value ?? null);
+
+  const hand = await prisma.trainingHand.findUnique({ where: { id: handId } });
+  if (!hand?.potSize || !hand?.betSize) throw new Error("Hand not found");
+
+  const isOwner = userId ? hand.userId === userId : guestId && hand.guestId === guestId;
+  if (!isOwner) throw new Error("Unauthorized");
+
+  const requiredEquity = hand.betSize / (hand.potSize + 2 * hand.betSize);
+  const points = scoreGuess(guessIndex, requiredEquity, hand.difficulty);
+
+  await prisma.trainingHand.update({
+    where: { id: handId },
+    data: { actualEquity: requiredEquity, pointsScored: points },
+  });
+
+  const { progressWindowSize, unlockThreshold, maxProgressPoints } = await getAppConfig();
+
+  if (!userId) {
+    const guestHands = await prisma.trainingHand.findMany({
+      where: { guestId, difficulty: hand.difficulty, module: "pot-odds", pointsScored: { not: null } },
+      orderBy: { createdAt: "desc" },
+      take: progressWindowSize,
+      select: { pointsScored: true },
+    });
+    const guestTotal = guestHands.reduce((sum, h) => sum + (h.pointsScored ?? 0), 0);
+    return { requiredEquity, pointsScored: points, unlockedDifficulty: null, progress: { count: guestHands.length, total: guestTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints } };
+  }
+
+  const unlockedDifficulty = await checkAndUnlock(userId, hand.difficulty, "pot-odds");
+
+  const recentHands = await prisma.trainingHand.findMany({
+    where: { userId, difficulty: hand.difficulty, module: "pot-odds", pointsScored: { not: null } },
+    orderBy: { createdAt: "desc" },
+    take: progressWindowSize,
+    select: { pointsScored: true },
+  });
+  const progressTotal = recentHands.reduce((sum, h) => sum + (h.pointsScored ?? 0), 0);
+
+  return { requiredEquity, pointsScored: points, unlockedDifficulty, progress: { count: recentHands.length, total: progressTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints } };
+}
+
+export async function getCorrectAnswer(handId: string): Promise<number> {
+  const session = await auth();
+  if (!(session?.user as any)?.isAdmin) throw new Error("Unauthorized");
+
+  const hand = await prisma.trainingHand.findUnique({ where: { id: handId } });
+  if (!hand) throw new Error("Hand not found");
+
+  const classCount = CLASS_COUNTS[hand.difficulty] ?? 10;
+
+  if (hand.potSize && hand.betSize) {
+    const equity = hand.betSize / (hand.potSize + 2 * hand.betSize);
+    return Math.min(Math.floor(equity * classCount), classCount - 1);
+  }
+
+  const heroCards = [
+    { rank: hand.heroCard1Rank!, suit: hand.heroCard1Suit! },
+    { rank: hand.heroCard2Rank!, suit: hand.heroCard2Suit! },
+  ];
+  const communityCards = hand.flopCard1Rank
+    ? [
+        { rank: hand.flopCard1Rank, suit: hand.flopCard1Suit! },
+        { rank: hand.flopCard2Rank!, suit: hand.flopCard2Suit! },
+        { rank: hand.flopCard3Rank!, suit: hand.flopCard3Suit! },
+        ...(hand.turnCardRank ? [{ rank: hand.turnCardRank, suit: hand.turnCardSuit! }] : []),
+        ...(hand.riverCardRank ? [{ rank: hand.riverCardRank, suit: hand.riverCardSuit! }] : []),
+      ]
+    : [];
+  const simsByDifficulty: Record<number, number> = { 1: 1000, 2: 2000, 3: 5000, 4: 20000 };
+  const simulations = simsByDifficulty[hand.difficulty] ?? 1000;
+  const equity = calculateEquity(heroCards, hand.villainRange!, communityCards, simulations);
+  return Math.min(Math.floor(equity * classCount), classCount - 1);
 }
