@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Header from "../components/Header";
+import GlossaryDrawer from "../components/glossary/GlossaryDrawer";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 
@@ -22,6 +23,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <Header />
           {children}
+          <GlossaryDrawer />
         </NextIntlClientProvider>
       </body>
     </html>

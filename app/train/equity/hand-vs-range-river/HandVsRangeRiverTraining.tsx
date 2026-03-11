@@ -7,6 +7,8 @@ import CardComponent from "../../../../components/Card";
 import TrainPageLayout from "../../../../components/train/TrainPageLayout";
 import RangeMatrix from "../../../../components/train/RangeMatrix";
 import DifficultySelector from "../../../../components/train/DifficultySelector";
+import GlossaryLink from "../../../../components/glossary/GlossaryLink";
+import MatrixTip from "../../../../components/train/MatrixTip";
 
 const MODULE = "river";
 
@@ -104,7 +106,22 @@ export default function HandVsRangeRiverTraining({ role }: { role: Role }) {
   return (
     <TrainPageLayout
       info={<RangeMatrix villainRange={hand.villainRange} heroCards={hand.heroCards} />}
-      explanation={<p>Estimate your hand&apos;s equity on the river. No more cards to come – this is the true showdown strength.</p>}
+      explanation={
+        <div className="space-y-2">
+          <p>
+            Auf dem River gibt es keine weiteren Karten — die{" "}
+            <GlossaryLink slug="equity/what-is-equity">Equity</GlossaryLink> ist entweder 0% oder
+            100%. Was du hier trainierst, ist die Frage: Wie oft liegt meine Hand vorne gegen eine
+            typische Villain-<GlossaryLink slug="ranges/what-is-a-range">Range</GlossaryLink>?
+          </p>
+          <p>
+            Die Preflop-Range ist hier natürlich am weitesten von der Realität entfernt. Trotzdem
+            schärft das Training dein Gefühl dafür, wie gut oder schlecht deine Hand
+            auf einem bestimmten Board steht.
+          </p>
+          <MatrixTip />
+        </div>
+      }
     >
     <div className="flex flex-col gap-6 max-w-2xl">
       <div>

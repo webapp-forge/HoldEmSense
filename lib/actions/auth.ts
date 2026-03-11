@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { signIn } from "../auth";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { cookies } from "next/headers";
 
 
 export async function register(formData: FormData) {
@@ -26,9 +27,17 @@ export async function register(formData: FormData) {
 
   const passwordHash = await bcrypt.hash(password, 12);
 
-  await prisma.user.create({
+  const user = await prisma.user.create({
     data: { email, username, passwordHash },
   });
+
+  const guestId = (await cookies()).get("guestId")?.value ?? null;
+  if (guestId) {
+    await prisma.trainingHand.updateMany({
+      where: { guestId },
+      data: { userId: user.id, guestId: null },
+    });
+  }
 
   try {
     await signIn("credentials", { email, password, redirectTo: "/train" });

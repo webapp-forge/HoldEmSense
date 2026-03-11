@@ -7,6 +7,8 @@ import CardComponent from "../../../../components/Card";
 import TrainPageLayout from "../../../../components/train/TrainPageLayout";
 import RangeMatrix from "../../../../components/train/RangeMatrix";
 import DifficultySelector from "../../../../components/train/DifficultySelector";
+import GlossaryLink from "../../../../components/glossary/GlossaryLink";
+import MatrixTip from "../../../../components/train/MatrixTip";
 
 type Role = "guest" | "registered" | "premium";
 
@@ -96,7 +98,21 @@ export default function HandVsRangeFlopTraining({ role }: { role: Role }) {
   return (
     <TrainPageLayout
       info={<RangeMatrix villainRange={hand.villainRange} heroCards={hand.heroCards} />}
-      explanation={<p>Estimate your hand&apos;s equity on the flop against the villain&apos;s range. The board changes your equity significantly.</p>}
+      explanation={
+        <div className="space-y-2">
+          <p>
+            Der Flop verändert die <GlossaryLink slug="equity/what-is-equity">Equity</GlossaryLink>{" "}
+            drastisch — Draws, Pair-Outs und Board-Texturen spielen jetzt eine große Rolle.
+          </p>
+          <p>
+            Die <GlossaryLink slug="ranges/top-x-percent">Top X%-Range</GlossaryLink> des Villains
+            ist eine Vereinfachung: In echten Spielen würde man sie nach dem Flop anpassen.
+            Hier trainierst du trotzdem ein wertvolles Gefühl — wie stark deine Hand gegen eine
+            typische Eröffnungsrange liegt.
+          </p>
+          <MatrixTip />
+        </div>
+      }
     >
     <div className="flex flex-col gap-6 max-w-2xl">
       <div>

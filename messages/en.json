@@ -1,9 +1,15 @@
 {
   "nav": {
     "train": "Train",
+    "glossary": "Guide",
     "login": "Login",
     "logout": "Logout",
     "register": "Register"
+  },
+  "glossary": {
+    "drawerLabel": "Guide",
+    "close": "Close",
+    "openArticle": "Open full article"
   },
   "home": {
     "tagline": "Train your poker intuition — think in ranges, not exact numbers.",

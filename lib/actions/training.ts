@@ -191,9 +191,15 @@ export async function submitGuess(handId: string, guess: number) {
     data: { actualEquity: equity, pointsScored: points, ...repetitionUpdate },
   });
 
-  // Guests have no progress tracking
   if (!userId) {
-    return { equity, pointsScored: points, unlockedDifficulty: null, progress: null };
+    const guestHands = await prisma.trainingHand.findMany({
+      where: { guestId, difficulty: hand.difficulty, module: hand.module, pointsScored: { not: null } },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      select: { pointsScored: true },
+    });
+    const guestTotal = guestHands.reduce((sum, h) => sum + (h.pointsScored ?? 0), 0);
+    return { equity, pointsScored: points, unlockedDifficulty: null, progress: { count: guestHands.length, total: guestTotal } };
   }
 
   const unlockedDifficulty = await checkAndUnlock(userId, hand.difficulty, hand.module);
@@ -336,10 +342,17 @@ export async function getRepetitionCount(): Promise<number> {
 
 export async function getHandProgress(difficulty: number, handModule: string): Promise<{ count: number; total: number }> {
   const session = await auth();
-  if (!session?.user?.id) return { count: 0, total: 0 };
+  const userId = session?.user?.id ?? null;
+  const guestId = userId ? null : ((await cookies()).get("guestId")?.value ?? null);
+
+  if (!userId && !guestId) return { count: 0, total: 0 };
+
+  const where = userId
+    ? { userId, difficulty, module: handModule, pointsScored: { not: null } }
+    : { guestId, difficulty, module: handModule, pointsScored: { not: null } };
 
   const hands = await prisma.trainingHand.findMany({
-    where: { userId: session.user.id, difficulty, module: handModule, pointsScored: { not: null } },
+    where,
     orderBy: { createdAt: "desc" },
     take: 100,
     select: { pointsScored: true },

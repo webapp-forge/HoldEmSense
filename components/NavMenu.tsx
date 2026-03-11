@@ -26,6 +26,7 @@ export default function NavMenu({ username, logoutAction }: Props) {
     <>
       {/* Desktop nav */}
       <nav className="hidden md:flex items-center gap-6">
+        <Link href="/glossary" className="hover:text-lime-400">{t("glossary")}</Link>
         <Link href="/train" className="hover:text-lime-400">{t("train")}</Link>
         {username ? (
           <>
@@ -56,6 +57,8 @@ export default function NavMenu({ username, logoutAction }: Props) {
 
         {open && (
           <div className="absolute right-0 top-10 bg-gray-800 border border-gray-700 rounded-lg shadow-xl w-56 py-2 z-50">
+            <Link href="/glossary" onClick={() => setOpen(false)} className="block px-4 py-2 text-sm hover:bg-gray-700">{t("glossary")}</Link>
+            <div className="border-t border-gray-700 my-1" />
             <span className="block px-4 py-1 text-xs text-gray-400 uppercase tracking-wider">Equity Training</span>
             {trainLinks.map((link) => (
               <Link

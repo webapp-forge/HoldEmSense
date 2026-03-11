@@ -7,6 +7,8 @@ import CardComponent from "../../../../components/Card";
 import TrainPageLayout from "../../../../components/train/TrainPageLayout";
 import RangeMatrix from "../../../../components/train/RangeMatrix";
 import DifficultySelector from "../../../../components/train/DifficultySelector";
+import GlossaryLink from "../../../../components/glossary/GlossaryLink";
+import MatrixTip from "../../../../components/train/MatrixTip";
 
 type Role = "guest" | "registered" | "premium";
 
@@ -93,7 +95,23 @@ export default function HandVsRangePreflopTraining({ role }: { role: Role }) {
   return (
     <TrainPageLayout
       info={<RangeMatrix villainRange={hand.villainRange} heroCards={hand.heroCards} />}
-      explanation={<p>Estimate your hand&apos;s equity against the villain&apos;s preflop range. Use the difficulty levels to train with more precise equity classes.</p>}
+      explanation={
+        <div className="space-y-2">
+          <p>
+            Du schätzt deine <GlossaryLink slug="equity/what-is-equity">Equity</GlossaryLink> gegen
+            die <GlossaryLink slug="ranges/what-is-a-range">Range</GlossaryLink> des Villains —
+            ausgedrückt als <GlossaryLink slug="ranges/top-x-percent">Top X%</GlossaryLink> seiner
+            möglichen Starthände.
+          </p>
+          <p>
+            Equity unter 50% bedeutet nicht automatisch folden — dafür braucht es die Pot Odds.
+            Ziel ist ein Zahlengefühl für{" "}
+            <GlossaryLink slug="equity/equity-vs-range">Equity gegen eine Range</GlossaryLink>,
+            kein exaktes Rechnen.
+          </p>
+          <MatrixTip />
+        </div>
+      }
     >
     <div className="flex flex-col gap-6 max-w-2xl">
       <div>

@@ -7,6 +7,8 @@ import CardComponent from "../../../../components/Card";
 import TrainPageLayout from "../../../../components/train/TrainPageLayout";
 import RangeMatrix from "../../../../components/train/RangeMatrix";
 import DifficultySelector from "../../../../components/train/DifficultySelector";
+import GlossaryLink from "../../../../components/glossary/GlossaryLink";
+import MatrixTip from "../../../../components/train/MatrixTip";
 
 const MODULE = "turn";
 
@@ -102,7 +104,22 @@ export default function HandVsRangeTurnTraining({ role }: { role: Role }) {
   return (
     <TrainPageLayout
       info={<RangeMatrix villainRange={hand.villainRange} heroCards={hand.heroCards} />}
-      explanation={<p>Estimate your hand&apos;s equity on the turn. With one card to come, equity becomes more defined.</p>}
+      explanation={
+        <div className="space-y-2">
+          <p>
+            Auf dem Turn ist nur noch eine Karte offen — die{" "}
+            <GlossaryLink slug="equity/what-is-equity">Equity</GlossaryLink> ist konkreter, aber
+            auch volatiler: Ein River-Out kann sie komplett drehen.
+          </p>
+          <p>
+            Die gezeigte <GlossaryLink slug="ranges/what-is-a-range">Range</GlossaryLink> ist die
+            Preflop-Eröffnungsrange des Villains. Im echten Spiel wäre sie bis zum Turn schon
+            deutlich eingeengt — hier übst du das Grundgefühl, bevor du mit Range-Anpassung
+            arbeitest.
+          </p>
+          <MatrixTip />
+        </div>
+      }
     >
     <div className="flex flex-col gap-6 max-w-2xl">
       <div>

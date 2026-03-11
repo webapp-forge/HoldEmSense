@@ -1,9 +1,15 @@
 {
   "nav": {
     "train": "Training",
+    "glossary": "Leitfaden",
     "login": "Anmelden",
     "logout": "Abmelden",
     "register": "Registrieren"
+  },
+  "glossary": {
+    "drawerLabel": "Leitfaden",
+    "close": "Schließen",
+    "openArticle": "Zum vollen Artikel"
   },
   "home": {
     "tagline": "Trainiere dein Poker-Gefühl — denk in Ranges, nicht in genauen Zahlen.",
