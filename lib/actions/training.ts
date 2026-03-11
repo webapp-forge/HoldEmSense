@@ -185,17 +185,18 @@ export async function submitGuess(handId: string, guess: number) {
   const equity = calculateEquity(heroCards, hand.villainRange, communityCards, simulations);
   const points = scoreGuess(guess, equity, hand.difficulty);
 
+  const { progressWindowSize, unlockThreshold, maxProgressPoints, leakBaseMinutes } = await getAppConfig();
+  const stageMs = getStageNextAvailableMS(leakBaseMinutes);
+
   const repetitionUpdate =
     points < 3
-      ? { repetitionStage: 1, repetitionAvailableAt: new Date(Date.now() + 60 * 60 * 1000) }
+      ? { repetitionStage: 1, repetitionAvailableAt: new Date(Date.now() + stageMs[1]) }
       : {};
 
   await prisma.trainingHand.update({
     where: { id: handId },
     data: { actualEquity: equity, pointsScored: points, ...repetitionUpdate },
   });
-
-  const { progressWindowSize, unlockThreshold, maxProgressPoints } = await getAppConfig();
 
   if (!userId) {
     const guestHands = await prisma.trainingHand.findMany({
@@ -240,11 +241,14 @@ export async function getUnlockedDifficulties(handModule: string): Promise<numbe
   return Array.from(unlocked).sort((a, b) => a - b);
 }
 
-const STAGE_NEXT_AVAILABLE_MS: Record<number, number> = {
-  1: 60 * 60 * 1000,           // 1h
-  2: 24 * 60 * 60 * 1000,      // 24h
-  3: 7 * 24 * 60 * 60 * 1000,  // 7d
-};
+function getStageNextAvailableMS(leakBaseMinutes: number): Record<number, number> {
+  const baseMs = leakBaseMinutes * 60 * 1000;
+  return {
+    1: baseMs,
+    2: baseMs * 24,
+    3: baseMs * 24 * 7,
+  };
+}
 
 export async function getOpenLeakCount(): Promise<number> {
   const session = await auth();
@@ -314,15 +318,18 @@ export async function submitRepetitionGuess(handId: string, guess: number) {
   const points = scoreGuess(guess, equity, hand.difficulty);
   const correct = points === 3; // Only a perfect hit advances the stage
 
+  const { leakBaseMinutes } = await getAppConfig();
+  const stageMs = getStageNextAvailableMS(leakBaseMinutes);
+
   let newStage: number;
   let newAvailableAt: Date | null;
 
   if (correct) {
     newStage = stage + 1; // 2, 3, or 4 (done)
-    newAvailableAt = newStage <= 3 ? new Date(Date.now() + STAGE_NEXT_AVAILABLE_MS[newStage]) : null;
+    newAvailableAt = newStage <= 3 ? new Date(Date.now() + stageMs[newStage]) : null;
   } else {
     newStage = Math.max(stage - 1, 1);
-    newAvailableAt = new Date(Date.now() + STAGE_NEXT_AVAILABLE_MS[newStage]);
+    newAvailableAt = new Date(Date.now() + stageMs[newStage]);
   }
 
   await prisma.trainingHand.update({
@@ -451,12 +458,18 @@ export async function submitPotOddsGuess(handId: string, guessIndex: number): Pr
   const requiredEquity = hand.betSize / (hand.potSize + 2 * hand.betSize);
   const points = scoreGuess(guessIndex, requiredEquity, hand.difficulty);
 
+  const { progressWindowSize, unlockThreshold, maxProgressPoints, leakBaseMinutes } = await getAppConfig();
+  const stageMs = getStageNextAvailableMS(leakBaseMinutes);
+
+  const repetitionUpdate =
+    userId && points < 3
+      ? { repetitionStage: 1, repetitionAvailableAt: new Date(Date.now() + stageMs[1]) }
+      : {};
+
   await prisma.trainingHand.update({
     where: { id: handId },
-    data: { actualEquity: requiredEquity, pointsScored: points },
+    data: { actualEquity: requiredEquity, pointsScored: points, ...repetitionUpdate },
   });
-
-  const { progressWindowSize, unlockThreshold, maxProgressPoints } = await getAppConfig();
 
   if (!userId) {
     const guestHands = await prisma.trainingHand.findMany({

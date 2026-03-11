@@ -16,6 +16,10 @@ const CONFIG_LABELS: Record<ConfigKey, { label: string; description: string }> =
     label: "Max. Punkte (Anzeige)",
     description: "Maximalpunkte für den Fortschrittsbalken (3 × Window-Size)",
   },
+  leakBaseMinutes: {
+    label: "Leak Basis-Intervall (Minuten)",
+    description: "Wartezeit nach Stufe 1 in Minuten (Standard: 60 = 1h, zum Testen z.B. 1)",
+  },
 };
 
 export default async function SuperVillainPage() {

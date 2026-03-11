@@ -55,8 +55,12 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
   const [sliderValue, setSliderValue] = useState(0);
 
   useEffect(() => {
-    getUnlockedDifficulties("pot-odds").then(setUnlockedDifficulties);
-    startNewHand(1);
+    getUnlockedDifficulties("pot-odds").then((unlocked) => {
+      setUnlockedDifficulties(unlocked);
+      const highest = unlocked[unlocked.length - 1];
+      setDifficulty(highest);
+      startNewHand(highest);
+    });
   }, []);
 
   const progressDifficulty = hand?.difficulty ?? difficulty;

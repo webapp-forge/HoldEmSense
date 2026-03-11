@@ -4,6 +4,7 @@ export const CONFIG_DEFAULTS = {
   progressWindowSize: 100,
   unlockThreshold: 250,
   maxProgressPoints: 300,
+  leakBaseMinutes: 60,
 } as const;
 
 export type ConfigKey = keyof typeof CONFIG_DEFAULTS;

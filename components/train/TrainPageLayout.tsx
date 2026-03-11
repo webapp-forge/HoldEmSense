@@ -19,11 +19,9 @@ export default function TrainPageLayout({ children, info, explanation }: Props) 
       </div>
 
       {/* Middle: module info */}
-      {info && (
-        <div className="hidden xl:block flex-1 min-w-0">
-          {info}
-        </div>
-      )}
+      <div className="hidden xl:block flex-1 min-w-0">
+        {info}
+      </div>
 
       {/* Right: explanation (collapsible) */}
       {explanation && (
