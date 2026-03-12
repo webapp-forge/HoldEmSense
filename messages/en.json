@@ -4,7 +4,8 @@
     "glossary": "Guide",
     "login": "Login",
     "logout": "Logout",
-    "register": "Register"
+    "register": "Register",
+    "hallOfFame": "Hall of Fame"
   },
   "glossary": {
     "drawerLabel": "Guide",
