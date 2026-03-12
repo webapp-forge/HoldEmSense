@@ -106,10 +106,10 @@ export async function getOrCreateHand(difficulty: number, handModule: string): P
     return {
       handId: existing.id,
       heroCards: [
-        { rank: existing.heroCard1Rank, suit: existing.heroCard1Suit },
-        { rank: existing.heroCard2Rank, suit: existing.heroCard2Suit },
+        { rank: existing.heroCard1Rank!, suit: existing.heroCard1Suit! },
+        { rank: existing.heroCard2Rank!, suit: existing.heroCard2Suit! },
       ],
-      villainRange: existing.villainRange,
+      villainRange: existing.villainRange!,
       flopCards,
       turnCard,
       riverCard,
@@ -174,8 +174,8 @@ export async function submitGuess(handId: string, guess: number) {
   if (!isOwner) throw new Error("Unauthorized");
 
   const heroCards = [
-    { rank: hand.heroCard1Rank, suit: hand.heroCard1Suit },
-    { rank: hand.heroCard2Rank, suit: hand.heroCard2Suit },
+    { rank: hand.heroCard1Rank!, suit: hand.heroCard1Suit! },
+    { rank: hand.heroCard2Rank!, suit: hand.heroCard2Suit! },
   ];
 
   const communityCards = hand.flopCard1Rank
@@ -190,7 +190,7 @@ export async function submitGuess(handId: string, guess: number) {
 
   const simsByDifficulty: Record<number, number> = { 1: 1000, 2: 2000, 3: 5000, 4: 20000 };
   const simulations = simsByDifficulty[hand.difficulty] ?? 1000;
-  const equity = calculateEquity(heroCards, hand.villainRange, communityCards, simulations);
+  const equity = calculateEquity(heroCards, hand.villainRange!, communityCards, simulations);
   const points = scoreGuess(guess, equity, hand.difficulty);
 
   const { progressWindowSize, unlockThreshold, maxProgressPoints, leakBaseMinutes } = await getAppConfig();
@@ -290,6 +290,19 @@ export async function getNextRepetitionHand(): Promise<HandResult & { stage: num
 
   if (!hand) return null;
 
+  // For beginner pot-odds leaks: normalize to the exact preset scenario so displayed
+  // pot/bet values always match the button labels (legacy hands may have non-preset values).
+  let displayPotSize = hand.potSize ?? undefined;
+  let displayBetSize = hand.betSize ?? undefined;
+  if (hand.module === "pot-odds" && hand.difficulty === 1 && hand.potSize && hand.betSize) {
+    const requiredEquity = hand.betSize / (hand.potSize + 2 * hand.betSize);
+    const correctIndex = BEGINNER_POT_ODDS_EQUITIES.reduce((best, eq, i) =>
+      Math.abs(eq - requiredEquity) < Math.abs(BEGINNER_POT_ODDS_EQUITIES[best] - requiredEquity) ? i : best, 0
+    );
+    displayPotSize = BEGINNER_POT_ODDS_PRESETS[correctIndex].potSize;
+    displayBetSize = BEGINNER_POT_ODDS_PRESETS[correctIndex].betSize;
+  }
+
   const flopCards = hand.flopCard1Rank
     ? [
         { rank: hand.flopCard1Rank, suit: hand.flopCard1Suit! },
@@ -312,8 +325,8 @@ export async function getNextRepetitionHand(): Promise<HandResult & { stage: num
     flopCards,
     turnCard,
     riverCard,
-    potSize: hand.potSize ?? undefined,
-    betSize: hand.betSize ?? undefined,
+    potSize: displayPotSize,
+    betSize: displayBetSize,
     stage: hand.repetitionStage!,
     difficulty: hand.difficulty,
     module: hand.module,
@@ -332,7 +345,9 @@ export async function submitRepetitionGuess(handId: string, guess: number) {
 
   const stage = hand.repetitionStage;
   const equity = hand.actualEquity!;
-  const points = scoreGuess(guess, equity, hand.difficulty);
+  const points = (hand.module === "pot-odds" && hand.difficulty === 1)
+    ? scorePotOddsBeginnerGuess(guess, equity)
+    : scoreGuess(guess, equity, hand.difficulty);
   const correct = points === 3; // Only a perfect hit advances the stage
 
   const { leakBaseMinutes } = await getAppConfig();
@@ -354,7 +369,13 @@ export async function submitRepetitionGuess(handId: string, guess: number) {
     data: { repetitionStage: newStage, repetitionAvailableAt: newAvailableAt },
   });
 
-  return { equity, pointsScored: points, correct, newStage };
+  // For beginner pot-odds, return the preset equity so the displayed value matches the button label
+  const displayEquity = (hand.module === "pot-odds" && hand.difficulty === 1)
+    ? BEGINNER_POT_ODDS_EQUITIES[BEGINNER_POT_ODDS_EQUITIES.reduce((best, eq, i) =>
+        Math.abs(eq - equity) < Math.abs(BEGINNER_POT_ODDS_EQUITIES[best] - equity) ? i : best, 0)]
+    : equity;
+
+  return { equity: displayEquity, pointsScored: points, correct, newStage };
 }
 
 export async function getRepetitionCount(): Promise<number> {

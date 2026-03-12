@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import TrainPageLayout from "../../../../components/train/TrainPageLayout";
 import DifficultySelector from "../../../../components/train/DifficultySelector";
 import GlossaryLink from "../../../../components/glossary/GlossaryLink";
+import { getMemoHint } from "../../../../components/train/potOddsHints";
 
 type Role = "guest" | "registered" | "premium";
 
@@ -49,20 +50,6 @@ function getBeginnerCorrectIndex(requiredEquity: number): number {
   );
 }
 
-const MEMO_HINTS: { maxFraction: number; label: string }[] = [
-  { maxFraction: 0.27, label: "Quarter-Pot ≈ 17% benötigt" },
-  { maxFraction: 0.37, label: "Drittel-Pot = 20% benötigt" },
-  { maxFraction: 0.60, label: "Half-Pot = immer 25% benötigt" },
-  { maxFraction: 0.85, label: "Zwei-Drittel-Pot ≈ 29% benötigt" },
-  { maxFraction: 1.15, label: "Pot-Bet = immer 33% benötigt" },
-  { maxFraction: 1.65, label: "1,5x Pot = 37,5% benötigt" },
-  { maxFraction: 2.5, label: "2x Pot = 40% benötigt" },
-];
-
-function getMemoHint(potSize: number, betSize: number): string | null {
-  const fraction = betSize / potSize;
-  return MEMO_HINTS.find((h) => fraction <= h.maxFraction)?.label ?? null;
-}
 
 type HandState = { handId: string; potSize: number; betSize: number; difficulty: number };
 
@@ -144,10 +131,10 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
             brauchst, damit ein Call langfristig profitabel ist.
           </p>
           <p>
-            Die Formel: <span className="text-white font-mono">Call ÷ (Pot + Bet + Call)</span>.
-            Da du immer genau den Bet-Betrag callst, vereinfacht sich das zu{" "}
-            <span className="text-white font-mono">Bet ÷ (Pot + 2 × Bet)</span>. Ziel ist ein
-            Gespür für die Zahlen — kein exaktes Rechnen am Tisch.
+            Die Formel:{" "}
+            <span className="text-white font-mono">Dein Call ÷ (Pot inkl. Bet + Call)</span>.
+            Du siehst beide Zahlen direkt im Szenario — einfach dividieren. Ziel ist ein
+            Gespür für die Standardwerte — kein exaktes Rechnen am Tisch.
           </p>
           <p>
             Präge dir die Werte für die typischen Bet-Größen gut ein. Wenn du weißt, dass ein
@@ -228,12 +215,8 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
         {/* Scenario */}
         <div className="bg-gray-900 border border-gray-700 rounded-lg px-5 py-4 flex flex-col gap-1 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-400">Pot</span>
-            <span className="text-white font-semibold">{hand.potSize} BB</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-400">Villain bet</span>
-            <span className="text-white font-semibold">{hand.betSize} BB</span>
+            <span className="text-gray-400">Pot (inkl. Bet)</span>
+            <span className="text-white font-semibold">{hand.potSize + hand.betSize} BB</span>
           </div>
           <div className="flex justify-between border-t border-gray-700 mt-2 pt-2">
             <span className="text-gray-400">Dein Call</span>

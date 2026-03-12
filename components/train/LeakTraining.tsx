@@ -6,7 +6,8 @@ import { useTranslations } from "next-intl";
 import CardComponent from "../Card";
 import TrainPageLayout from "./TrainPageLayout";
 import RangeMatrix from "./RangeMatrix";
-import EquityGuessPanel, { getCorrectIndex } from "./EquityGuessPanel";
+import EquityGuessPanel from "./EquityGuessPanel";
+import { getMemoHint } from "./potOddsHints";
 
 const MODULE_LABEL: Record<string, string> = {
   preflop: "Hand vs Range",
@@ -37,20 +38,6 @@ const BEGINNER_PRESET_EQUITIES = [
   200 / 500,
 ];
 
-const MEMO_HINTS: { maxFraction: number; label: string }[] = [
-  { maxFraction: 0.27, label: "Quarter-Pot ≈ 17% benötigt" },
-  { maxFraction: 0.37, label: "Drittel-Pot = 20% benötigt" },
-  { maxFraction: 0.60, label: "Half-Pot = immer 25% benötigt" },
-  { maxFraction: 0.85, label: "Zwei-Drittel-Pot ≈ 29% benötigt" },
-  { maxFraction: 1.15, label: "Pot-Bet = immer 33% benötigt" },
-  { maxFraction: 1.65, label: "1,5x Pot = 37,5% benötigt" },
-  { maxFraction: 2.5, label: "2x Pot = 40% benötigt" },
-];
-
-function getMemoHint(potSize: number, betSize: number): string | null {
-  const fraction = betSize / potSize;
-  return MEMO_HINTS.find((h) => fraction <= h.maxFraction)?.label ?? null;
-}
 
 type HandState = {
   handId: string;
@@ -194,12 +181,8 @@ export default function LeakTraining() {
         {isPotOdds && hand.potSize && hand.betSize && (
           <div className="bg-gray-900 border border-gray-700 rounded-lg px-5 py-4 flex flex-col gap-1 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-400">Pot</span>
-              <span className="text-white font-semibold">{hand.potSize} BB</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Villain bet</span>
-              <span className="text-white font-semibold">{hand.betSize} BB</span>
+              <span className="text-gray-400">Pot (inkl. Bet)</span>
+              <span className="text-white font-semibold">{hand.potSize + hand.betSize} BB</span>
             </div>
             <div className="flex justify-between border-t border-gray-700 mt-2 pt-2">
               <span className="text-gray-400">Dein Call</span>
