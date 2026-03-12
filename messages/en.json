@@ -118,6 +118,18 @@
     "nextIn7d": "Next session in 7 days.",
     "nextHand": "Next leak"
   },
+  "hallOfFame": {
+    "title": "Hall of Fame",
+    "loading": "Loading...",
+    "emptyMonth": "No hands played this month yet.",
+    "emptyAllTime": "No hands played yet.",
+    "allTime": "All-Time",
+    "colPlayer": "Player",
+    "colHands": "Hands",
+    "colScore": "Score*",
+    "you": "you",
+    "footnote": "* Score = sum of hand scores \u00d7 difficulty weight \u2014 Beginner \u00d71, Intermediate \u00d71.5, Advanced \u00d72, Expert \u00d72.5"
+  },
   "difficulty": {
     "1": "Beginner",
     "2": "Intermediate",

@@ -118,6 +118,18 @@
     "nextIn7d": "Nächste Session in 7 Tagen.",
     "nextHand": "Nächster Leak"
   },
+  "hallOfFame": {
+    "title": "Hall of Fame",
+    "loading": "Wird geladen...",
+    "emptyMonth": "Noch keine H\u00e4nde diesen Monat gespielt.",
+    "emptyAllTime": "Noch keine H\u00e4nde gespielt.",
+    "allTime": "Gesamt",
+    "colPlayer": "Spieler",
+    "colHands": "H\u00e4nde",
+    "colScore": "Score*",
+    "you": "du",
+    "footnote": "* Score = Summe der Handwertungen \u00d7 Schwierigkeitsgewicht \u2014 Anf\u00e4nger \u00d71, Mittel \u00d71,5, Fortgeschritten \u00d72, Experte \u00d72,5"
+  },
   "difficulty": {
     "1": "Anfänger",
     "2": "Mittel",

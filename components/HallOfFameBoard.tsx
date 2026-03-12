@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { getHallOfFameMonth, getHallOfFameAllTime, LeaderboardEntry } from "@/lib/actions/hallOfFame";
 
 type View = "month" | "alltime";
@@ -25,6 +26,7 @@ const RANK_ROW_CLASS: Record<number, string> = {
 };
 
 export default function HallOfFameBoard({ initialView, initialEntries, currentMonth, currentUsername }: Props) {
+  const t = useTranslations("hallOfFame");
   const [view, setView] = useState<View>(initialView);
   const [entries, setEntries] = useState<LeaderboardEntry[]>(initialEntries);
   const [loading, setLoading] = useState(false);
@@ -40,7 +42,7 @@ export default function HallOfFameBoard({ initialView, initialEntries, currentMo
     setLoading(false);
   }
 
-  const emptyLabel = view === "month" ? "No hands played this month yet." : "No hands played yet.";
+  const emptyLabel = view === "month" ? t("emptyMonth") : t("emptyAllTime");
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl">
@@ -48,7 +50,7 @@ export default function HallOfFameBoard({ initialView, initialEntries, currentMo
       <div>
         <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-3">
           <span className="text-amber-400">🏆</span>
-          Hall of Fame
+          {t("title")}
         </h1>
       </div>
 
@@ -68,22 +70,22 @@ export default function HallOfFameBoard({ initialView, initialEntries, currentMo
             view === "alltime" ? "bg-lime-600 text-white" : "bg-gray-800 hover:bg-gray-700 text-gray-300"
           }`}
         >
-          All-Time
+          {t("allTime")}
         </button>
       </div>
 
       {/* Leaderboard */}
       {loading ? (
-        <div className="text-gray-400">Loading...</div>
+        <div className="text-gray-400">{t("loading")}</div>
       ) : entries.length === 0 ? (
         <div className="text-gray-500">{emptyLabel}</div>
       ) : (
         <div className="flex flex-col gap-1.5">
           <div className="grid grid-cols-[2.5rem_1fr_auto_auto] gap-3 px-3 py-1 text-xs text-gray-500 uppercase tracking-wider">
             <span>#</span>
-            <span>Player</span>
-            <span className="text-right">Hands</span>
-            <span className="text-right w-20">Score*</span>
+            <span>{t("colPlayer")}</span>
+            <span className="text-right">{t("colHands")}</span>
+            <span className="text-right w-20">{t("colScore")}</span>
           </div>
 
           {entries.map((entry) => {
@@ -109,7 +111,7 @@ export default function HallOfFameBoard({ initialView, initialEntries, currentMo
                 </span>
                 <span className={`font-medium ${isTop3 ? "text-base" : "text-sm"} ${isCurrentUser ? "text-lime-300" : "text-white"}`}>
                   {entry.username}
-                  {isCurrentUser && <span className="ml-2 text-xs text-lime-500">(you)</span>}
+                  {isCurrentUser && <span className="ml-2 text-xs text-lime-500">({t("you")})</span>}
                 </span>
                 <span className="text-sm text-gray-400 text-right">{entry.handsPlayed}</span>
                 <span className={`font-semibold text-right w-20 ${isTop3 ? "text-base text-white" : "text-sm text-gray-200"}`}>
@@ -123,7 +125,7 @@ export default function HallOfFameBoard({ initialView, initialEntries, currentMo
 
       {/* Footnote */}
       <p className="text-xs text-gray-600 mt-1">
-        * Score = hands played &times; difficulty weight &mdash; Beginner ×1, Intermediate ×1.5, Advanced ×2, Pro ×2.5
+        {t("footnote")}
       </p>
     </div>
   );

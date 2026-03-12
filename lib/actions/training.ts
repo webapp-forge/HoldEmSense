@@ -30,7 +30,7 @@ function scoreGuess(guessIndex: number, actualEquity: number, difficulty: number
 async function checkAndUnlock(userId: string, difficulty: number, handModule: string): Promise<number | null> {
   if (difficulty >= 4) return null;
 
-  // Difficulty 3 (Advanced) and 4 (Pro) are premium-only
+  // Difficulty 3 (Advanced) and 4 (Expert) are premium-only
   if (difficulty >= 2) {
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { isPremium: true } });
     if (!user?.isPremium) return null;
@@ -437,7 +437,7 @@ function generatePotOddsScenario(difficulty: number): { potSize: number; betSize
     const fraction = fractions[Math.floor(Math.random() * fractions.length)];
     return { potSize: pot, betSize: Math.round((pot * fraction) / 5) * 5 || 5 };
   }
-  // Advanced/Pro: random amounts, no rounding
+  // Advanced/Expert: random amounts, no rounding
   const pot = Math.floor(Math.random() * 140) + 20;
   const fraction = 0.1 + Math.random() * 2.4; // 10% to 250% of pot
   return { potSize: pot, betSize: Math.max(1, Math.round(pot * fraction)) };
