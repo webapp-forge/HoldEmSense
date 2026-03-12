@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getNextRepetitionHand, submitRepetitionGuess } from "../../lib/actions/training";
 import { useTranslations } from "next-intl";
 import CardComponent from "../Card";
@@ -64,6 +65,7 @@ type Result = {
 export default function LeakTraining() {
   const t = useTranslations("train");
   const tl = useTranslations("leakFixing");
+  const router = useRouter();
   const td = useTranslations("difficulty");
 
   const [hand, setHand] = useState<HandState | null>(null);
@@ -119,6 +121,7 @@ export default function LeakTraining() {
       newStage: res.newStage,
     });
     setCalculating(false);
+    router.refresh();
     window.dispatchEvent(new Event("leak-processed"));
   }
 

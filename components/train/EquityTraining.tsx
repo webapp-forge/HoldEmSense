@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   getOrCreateHand,
   submitGuess,
@@ -122,6 +123,7 @@ export default function EquityTraining({
 }) {
   const t = useTranslations("train");
   const td = useTranslations("difficulty");
+  const router = useRouter();
   const [difficulty, setDifficulty] = useState(1);
   const [unlockedDifficulties, setUnlockedDifficulties] = useState<number[]>([1]);
   const [hand, setHand] = useState<HandState | null>(null);
@@ -186,6 +188,7 @@ export default function EquityTraining({
     const newlyUnlocked = refreshed.find((d) => !unlockedDifficulties.includes(d));
     if (newlyUnlocked) setNewUnlock(newlyUnlocked);
     setUnlockedDifficulties(refreshed);
+    router.refresh();
   }
 
   if (loading || !hand) return <div className="text-gray-400">{t("dealing")}</div>;

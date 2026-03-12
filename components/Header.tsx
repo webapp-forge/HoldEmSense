@@ -5,15 +5,17 @@ import NavMenu from "@/components/NavMenu";
 import NavLinks from "@/components/NavLinks";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { getTranslations } from "next-intl/server";
+import { getDailyStreak } from "@/lib/actions/training";
 
 export default async function Header() {
-  const session = await auth();
-  const t = await getTranslations("nav");
+  const [session, t] = await Promise.all([auth(), getTranslations("nav")]);
+  const { streak, trainedToday } = session?.user ? await getDailyStreak() : { streak: 0, trainedToday: false };
 
   const logoutAction = async () => {
     "use server";
     await signOut({ redirectTo: "/" });
   };
+
 
   return (
     <header className="relative flex items-center px-6 py-4 bg-gray-900 text-white">
@@ -68,7 +70,7 @@ export default async function Header() {
         <div className="hidden md:block">
           <LanguageSwitcher />
         </div>
-        <NavMenu username={session?.user?.name} logoutAction={logoutAction} />
+        <NavMenu username={session?.user?.name} logoutAction={logoutAction} streak={streak} trainedToday={trainedToday} />
       </div>
     </header>
   );

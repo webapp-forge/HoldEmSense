@@ -16,9 +16,11 @@ const trainLinks = [
 type Props = {
   username?: string | null;
   logoutAction: () => Promise<void>;
+  streak?: number;
+  trainedToday?: boolean;
 };
 
-export default function NavMenu({ username, logoutAction }: Props) {
+export default function NavMenu({ username, logoutAction, streak = 0, trainedToday = false }: Props) {
   const [open, setOpen] = useState(false);
   const t = useTranslations("nav");
 
@@ -28,7 +30,18 @@ export default function NavMenu({ username, logoutAction }: Props) {
       <div className="hidden md:flex items-center gap-5">
         {username ? (
           <>
-            <span className="text-gray-400 text-sm">{username}</span>
+            <span className="text-gray-400 text-sm flex items-center gap-2">
+              <span
+                title={streak === 0 ? t("streakStart") : trainedToday ? t("streakDays", { days: streak }) : t("streakKeep")}
+                className={`relative inline-flex items-end justify-center w-7 h-9 transition-all duration-700 ${trainedToday ? "" : "grayscale"}`}
+              >
+                <span className="text-3xl leading-none absolute top-0">🔥</span>
+                {streak > 0 && (
+                  <span className={`relative z-10 font-black text-base leading-none mb-3 ${trainedToday ? "text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.9),0_0_6px_rgba(0,0,0,0.7)]" : "text-black"}`}>{streak}</span>
+                )}
+              </span>
+              {username}
+            </span>
             <form action={logoutAction}>
               <button type="submit" className="hover:text-lime-400 text-sm">{t("logout")}</button>
             </form>
@@ -76,7 +89,15 @@ export default function NavMenu({ username, logoutAction }: Props) {
             <div className="border-t border-gray-700 my-1" />
             {username ? (
               <>
-                <span className="block px-4 py-2 text-sm text-gray-400">{username}</span>
+                <span className="block px-4 py-2 text-sm text-gray-400 flex items-center gap-2">
+                  <span className={`relative inline-flex items-end justify-center w-7 h-8 transition-all duration-700 ${trainedToday ? "" : "grayscale"}`}>
+                    <span className="text-3xl leading-none absolute top-0">🔥</span>
+                    {streak > 0 && (
+                      <span className={`relative z-10 font-black text-[9px] leading-none mb-1 ${trainedToday ? "text-white drop-shadow" : "text-black"}`}>{streak}</span>
+                    )}
+                  </span>
+                  {username}
+                </span>
                 <form action={logoutAction}>
                   <button type="submit" className="w-full text-left px-4 py-2 text-sm hover:bg-gray-700">
                     {t("logout")}

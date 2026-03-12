@@ -589,3 +589,51 @@ export async function getCorrectAnswer(handId: string): Promise<number> {
   const equity = calculateEquity(heroCards, hand.villainRange!, communityCards, simulations);
   return Math.min(Math.floor(equity * classCount), classCount - 1);
 }
+
+export async function getDailyStreak(): Promise<{ streak: number; trainedToday: boolean }> {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return { streak: 0, trainedToday: false };
+
+  const rows = await prisma.$queryRaw<{ day: unknown }[]>`
+    SELECT DISTINCT DATE(createdAt) AS day
+    FROM TrainingHand
+    WHERE userId = ${userId}
+    ORDER BY day DESC
+    LIMIT 400
+  `;
+
+  if (rows.length === 0) return { streak: 0, trainedToday: false };
+
+  // MySQL DATE() may return a Date object or a string depending on driver version
+  const normalize = (val: unknown): string => {
+    if (val instanceof Date) return val.toISOString().slice(0, 10);
+    return String(val).slice(0, 10);
+  };
+
+  const toStr = (d: Date) => d.toISOString().slice(0, 10);
+  const now = new Date();
+  const todayStr = toStr(now);
+  const yest = new Date(now);
+  yest.setUTCDate(yest.getUTCDate() - 1);
+  const yesterdayStr = toStr(yest);
+
+  const dates = rows.map((r) => normalize(r.day));
+  const trainedToday = dates[0] === todayStr;
+
+  // Streak is only active if the user trained today or yesterday
+  if (!trainedToday && dates[0] !== yesterdayStr) return { streak: 0, trainedToday: false };
+
+  let streak = 0;
+  const start = new Date(dates[0] + "T00:00:00Z");
+  for (const dateStr of dates) {
+    const expected = new Date(start);
+    expected.setUTCDate(expected.getUTCDate() - streak);
+    if (dateStr === toStr(expected)) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return { streak, trainedToday };
+}

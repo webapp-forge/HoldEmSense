@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getOrCreatePotOddsHand, submitPotOddsGuess, getUnlockedDifficulties, getHandProgress } from "../../../../lib/actions/training";
 import { useTranslations } from "next-intl";
 import TrainPageLayout from "../../../../components/train/TrainPageLayout";
@@ -56,6 +57,7 @@ type HandState = { handId: string; potSize: number; betSize: number; difficulty:
 export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin: boolean }) {
   const t = useTranslations("train");
   const td = useTranslations("difficulty");
+  const router = useRouter();
   const [difficulty, setDifficulty] = useState(1);
   const [unlockedDifficulties, setUnlockedDifficulties] = useState<number[]>([1]);
   const [hand, setHand] = useState<HandState | null>(null);
@@ -114,6 +116,7 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
     const newlyUnlocked = refreshed.find((d) => !unlockedDifficulties.includes(d));
     if (newlyUnlocked) setNewUnlock(newlyUnlocked);
     setUnlockedDifficulties(refreshed);
+    router.refresh();
   }
 
   const equityClasses = getEquityClasses(difficulty);

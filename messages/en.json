@@ -5,7 +5,10 @@
     "login": "Login",
     "logout": "Logout",
     "register": "Register",
-    "hallOfFame": "Hall of Fame"
+    "hallOfFame": "Hall of Fame",
+    "streakDays": "{days} days in a row",
+    "streakKeep": "Train today to keep your streak alive",
+    "streakStart": "Train today to start your streak"
   },
   "glossary": {
     "drawerLabel": "Guide",
