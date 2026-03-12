@@ -30,6 +30,12 @@ function scoreGuess(guessIndex: number, actualEquity: number, difficulty: number
 async function checkAndUnlock(userId: string, difficulty: number, handModule: string): Promise<number | null> {
   if (difficulty >= 4) return null;
 
+  // Difficulty 3 (Advanced) and 4 (Pro) are premium-only
+  if (difficulty >= 2) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { isPremium: true } });
+    if (!user?.isPremium) return null;
+  }
+
   const { progressWindowSize, unlockThreshold } = await getAppConfig();
 
   const hands = await prisma.trainingHand.findMany({
@@ -63,6 +69,8 @@ type HandResult = {
   flopCards: { rank: string; suit: string }[] | undefined;
   turnCard: { rank: string; suit: string } | undefined;
   riverCard: { rank: string; suit: string } | undefined;
+  potSize?: number;
+  betSize?: number;
 };
 
 export async function getOrCreateHand(difficulty: number, handModule: string): Promise<HandResult> {
@@ -231,6 +239,9 @@ export async function getUnlockedDifficulties(handModule: string): Promise<numbe
   const session = await auth();
   if (!session?.user?.id) return [1];
 
+  const isPremium = !!(session.user as any).isPremium;
+  const maxDifficulty = isPremium ? 4 : 2;
+
   const progressModule = PROGRESS_MODULE[handModule] ?? handModule;
   const progress = await prisma.userProgress.findMany({
     where: { userId: session.user.id, module: progressModule },
@@ -238,7 +249,9 @@ export async function getUnlockedDifficulties(handModule: string): Promise<numbe
   });
 
   const unlocked = new Set([1, ...progress.map((p) => p.difficulty)]);
-  return Array.from(unlocked).sort((a, b) => a - b);
+  return Array.from(unlocked)
+    .filter((d) => d <= maxDifficulty)
+    .sort((a, b) => a - b);
 }
 
 function getStageNextAvailableMS(leakBaseMinutes: number): Record<number, number> {
@@ -262,7 +275,7 @@ export async function getOpenLeakCount(): Promise<number> {
   });
 }
 
-export async function getNextRepetitionHand(): Promise<HandResult & { stage: number; difficulty: number; module: string } | null> {
+export async function getNextRepetitionHand(): Promise<HandResult & { stage: number; difficulty: number; module: string; potSize?: number; betSize?: number } | null> {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Not authenticated");
 
@@ -289,14 +302,18 @@ export async function getNextRepetitionHand(): Promise<HandResult & { stage: num
 
   return {
     handId: hand.id,
-    heroCards: [
-      { rank: hand.heroCard1Rank, suit: hand.heroCard1Suit },
-      { rank: hand.heroCard2Rank, suit: hand.heroCard2Suit },
-    ],
-    villainRange: hand.villainRange,
+    heroCards: hand.heroCard1Rank
+      ? [
+          { rank: hand.heroCard1Rank, suit: hand.heroCard1Suit! },
+          { rank: hand.heroCard2Rank!, suit: hand.heroCard2Suit! },
+        ]
+      : [],
+    villainRange: hand.villainRange ?? 0,
     flopCards,
     turnCard,
     riverCard,
+    potSize: hand.potSize ?? undefined,
+    betSize: hand.betSize ?? undefined,
     stage: hand.repetitionStage!,
     difficulty: hand.difficulty,
     module: hand.module,
@@ -383,13 +400,35 @@ export async function getHandProgress(difficulty: number, handModule: string): P
   return { count: hands.length, total, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints };
 }
 
+// Canonical bet sizes for Beginner: always exact standard fractions, clean numbers
+const BEGINNER_POT_ODDS_PRESETS: { potSize: number; betSize: number }[] = [
+  { potSize: 100, betSize: 25 },  // quarter-pot  ≈ 16.7%
+  { potSize:  90, betSize: 30 },  // third-pot    = 20%
+  { potSize: 100, betSize: 50 },  // half-pot     = 25%
+  { potSize:  90, betSize: 60 },  // two-thirds   ≈ 28.6%
+  { potSize: 100, betSize: 100 }, // pot-bet      ≈ 33.3%
+  { potSize: 100, betSize: 150 }, // 1.5x pot     = 37.5%
+  { potSize: 100, betSize: 200 }, // 2x pot       = 40%
+];
+
+// Pre-computed equities for the 7 beginner presets (index matches preset index)
+const BEGINNER_POT_ODDS_EQUITIES = BEGINNER_POT_ODDS_PRESETS.map(
+  ({ potSize, betSize }) => betSize / (potSize + 2 * betSize)
+);
+
+function scorePotOddsBeginnerGuess(guessIndex: number, requiredEquity: number): number {
+  const correctIndex = BEGINNER_POT_ODDS_EQUITIES.reduce((best, eq, i) =>
+    Math.abs(eq - requiredEquity) < Math.abs(BEGINNER_POT_ODDS_EQUITIES[best] - requiredEquity) ? i : best, 0
+  );
+  const diff = Math.abs(guessIndex - correctIndex);
+  if (diff === 0) return 3;
+  if (diff === 1) return 1;
+  return 0;
+}
+
 function generatePotOddsScenario(difficulty: number): { potSize: number; betSize: number } {
   if (difficulty === 1) {
-    const pots = [40, 60, 80, 100];
-    const fractions = [0.25, 0.5, 0.75, 1.0];
-    const pot = pots[Math.floor(Math.random() * pots.length)];
-    const fraction = fractions[Math.floor(Math.random() * fractions.length)];
-    return { potSize: pot, betSize: Math.round((pot * fraction) / 5) * 5 || 5 };
+    return BEGINNER_POT_ODDS_PRESETS[Math.floor(Math.random() * BEGINNER_POT_ODDS_PRESETS.length)];
   }
   if (difficulty === 2) {
     const pots = [40, 50, 60, 70, 80, 90, 100, 120];
@@ -456,7 +495,9 @@ export async function submitPotOddsGuess(handId: string, guessIndex: number): Pr
   if (!isOwner) throw new Error("Unauthorized");
 
   const requiredEquity = hand.betSize / (hand.potSize + 2 * hand.betSize);
-  const points = scoreGuess(guessIndex, requiredEquity, hand.difficulty);
+  const points = hand.difficulty === 1
+    ? scorePotOddsBeginnerGuess(guessIndex, requiredEquity)
+    : scoreGuess(guessIndex, requiredEquity, hand.difficulty);
 
   const { progressWindowSize, unlockThreshold, maxProgressPoints, leakBaseMinutes } = await getAppConfig();
   const stageMs = getStageNextAvailableMS(leakBaseMinutes);

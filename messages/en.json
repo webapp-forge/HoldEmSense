@@ -105,6 +105,7 @@
     "equityLeaks": "Equity Leaks"
   },
   "leakFixing": {
+    "title": "Leak Training",
     "noLeaks": "No leaks to review right now. Keep training and come back later!",
     "stage": "Stage {stage}/3",
     "fixed": "Leak fixed!",

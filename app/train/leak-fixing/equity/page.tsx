@@ -1,6 +1,6 @@
 import { auth } from "../../../../lib/auth";
 import TrainPageLayout from "../../../../components/train/TrainPageLayout";
-import EquityLeaksTraining from "./EquityLeaksTraining";
+import LeakTraining from "../../../../components/train/LeakTraining";
 import { getTranslations } from "next-intl/server";
 
 export default async function EquityLeaksPage() {
@@ -74,5 +74,5 @@ export default async function EquityLeaksPage() {
     );
   }
 
-  return <EquityLeaksTraining />;
+  return <LeakTraining />;
 }

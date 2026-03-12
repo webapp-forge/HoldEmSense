@@ -105,6 +105,7 @@
     "equityLeaks": "Equity Leaks"
   },
   "leakFixing": {
+    "title": "Leaks wiederholen",
     "noLeaks": "Gerade keine Leaks zu wiederholen. Weiter trainieren und später wiederkommen!",
     "stage": "Stufe {stage}/3",
     "fixed": "Leak behoben!",

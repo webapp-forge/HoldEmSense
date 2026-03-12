@@ -22,14 +22,41 @@ function getCorrectIndex(equity: number, difficulty: number): number {
   return Math.min(Math.floor((equity * 100) / step), count - 1);
 }
 
+// Beginner Pot Odds: 7 fixed canonical scenarios (must match server-side BEGINNER_POT_ODDS_PRESETS)
+const BEGINNER_PRESET_LABELS = [
+  "16,7%",
+  "20,0%",
+  "25,0%",
+  "28,6%",
+  "33,3%",
+  "37,5%",
+  "40,0%",
+];
+
+const BEGINNER_PRESET_EQUITIES = [
+  25 / 150,   // ≈ 16.67%
+  30 / 150,   // = 20%
+  50 / 200,   // = 25%
+  60 / 210,   // ≈ 28.57%
+  100 / 300,  // ≈ 33.33%
+  150 / 400,  // = 37.5%
+  200 / 500,  // = 40%
+];
+
+function getBeginnerCorrectIndex(requiredEquity: number): number {
+  return BEGINNER_PRESET_EQUITIES.reduce((best, eq, i) =>
+    Math.abs(eq - requiredEquity) < Math.abs(BEGINNER_PRESET_EQUITIES[best] - requiredEquity) ? i : best, 0
+  );
+}
+
 const MEMO_HINTS: { maxFraction: number; label: string }[] = [
   { maxFraction: 0.27, label: "Quarter-Pot ≈ 17% benötigt" },
-  { maxFraction: 0.37, label: "Drittel-Pot ≈ 25% benötigt" },
+  { maxFraction: 0.37, label: "Drittel-Pot = 20% benötigt" },
   { maxFraction: 0.60, label: "Half-Pot = immer 25% benötigt" },
   { maxFraction: 0.85, label: "Zwei-Drittel-Pot ≈ 29% benötigt" },
   { maxFraction: 1.15, label: "Pot-Bet = immer 33% benötigt" },
-  { maxFraction: 1.65, label: "1,5x Pot ≈ 38% benötigt" },
-  { maxFraction: 2.5, label: "2x Pot ≈ 40% benötigt" },
+  { maxFraction: 1.65, label: "1,5x Pot = 37,5% benötigt" },
+  { maxFraction: 2.5, label: "2x Pot = 40% benötigt" },
 ];
 
 function getMemoHint(potSize: number, betSize: number): string | null {
@@ -122,6 +149,11 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
             <span className="text-white font-mono">Bet ÷ (Pot + 2 × Bet)</span>. Ziel ist ein
             Gespür für die Zahlen — kein exaktes Rechnen am Tisch.
           </p>
+          <p>
+            Präge dir die Werte für die typischen Bet-Größen gut ein. Wenn du weißt, dass ein
+            Pot-Bet immer 33,3% erfordert und ein Half-Pot immer 25%, kannst du später bei
+            krummen Bets schnell eine gute Näherung bilden — ohne zu rechnen.
+          </p>
         </div>
       }
     >
@@ -212,7 +244,10 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
         {/* Cheat button (admin only) */}
         {isAdmin && guessed === null && !calculating && (
           <button
-            onClick={() => handleGuess(getCorrectIndex(hand.betSize / (hand.potSize + 2 * hand.betSize), difficulty))}
+            onClick={() => {
+              const eq = hand.betSize / (hand.potSize + 2 * hand.betSize);
+              handleGuess(difficulty === 1 ? getBeginnerCorrectIndex(eq) : getCorrectIndex(eq, difficulty));
+            }}
             className="self-start px-3 py-1.5 bg-red-800 hover:bg-red-700 rounded text-xs font-medium text-red-200"
           >
             Guess Right
@@ -222,7 +257,33 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
         {/* Guess buttons / slider */}
         <div>
           <p className="text-sm text-gray-400 mb-3">Wie viel Equity brauchst du mindestens?</p>
-          {useSlider ? (
+          {difficulty === 1 ? (
+            <div className="flex flex-wrap gap-2">
+              {BEGINNER_PRESET_LABELS.map((label, i) => {
+                const correctIdx = requiredEquity !== null ? getBeginnerCorrectIndex(requiredEquity) : null;
+                const isGuessed = guessed === i;
+                const isCorrect = correctIdx === i;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => handleGuess(i)}
+                    disabled={guessed !== null || calculating}
+                    className={`px-3 py-2 rounded text-sm font-medium transition-colors ${
+                      guessed === null || calculating
+                        ? "bg-gray-700 hover:bg-gray-600"
+                        : isCorrect
+                        ? "bg-lime-600"
+                        : isGuessed
+                        ? "bg-red-700"
+                        : "bg-gray-800 opacity-50"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          ) : useSlider ? (
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-4">
                 <input

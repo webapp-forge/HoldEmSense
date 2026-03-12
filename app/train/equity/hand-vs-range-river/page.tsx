@@ -1,6 +1,6 @@
 import { auth } from "../../../../lib/auth";
 import RegisterToUnlock from "../../../../components/train/RegisterToUnlock";
-import HandVsRangeRiverTraining from "./HandVsRangeRiverTraining";
+import EquityTraining from "../../../../components/train/EquityTraining";
 import { getTranslations } from "next-intl/server";
 
 export default async function HandVsRangeRiverPage() {
@@ -11,5 +11,5 @@ export default async function HandVsRangeRiverPage() {
   }
   const role = (session.user as any).isPremium ? "premium" : "registered";
   const isAdmin = !!(session.user as any).isAdmin;
-  return <HandVsRangeRiverTraining role={role} isAdmin={isAdmin} />;
+  return <EquityTraining handModule="river" role={role} isAdmin={isAdmin} />;
 }

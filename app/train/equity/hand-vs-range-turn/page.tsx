@@ -1,6 +1,6 @@
 import { auth } from "../../../../lib/auth";
 import RegisterToUnlock from "../../../../components/train/RegisterToUnlock";
-import HandVsRangeTurnTraining from "./HandVsRangeTurnTraining";
+import EquityTraining from "../../../../components/train/EquityTraining";
 import { getTranslations } from "next-intl/server";
 
 export default async function HandVsRangeTurnPage() {
@@ -11,5 +11,5 @@ export default async function HandVsRangeTurnPage() {
   }
   const role = (session.user as any).isPremium ? "premium" : "registered";
   const isAdmin = !!(session.user as any).isAdmin;
-  return <HandVsRangeTurnTraining role={role} isAdmin={isAdmin} />;
+  return <EquityTraining handModule="turn" role={role} isAdmin={isAdmin} />;
 }

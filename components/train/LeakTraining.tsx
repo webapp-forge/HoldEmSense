@@ -1,31 +1,56 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getNextRepetitionHand, submitRepetitionGuess } from "../../../../lib/actions/training";
+import { getNextRepetitionHand, submitRepetitionGuess } from "../../lib/actions/training";
 import { useTranslations } from "next-intl";
-import CardComponent from "../../../../components/Card";
-import TrainPageLayout from "../../../../components/train/TrainPageLayout";
-import RangeMatrix from "../../../../components/train/RangeMatrix";
-
-const CLASS_STEPS: Record<number, number> = { 1: 20, 2: 10, 3: 5, 4: 2 };
-
-function getEquityClasses(difficulty: number): string[] {
-  const step = CLASS_STEPS[difficulty] ?? 10;
-  return Array.from({ length: 100 / step }, (_, i) => `${i * step}–${(i + 1) * step}%`);
-}
-
-function getCorrectIndex(equity: number, difficulty: number): number {
-  const step = CLASS_STEPS[difficulty] ?? 10;
-  const count = 100 / step;
-  return Math.min(Math.floor((equity * 100) / step), count - 1);
-}
+import CardComponent from "../Card";
+import TrainPageLayout from "./TrainPageLayout";
+import RangeMatrix from "./RangeMatrix";
+import EquityGuessPanel, { getCorrectIndex } from "./EquityGuessPanel";
 
 const MODULE_LABEL: Record<string, string> = {
   preflop: "Hand vs Range",
   flop: "Flop: Hand vs Range",
   turn: "Turn: Hand vs Range",
   river: "River: Hand vs Range",
+  "pot-odds": "Pot Odds",
 };
+
+// Beginner Pot Odds presets — must match BEGINNER_POT_ODDS_PRESETS in training.ts
+const BEGINNER_PRESET_LABELS = [
+  "16,7%",
+  "20,0%",
+  "25,0%",
+  "28,6%",
+  "33,3%",
+  "37,5%",
+  "40,0%",
+];
+
+const BEGINNER_PRESET_EQUITIES = [
+  25 / 150,
+  30 / 150,
+  50 / 200,
+  60 / 210,
+  100 / 300,
+  150 / 400,
+  200 / 500,
+];
+
+const MEMO_HINTS: { maxFraction: number; label: string }[] = [
+  { maxFraction: 0.27, label: "Quarter-Pot ≈ 17% benötigt" },
+  { maxFraction: 0.37, label: "Drittel-Pot = 20% benötigt" },
+  { maxFraction: 0.60, label: "Half-Pot = immer 25% benötigt" },
+  { maxFraction: 0.85, label: "Zwei-Drittel-Pot ≈ 29% benötigt" },
+  { maxFraction: 1.15, label: "Pot-Bet = immer 33% benötigt" },
+  { maxFraction: 1.65, label: "1,5x Pot = 37,5% benötigt" },
+  { maxFraction: 2.5, label: "2x Pot = 40% benötigt" },
+];
+
+function getMemoHint(potSize: number, betSize: number): string | null {
+  const fraction = betSize / potSize;
+  return MEMO_HINTS.find((h) => fraction <= h.maxFraction)?.label ?? null;
+}
 
 type HandState = {
   handId: string;
@@ -34,6 +59,8 @@ type HandState = {
   turnCard?: { rank: string; suit: string };
   riverCard?: { rank: string; suit: string };
   villainRange: number;
+  potSize?: number;
+  betSize?: number;
   difficulty: number;
   stage: number;
   module: string;
@@ -47,7 +74,7 @@ type Result = {
   newStage: number;
 };
 
-export default function EquityLeaksTraining() {
+export default function LeakTraining() {
   const t = useTranslations("train");
   const tl = useTranslations("leakFixing");
   const td = useTranslations("difficulty");
@@ -81,6 +108,8 @@ export default function EquityLeaksTraining() {
         turnCard: next.turnCard,
         riverCard: next.riverCard,
         villainRange: next.villainRange,
+        potSize: next.potSize,
+        betSize: next.betSize,
         difficulty: next.difficulty,
         stage: next.stage,
         module: next.module,
@@ -95,7 +124,13 @@ export default function EquityLeaksTraining() {
     setGuessed(classIndex);
     setCalculating(true);
     const res = await submitRepetitionGuess(hand.handId, classIndex);
-    setResult({ equity: res.equity, pointsScored: res.pointsScored, correct: res.correct, prevStage: hand.stage, newStage: res.newStage });
+    setResult({
+      equity: res.equity,
+      pointsScored: res.pointsScored,
+      correct: res.correct,
+      prevStage: hand.stage,
+      newStage: res.newStage,
+    });
     setCalculating(false);
     window.dispatchEvent(new Event("leak-processed"));
   }
@@ -106,7 +141,7 @@ export default function EquityLeaksTraining() {
     return (
       <TrainPageLayout info={null} explanation={null}>
         <div className="flex flex-col gap-4 max-w-2xl">
-          <h2 className="text-xl font-bold">Equity Leaks</h2>
+          <h2 className="text-xl font-bold">{tl("title")}</h2>
           <p className="text-gray-400">{tl("noLeaks")}</p>
         </div>
       </TrainPageLayout>
@@ -115,8 +150,7 @@ export default function EquityLeaksTraining() {
 
   if (!hand) return null;
 
-  const equityClasses = getEquityClasses(hand.difficulty);
-  const useSlider = hand.difficulty >= 3;
+  const isPotOdds = hand.module === "pot-odds";
 
   function stageMessage(res: Result): string {
     if (res.newStage === 4) return tl("fixed");
@@ -132,26 +166,50 @@ export default function EquityLeaksTraining() {
     return tl("nextIn7d");
   }
 
+  const actualEquity = result?.equity ?? null;
+
   return (
     <TrainPageLayout
-      info={<RangeMatrix villainRange={hand.villainRange} heroCards={hand.heroCards} />}
+      info={isPotOdds ? null : <RangeMatrix villainRange={hand.villainRange} heroCards={hand.heroCards} />}
       explanation={null}
     >
       <div className="flex flex-col gap-6 max-w-2xl">
         <div>
-          <h2 className="text-xl font-bold">Equity Leaks</h2>
+          <h2 className="text-xl font-bold">{tl("title")}</h2>
           <p className="text-gray-500 text-sm mt-0.5">{MODULE_LABEL[hand.module] ?? hand.module}</p>
           <div className="flex items-center gap-3 mt-1 text-sm text-gray-400">
-            <span>Villain range: Top <span className="text-white font-semibold">{hand.villainRange}%</span></span>
-            <span className="text-gray-600">|</span>
+            {!isPotOdds && (
+              <>
+                <span>Villain range: Top <span className="text-white font-semibold">{hand.villainRange}%</span></span>
+                <span className="text-gray-600">|</span>
+              </>
+            )}
             <span>{td(String(hand.difficulty))}</span>
             <span className="text-gray-600">|</span>
             <span className="text-amber-400">{tl("stage", { stage: hand.stage })}</span>
           </div>
         </div>
 
-        {/* Flop + Turn + River */}
-        {hand.flopCards && (
+        {/* Pot odds scenario */}
+        {isPotOdds && hand.potSize && hand.betSize && (
+          <div className="bg-gray-900 border border-gray-700 rounded-lg px-5 py-4 flex flex-col gap-1 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Pot</span>
+              <span className="text-white font-semibold">{hand.potSize} BB</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Villain bet</span>
+              <span className="text-white font-semibold">{hand.betSize} BB</span>
+            </div>
+            <div className="flex justify-between border-t border-gray-700 mt-2 pt-2">
+              <span className="text-gray-400">Dein Call</span>
+              <span className="text-white font-semibold">{hand.betSize} BB</span>
+            </div>
+          </div>
+        )}
+
+        {/* Community cards (equity modules) */}
+        {!isPotOdds && hand.flopCards && (
           <div style={{ display: "flex", alignItems: "flex-end" }}>
             <div>
               <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Flop</p>
@@ -176,85 +234,30 @@ export default function EquityLeaksTraining() {
           </div>
         )}
 
-        {/* Hero cards */}
-        <div>
-          <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Your hand</p>
-          <div className="flex gap-2">
-            {hand.heroCards.map((card, i) => (
-              <CardComponent key={i} rank={card.rank} suit={card.suit} />
-            ))}
+        {/* Hero cards (equity modules only) */}
+        {!isPotOdds && (
+          <div>
+            <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Your hand</p>
+            <div className="flex gap-2">
+              {hand.heroCards.map((card, i) => (
+                <CardComponent key={i} rank={card.rank} suit={card.suit} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Equity guess */}
-        <div>
-          <p className="text-sm text-gray-400 mb-3">{t("whatIsYourEquity")}</p>
-          {useSlider ? (
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-4">
-                <input
-                  type="range"
-                  min={0}
-                  max={equityClasses.length - 1}
-                  step={1}
-                  value={sliderValue}
-                  onChange={(e) => setSliderValue(Number(e.target.value))}
-                  disabled={guessed !== null}
-                  className="flex-1 accent-lime-500"
-                />
-                <span className="text-white font-medium w-20 text-right">
-                  {equityClasses[sliderValue]}
-                </span>
-              </div>
-              {guessed === null && !calculating && (
-                <button
-                  onClick={() => handleGuess(sliderValue)}
-                  className="self-start px-4 py-2 bg-lime-600 hover:bg-lime-500 rounded text-sm font-medium"
-                >
-                  {t("submit")}
-                </button>
-              )}
-              {guessed !== null && !calculating && result && (
-                <div className="flex gap-2 flex-wrap text-sm">
-                  <span className={`px-3 py-1 rounded font-medium ${guessed === getCorrectIndex(result.equity, hand.difficulty) ? "bg-lime-600" : "bg-red-700"}`}>
-                    Your guess: {equityClasses[guessed]}
-                  </span>
-                  {guessed !== getCorrectIndex(result.equity, hand.difficulty) && (
-                    <span className="px-3 py-1 rounded font-medium bg-lime-600">
-                      Correct: {equityClasses[getCorrectIndex(result.equity, hand.difficulty)]}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {equityClasses.map((label, i) => {
-                const correctIdx = result ? getCorrectIndex(result.equity, hand.difficulty) : null;
-                const isGuessed = guessed === i;
-                const isCorrect = correctIdx === i;
-                return (
-                  <button
-                    key={i}
-                    onClick={() => handleGuess(i)}
-                    disabled={guessed !== null || calculating}
-                    className={`px-3 py-2 rounded text-sm font-medium transition-colors ${
-                      guessed === null || calculating
-                        ? "bg-gray-700 hover:bg-gray-600"
-                        : isCorrect
-                        ? "bg-lime-600"
-                        : isGuessed
-                        ? "bg-red-700"
-                        : "bg-gray-800 opacity-50"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        <EquityGuessPanel
+          difficulty={hand.difficulty}
+          guessed={guessed}
+          calculating={calculating}
+          actualEquity={actualEquity}
+          onGuess={handleGuess}
+          sliderValue={sliderValue}
+          onSliderChange={setSliderValue}
+          prompt={isPotOdds ? "Wie viel Equity brauchst du mindestens?" : t("whatIsYourEquity")}
+          presetLabels={isPotOdds && hand.difficulty === 1 ? BEGINNER_PRESET_LABELS : undefined}
+          presetEquities={isPotOdds && hand.difficulty === 1 ? BEGINNER_PRESET_EQUITIES : undefined}
+        />
 
         {calculating && <div className="text-gray-400 text-sm">{t("calculating")}</div>}
 
@@ -265,11 +268,25 @@ export default function EquityLeaksTraining() {
               {result.pointsScored === 1 && <span className="text-yellow-400 font-bold text-lg">{t("close")}</span>}
               {result.pointsScored === 0 && <span className="text-red-400 font-bold text-lg">{t("miss")}</span>}
               <span className="text-gray-400 text-sm">
-                {t("actualEquity")}: <span className="text-white font-medium">{(result.equity * 100).toFixed(1)}%</span>
+                {isPotOdds ? "Benötigte Equity" : t("actualEquity")}:{" "}
+                <span className="text-white font-medium">{(result.equity * 100).toFixed(1)}%</span>
               </span>
             </div>
 
-            <div className={`text-sm px-3 py-2 rounded ${result.newStage === 4 ? "bg-lime-900 border border-lime-600 text-lime-300" : result.correct ? "bg-gray-800 text-gray-300" : "bg-gray-800 text-gray-400"}`}>
+            {isPotOdds && hand.potSize && hand.betSize && (() => {
+              const hint = getMemoHint(hand.potSize, hand.betSize);
+              return hint ? <p className="text-xs text-gray-500">{hint}</p> : null;
+            })()}
+
+            <div
+              className={`text-sm px-3 py-2 rounded ${
+                result.newStage === 4
+                  ? "bg-lime-900 border border-lime-600 text-lime-300"
+                  : result.correct
+                  ? "bg-gray-800 text-gray-300"
+                  : "bg-gray-800 text-gray-400"
+              }`}
+            >
               {stageMessage(result)}
               {nextAvailableMessage(result) && (
                 <span className="ml-2 text-gray-500">{nextAvailableMessage(result)}</span>
