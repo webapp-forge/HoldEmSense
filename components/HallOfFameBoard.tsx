@@ -50,9 +50,6 @@ export default function HallOfFameBoard({ initialView, initialEntries, currentMo
           <span className="text-amber-400">🏆</span>
           Hall of Fame
         </h1>
-        <p className="text-gray-400 text-sm mt-1.5">
-          Score = sum of last 100 hands per module &amp; difficulty. Max {5 * 4 * 100 * 3} pts.
-        </p>
       </div>
 
       {/* View toggle */}
@@ -86,7 +83,7 @@ export default function HallOfFameBoard({ initialView, initialEntries, currentMo
             <span>#</span>
             <span>Player</span>
             <span className="text-right">Hands</span>
-            <span className="text-right w-20">Score</span>
+            <span className="text-right w-20">Score*</span>
           </div>
 
           {entries.map((entry) => {
@@ -106,8 +103,9 @@ export default function HallOfFameBoard({ initialView, initialEntries, currentMo
                   isTop3 ? "py-3" : "py-2.5"
                 } ${rowClass}`}
               >
-                <span className={`font-bold text-center ${isTop3 ? "text-lg" : "text-sm text-gray-500"}`}>
-                  {crown ? `${entry.rank}${crown}` : entry.rank}
+                <span className={`font-bold text-center flex items-center justify-center gap-1 ${isTop3 ? "text-lg" : "text-sm text-gray-500"}`}>
+                  <span>{entry.rank}</span>
+                  {crown && <span>{crown}</span>}
                 </span>
                 <span className={`font-medium ${isTop3 ? "text-base" : "text-sm"} ${isCurrentUser ? "text-lime-300" : "text-white"}`}>
                   {entry.username}
@@ -122,6 +120,11 @@ export default function HallOfFameBoard({ initialView, initialEntries, currentMo
           })}
         </div>
       )}
+
+      {/* Footnote */}
+      <p className="text-xs text-gray-600 mt-1">
+        * Score = hands played &times; difficulty weight &mdash; Beginner ×1, Intermediate ×1.5, Advanced ×2, Pro ×2.5
+      </p>
     </div>
   );
 }

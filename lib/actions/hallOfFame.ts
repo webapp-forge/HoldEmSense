@@ -12,6 +12,8 @@ export type LeaderboardEntry = {
 async function computeLeaderboard(
   dateFilter?: { gte: Date; lt: Date }
 ): Promise<LeaderboardEntry[]> {
+  const DIFFICULTY_WEIGHT: Record<number, number> = { 1: 1, 2: 1.5, 3: 2, 4: 2.5 };
+
   const hands = await prisma.trainingHand.findMany({
     where: {
       userId: { not: null },
@@ -20,46 +22,35 @@ async function computeLeaderboard(
     },
     select: {
       userId: true,
-      module: true,
       difficulty: true,
       pointsScored: true,
       user: { select: { username: true } },
     },
-    orderBy: { createdAt: "desc" },
   });
 
-  // Group by userId -> (module:difficulty) -> take last 100 -> sum
-  const userComboMap = new Map<string, Map<string, { count: number; sum: number }>>();
-  const usernames = new Map<string, string>();
+  const userMap = new Map<string, { score: number; handsPlayed: number; username: string }>();
 
   for (const hand of hands) {
     const uid = hand.userId!;
-    if (!userComboMap.has(uid)) {
-      userComboMap.set(uid, new Map());
-      usernames.set(uid, hand.user?.username ?? "Unknown");
-    }
-    const comboKey = `${hand.module}:${hand.difficulty}`;
-    const comboMap = userComboMap.get(uid)!;
-    const existing = comboMap.get(comboKey) ?? { count: 0, sum: 0 };
-    if (existing.count < 100) {
-      existing.sum += hand.pointsScored!;
-      existing.count++;
-      comboMap.set(comboKey, existing);
-    }
+    const weight = DIFFICULTY_WEIGHT[hand.difficulty] ?? 1;
+    const existing = userMap.get(uid) ?? { score: 0, handsPlayed: 0, username: hand.user?.username ?? "Unknown" };
+    existing.score += hand.pointsScored! * weight;
+    existing.handsPlayed++;
+    userMap.set(uid, existing);
   }
 
-  const scores: { userId: string; score: number; handsPlayed: number }[] = [];
-  for (const [uid, comboMap] of userComboMap.entries()) {
-    const score = Array.from(comboMap.values()).reduce((s, c) => s + c.sum, 0);
-    const handsPlayed = Array.from(comboMap.values()).reduce((s, c) => s + c.count, 0);
-    scores.push({ userId: uid, score, handsPlayed });
-  }
+  const scores = Array.from(userMap.entries()).map(([uid, data]) => ({
+    userId: uid,
+    score: Math.round(data.score),
+    handsPlayed: data.handsPlayed,
+    username: data.username,
+  }));
 
   scores.sort((a, b) => b.score - a.score);
 
   return scores.slice(0, 20).map((entry, i) => ({
     rank: i + 1,
-    username: usernames.get(entry.userId) ?? "Unknown",
+    username: entry.username,
     score: entry.score,
     handsPlayed: entry.handsPlayed,
   }));

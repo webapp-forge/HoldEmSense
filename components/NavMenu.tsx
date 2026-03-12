@@ -24,11 +24,8 @@ export default function NavMenu({ username, logoutAction }: Props) {
 
   return (
     <>
-      {/* Desktop nav */}
-      <nav className="hidden md:flex items-center gap-6">
-        <Link href="/glossary" className="hover:text-lime-400">{t("glossary")}</Link>
-        <Link href="/train" className="hover:text-lime-400">{t("train")}</Link>
-        <Link href="/hall-of-fame" className="hover:text-lime-400">{t("hallOfFame")}</Link>
+      {/* Desktop: user controls only — nav links are in Header */}
+      <div className="hidden md:flex items-center gap-5">
         {username ? (
           <>
             <span className="text-gray-400 text-sm">{username}</span>
@@ -38,11 +35,11 @@ export default function NavMenu({ username, logoutAction }: Props) {
           </>
         ) : (
           <>
-            <Link href="/login" className="hover:text-lime-400">{t("login")}</Link>
+            <Link href="/login" className="hover:text-lime-400 text-sm">{t("login")}</Link>
             <Link href="/register" className="hover:text-lime-400 bg-lime-600 px-3 py-1 rounded text-sm">{t("register")}</Link>
           </>
         )}
-      </nav>
+      </div>
 
       {/* Mobile burger */}
       <div className="relative md:hidden">
