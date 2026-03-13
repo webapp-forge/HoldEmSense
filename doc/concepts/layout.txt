@@ -38,10 +38,8 @@ MOBILE (Overlay-Verhalten)
 - Matrix-Drawer: w-fit (passt sich Matrixgröße an)
 - Info-Drawer: w-80 (320px, gute Lesebreite)
 - Beide: max-w-[90vw] (Sicherheit für sehr kleine Screens)
+- Mobile Menu soll immer mit  Desktop Sidebar synchron gehalten werden
 
-
-TODO
-- ✅ Fixed Header
 
 
 ## Relevante Dateien

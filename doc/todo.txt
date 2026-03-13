@@ -1,10 +1,10 @@
+- Streak in Mobile sieht komisch aus + woanders platzieren?
 - Pot Odds Training: dieser Hinweis ist noch irreführend: 
     2x Pot — dein Call = 2/5 des Endpots (40,0%) 
     (können ja mehrere gegner involviert sein)
     -> andere Größen auch noch prüfen!
 - Zeitabstände im Leak Training sind keine echten Parameter (Ausgabe ist immer 1 hour)
 - Odds and Outs?
-- Streaks
 - Bug: Equity Leak, 33% richtig geklickt, aber Fehler bekommen!
 - Leaks fehlen Mobile
 - Mobile: Matrix und Info als Overlay
