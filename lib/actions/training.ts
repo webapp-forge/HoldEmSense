@@ -18,6 +18,7 @@ const PROGRESS_MODULE: Record<string, string> = {
   turn: "hand-vs-range-turn",
   river: "hand-vs-range-river",
   "pot-odds": "pot-odds",
+  "combined-pot-odds": "combined-pot-odds",
 };
 
 function scoreGuess(guessIndex: number, actualEquity: number, difficulty: number): number {
@@ -28,6 +29,18 @@ function scoreGuess(guessIndex: number, actualEquity: number, difficulty: number
   if (diff === 1) return 1;
   return 0;
 }
+
+// Combined module: 0/1/2 for equity so the decision point (+0/+1) keeps max at 3
+function scoreCombinedEquityGuess(guessIndex: number, actualEquity: number, difficulty: number): number {
+  const classCount = CLASS_COUNTS[difficulty] ?? 10;
+  const correctIndex = Math.min(Math.floor(actualEquity * classCount), classCount - 1);
+  const diff = Math.abs(guessIndex - correctIndex);
+  if (diff === 0) return 2;
+  if (diff === 1) return 1;
+  return 0;
+}
+
+const COMBINED_BREAKEVEN_MARGIN = 0.05;
 
 async function checkAndUnlock(userId: string, difficulty: number, handModule: string): Promise<number | null> {
   if (difficulty >= 4) return null;
@@ -642,6 +655,205 @@ export async function submitPotOddsGuess(handId: string, guessIndex: number): Pr
   return { requiredEquity, pointsScored: points, unlockedDifficulty, newAchievements, progress: { count: recentHands.length, total: progressTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints } };
 }
 
+export async function getOrCreateCombinedHand(difficulty: number): Promise<HandResult & { potSize: number; betSize: number }> {
+  const session = await auth();
+  const userId = session?.user?.id ?? null;
+  const guestId = userId ? null : ((await cookies()).get("guestId")?.value ?? null);
+  if (!userId && !guestId) throw new Error("No identity");
+
+  const where = userId
+    ? { userId, difficulty, module: "combined-pot-odds", pointsScored: null }
+    : { guestId, difficulty, module: "combined-pot-odds", pointsScored: null };
+
+  const existing = await prisma.trainingHand.findFirst({ where, orderBy: { createdAt: "desc" } });
+
+  if (existing?.potSize && existing?.betSize && existing?.heroCard1Rank) {
+    const flopCards = existing.flopCard1Rank
+      ? [
+          { rank: existing.flopCard1Rank, suit: existing.flopCard1Suit! },
+          { rank: existing.flopCard2Rank!, suit: existing.flopCard2Suit! },
+          { rank: existing.flopCard3Rank!, suit: existing.flopCard3Suit! },
+        ]
+      : undefined;
+    const turnCard = existing.turnCardRank ? { rank: existing.turnCardRank, suit: existing.turnCardSuit! } : undefined;
+    const riverCard = existing.riverCardRank ? { rank: existing.riverCardRank, suit: existing.riverCardSuit! } : undefined;
+    return {
+      handId: existing.id,
+      heroCards: [
+        { rank: existing.heroCard1Rank, suit: existing.heroCard1Suit! },
+        { rank: existing.heroCard2Rank!, suit: existing.heroCard2Suit! },
+      ],
+      villainRange: existing.villainRange!,
+      flopCards,
+      turnCard,
+      riverCard,
+      potSize: existing.potSize,
+      betSize: existing.betSize,
+    };
+  }
+
+  // Randomly pick a street (flop / turn / river)
+  const COMBINED_POOL_NAMES = ["flop-equity", "turn-equity", "river-equity"] as const;
+  const COMBINED_STREET_MODULES = ["flop", "turn", "river"] as const;
+  const streetIdx = Math.floor(Math.random() * 3);
+  const poolModule = COMBINED_POOL_NAMES[streetIdx];
+  const streetHandModule = COMBINED_STREET_MODULES[streetIdx];
+
+  const preGen = await drawFromPreGeneratedPool(poolModule, streetHandModule);
+  const heroCards = preGen?.heroCards ?? drawHeroCards(getProfileForModule(streetHandModule));
+  const villainRangeValue = preGen?.villainRange ?? [10, 15, 20, 25, 30, 40, 50][Math.floor(Math.random() * 7)];
+  const flopCards = preGen?.flopCards ?? drawCards(3, heroCards);
+  const turnCard = preGen?.turnCard ?? (streetIdx >= 1 ? drawCards(1, [...heroCards, ...flopCards])[0] : undefined);
+  const riverCard = preGen?.riverCard ?? (streetIdx >= 2 ? drawCards(1, [...heroCards, ...flopCards, ...(turnCard ? [turnCard] : [])])[0] : undefined);
+  const { potSize, betSize } = generatePotOddsScenario(difficulty);
+
+  const hand = await prisma.trainingHand.create({
+    data: {
+      userId: userId ?? undefined,
+      ...(guestId && { guestId } as any),
+      module: "combined-pot-odds",
+      heroCard1Rank: heroCards[0].rank,
+      heroCard1Suit: heroCards[0].suit,
+      heroCard2Rank: heroCards[1].rank,
+      heroCard2Suit: heroCards[1].suit,
+      flopCard1Rank: flopCards[0].rank,
+      flopCard1Suit: flopCards[0].suit,
+      flopCard2Rank: flopCards[1].rank,
+      flopCard2Suit: flopCards[1].suit,
+      flopCard3Rank: flopCards[2].rank,
+      flopCard3Suit: flopCards[2].suit,
+      ...(turnCard && { turnCardRank: turnCard.rank, turnCardSuit: turnCard.suit }),
+      ...(riverCard && { riverCardRank: riverCard.rank, riverCardSuit: riverCard.suit }),
+      villainRange: villainRangeValue,
+      potSize,
+      betSize,
+      difficulty,
+      ...(preGen && { actualEquity: preGen.equity }),
+    },
+  });
+
+  return { handId: hand.id, heroCards, flopCards, turnCard, riverCard, villainRange: villainRangeValue, potSize, betSize };
+}
+
+export async function submitCombinedGuess(handId: string, guessIndex: number): Promise<{
+  equity: number;
+  requiredEquity: number;
+  potSize: number;
+  betSize: number;
+  equityPoints: number;
+}> {
+  const session = await auth();
+  const userId = session?.user?.id ?? null;
+  const guestId = userId ? null : ((await cookies()).get("guestId")?.value ?? null);
+
+  const hand = await prisma.trainingHand.findUnique({ where: { id: handId } });
+  if (!hand) throw new Error("Hand not found");
+  if (!hand.potSize || !hand.betSize) throw new Error("Missing pot/bet data");
+
+  const isOwner = userId ? hand.userId === userId : guestId && hand.guestId === guestId;
+  if (!isOwner) throw new Error("Unauthorized");
+
+  const heroCards = [
+    { rank: hand.heroCard1Rank!, suit: hand.heroCard1Suit! },
+    { rank: hand.heroCard2Rank!, suit: hand.heroCard2Suit! },
+  ];
+  const communityCards = [
+    { rank: hand.flopCard1Rank!, suit: hand.flopCard1Suit! },
+    { rank: hand.flopCard2Rank!, suit: hand.flopCard2Suit! },
+    { rank: hand.flopCard3Rank!, suit: hand.flopCard3Suit! },
+    ...(hand.turnCardRank ? [{ rank: hand.turnCardRank, suit: hand.turnCardSuit! }] : []),
+    ...(hand.riverCardRank ? [{ rank: hand.riverCardRank, suit: hand.riverCardSuit! }] : []),
+  ];
+
+  const equity = hand.actualEquity !== null && hand.actualEquity !== undefined
+    ? hand.actualEquity
+    : (() => {
+        const simsByDifficulty: Record<number, number> = { 1: 1000, 2: 2000, 3: 5000, 4: 20000 };
+        return calculateEquity(heroCards, hand.villainRange!, communityCards, simsByDifficulty[hand.difficulty] ?? 1000);
+      })();
+
+  const equityPoints = scoreCombinedEquityGuess(guessIndex, equity, hand.difficulty);
+  const requiredEquity = hand.betSize / (hand.potSize + 2 * hand.betSize);
+
+  await prisma.trainingHand.update({
+    where: { id: handId },
+    data: { actualEquity: equity, equityGuessIndex: guessIndex },
+  });
+
+  return { equity, requiredEquity, potSize: hand.potSize, betSize: hand.betSize, equityPoints };
+}
+
+export async function submitCombinedDecision(handId: string, callDecision: boolean): Promise<{
+  totalPoints: number;
+  equityPoints: number;
+  decisionPoints: number;
+  isBreakeven: boolean;
+  unlockedDifficulty: number | null;
+  newAchievements: string[];
+  progress: { count: number; total: number; windowSize: number; unlockThreshold: number; maxPoints: number };
+}> {
+  const session = await auth();
+  const userId = session?.user?.id ?? null;
+  const guestId = userId ? null : ((await cookies()).get("guestId")?.value ?? null);
+
+  const hand = await prisma.trainingHand.findUnique({ where: { id: handId } });
+  if (!hand) throw new Error("Hand not found");
+  if (!hand.potSize || !hand.betSize) throw new Error("Missing pot/bet data");
+  if (hand.actualEquity === null || hand.actualEquity === undefined) throw new Error("Equity not calculated yet");
+  if (hand.equityGuessIndex === null || hand.equityGuessIndex === undefined) throw new Error("Equity guess not submitted yet");
+
+  const isOwner = userId ? hand.userId === userId : guestId && hand.guestId === guestId;
+  if (!isOwner) throw new Error("Unauthorized");
+
+  const equity = hand.actualEquity;
+  const requiredEquity = hand.betSize / (hand.potSize + 2 * hand.betSize);
+  const isBreakeven = Math.abs(equity - requiredEquity) < COMBINED_BREAKEVEN_MARGIN;
+  const correctDecision = equity >= requiredEquity; // true = call, false = fold
+  const decisionPoints = isBreakeven || callDecision === correctDecision ? 1 : 0;
+  const equityPoints = scoreCombinedEquityGuess(hand.equityGuessIndex, equity, hand.difficulty);
+  const totalPoints = equityPoints + decisionPoints;
+
+  const { progressWindowSize, unlockThreshold, maxProgressPoints, leakBaseMinutes } = await getAppConfig();
+  const stageMs = getStageNextAvailableMS(leakBaseMinutes);
+
+  const repetitionUpdate = userId && totalPoints < 3
+    ? { repetitionStage: 1, repetitionAvailableAt: new Date(Date.now() + stageMs[1]) }
+    : {};
+
+  await prisma.trainingHand.update({
+    where: { id: handId },
+    data: { pointsScored: totalPoints, ...repetitionUpdate },
+  });
+
+  if (!userId) {
+    const guestHands = await prisma.trainingHand.findMany({
+      where: { guestId, difficulty: hand.difficulty, module: "combined-pot-odds", pointsScored: { not: null } },
+      orderBy: { createdAt: "desc" },
+      take: progressWindowSize,
+      select: { pointsScored: true },
+    });
+    const guestTotal = guestHands.reduce((sum, h) => sum + (h.pointsScored ?? 0), 0);
+    return { totalPoints, equityPoints, decisionPoints, isBreakeven, unlockedDifficulty: null, newAchievements: [], progress: { count: guestHands.length, total: guestTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints } };
+  }
+
+  const [unlockedDifficulty, newAchievements] = await Promise.all([
+    checkAndUnlock(userId, hand.difficulty, "combined-pot-odds"),
+    checkAndGrantAchievements(userId),
+  ]);
+
+  if (totalPoints >= 3) revalidatePath("/", "layout");
+
+  const recentHands = await prisma.trainingHand.findMany({
+    where: { userId, difficulty: hand.difficulty, module: "combined-pot-odds", pointsScored: { not: null } },
+    orderBy: { createdAt: "desc" },
+    take: progressWindowSize,
+    select: { pointsScored: true },
+  });
+  const progressTotal = recentHands.reduce((sum, h) => sum + (h.pointsScored ?? 0), 0);
+
+  return { totalPoints, equityPoints, decisionPoints, isBreakeven, unlockedDifficulty, newAchievements, progress: { count: recentHands.length, total: progressTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints } };
+}
+
 export async function getCorrectAnswer(handId: string): Promise<number> {
   const session = await auth();
   if (!(session?.user as any)?.isAdmin) throw new Error("Unauthorized");
@@ -651,7 +863,8 @@ export async function getCorrectAnswer(handId: string): Promise<number> {
 
   const classCount = CLASS_COUNTS[hand.difficulty] ?? 10;
 
-  if (hand.potSize && hand.betSize) {
+  // combined-pot-odds stores pot/bet but equity is the hand equity, not the required pot-odds equity
+  if (hand.potSize && hand.betSize && hand.module !== "combined-pot-odds") {
     const equity = hand.betSize / (hand.potSize + 2 * hand.betSize);
     return Math.min(Math.floor(equity * classCount), classCount - 1);
   }

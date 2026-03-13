@@ -82,10 +82,14 @@ export default function NavMenu({ username, logoutAction, streak = 0, trainedTod
                 {link.label}
               </Link>
             ))}
-            <div className="border-t border-gray-700 my-1" />
-            <div className="px-4 py-2">
-              <LanguageSwitcher />
-            </div>
+            {!username && (
+              <>
+                <div className="border-t border-gray-700 my-1" />
+                <div className="px-4 py-2">
+                  <LanguageSwitcher />
+                </div>
+              </>
+            )}
             <div className="border-t border-gray-700 my-1" />
             {username ? (
               <>

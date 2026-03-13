@@ -1,3 +1,4 @@
+- Odds and Outs?
 - Pot Odds, besserer Ansatz: eigener Anteil am Pot statt Betgröße memorisieren, 
 da Betgröße nur bei 1vs1 gilt!
 - Streaks

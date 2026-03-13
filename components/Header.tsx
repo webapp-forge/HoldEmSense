@@ -67,9 +67,11 @@ export default async function Header() {
 
       {/* Right: Language + User */}
       <div className="ml-auto flex items-center gap-6">
-        <div className="hidden md:block">
-          <LanguageSwitcher />
-        </div>
+        {!session && (
+          <div className="hidden md:block">
+            <LanguageSwitcher />
+          </div>
+        )}
         <NavMenu username={session?.user?.name} logoutAction={logoutAction} streak={streak} trainedToday={trainedToday} />
       </div>
     </header>

@@ -134,6 +134,25 @@
     "showMatrix": "Range Matrix",
     "showInfo": "Info"
   },
+  "combinedPotOdds": {
+    "title": "Hand vs Range + Pot Odds",
+    "step1": "Schritt 1 von 2: Equity schätzen",
+    "step2": "Schritt 2 von 2: Call oder Fold?",
+    "potInclBet": "Pot (inkl. Bet)",
+    "yourCall": "Dein Call",
+    "requiredEquity": "Benötigte Equity",
+    "call": "Call",
+    "fold": "Fold",
+    "decisionCorrect": "Richtige Entscheidung!",
+    "decisionWrong": "Falsche Entscheidung",
+    "breakevenZone": "Breakeven-Zone — beide Entscheidungen sind vertretbar",
+    "shouldHaveCalledDetail": "Deine Equity ({equity}%) überschreitet die benötigte Equity — Call wäre profitabler gewesen.",
+    "shouldHaveFoldedDetail": "Deine Equity ({equity}%) reicht nicht für einen profitablen Call — Fold wäre besser.",
+    "equityExact": "Treffer! +2",
+    "equityClose": "Nah dran! +1",
+    "equityMiss": "Daneben +0",
+    "totalPoints": "Gesamt: {pts} Punkte"
+  },
   "sidebar": {
     "equityTraining": "Equity & Pot Odds",
     "weaknessTraining": "Fix your leaks",

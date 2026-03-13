@@ -51,11 +51,12 @@ model TrainingHand {
   turnCardSuit  String?
   riverCardRank String?
   riverCardSuit String?
-  villainRange  Int?
-  potSize       Int?
-  betSize       Int?
-  difficulty    Int
-  pointsScored  Int?
+  villainRange       Int?
+  potSize            Int?
+  betSize            Int?
+  equityGuessIndex   Int?
+  difficulty         Int
+  pointsScored       Int?
   actualEquity         Float?
   repetitionStage      Int?
   repetitionAvailableAt DateTime?

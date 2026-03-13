@@ -1,17 +1,17 @@
 import { auth } from "../../../../lib/auth";
+import { getFourColorDeck } from "../../../../lib/actions/deckStyle";
 import RegisterToUnlock from "../../../../components/train/RegisterToUnlock";
 import { getTranslations } from "next-intl/server";
+import CombinedPotOddsTraining from "./CombinedPotOddsTraining";
 
 export default async function HandVsRangePotOddsPage() {
-  const session = await auth();
   const t = await getTranslations("sidebar");
+  const [session, fourColor] = await Promise.all([auth(), getFourColorDeck()]);
 
   if (!session) return <RegisterToUnlock title={t("handVsRangePotOdds")} />;
 
-  return (
-    <div>
-      <h2 className="text-xl font-bold">{t("handVsRangePotOdds")}</h2>
-      <p className="text-gray-400 mt-2">Placeholder — with pot odds.</p>
-    </div>
-  );
+  const role = (session.user as any).isPremium ? "premium" : "registered";
+  const isAdmin = !!(session.user as any).isAdmin;
+
+  return <CombinedPotOddsTraining role={role} isAdmin={isAdmin} fourColor={fourColor} />;
 }

@@ -1,30 +1,38 @@
 "use client";
 
 import { useLocale } from "next-intl";
+import { useTransition } from "react";
 import { setLocale } from "../lib/actions/locale";
+
+const LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "de", label: "Deutsch" },
+  { code: "es", label: "Español" },
+  { code: "pt", label: "Português" },
+];
 
 export default function LanguageSwitcher() {
   const locale = useLocale();
+  const [isPending, startTransition] = useTransition();
+
+  function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    startTransition(async () => {
+      await setLocale(e.target.value);
+    });
+  }
 
   return (
-    <div className="flex items-center gap-1 text-sm">
-      <button
-        onClick={() => setLocale("en")}
-        className={`px-1.5 py-0.5 rounded transition-colors ${
-          locale === "en" ? "text-lime-400 font-medium" : "text-gray-400 hover:text-white"
-        }`}
-      >
-        EN
-      </button>
-      <span className="text-gray-600">|</span>
-      <button
-        onClick={() => setLocale("de")}
-        className={`px-1.5 py-0.5 rounded transition-colors ${
-          locale === "de" ? "text-lime-400 font-medium" : "text-gray-400 hover:text-white"
-        }`}
-      >
-        DE
-      </button>
-    </div>
+    <select
+      value={locale}
+      onChange={handleChange}
+      disabled={isPending}
+      className="bg-gray-800 text-gray-300 text-sm rounded px-2 py-1 border border-gray-700 hover:border-gray-500 focus:outline-none focus:border-lime-500 cursor-pointer disabled:opacity-50 transition-colors"
+    >
+      {LANGUAGES.map(({ code, label }) => (
+        <option key={code} value={code}>
+          {label}
+        </option>
+      ))}
+    </select>
   );
 }

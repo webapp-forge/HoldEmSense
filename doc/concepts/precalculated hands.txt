@@ -25,8 +25,11 @@ npx tsx scripts/generate-river-hands.ts
 
 Felder: heroCard1-2, flopCard1-3, turnCard, riverCard, villainRange, equity
 
-Anzahl Hände pro Modul anzeigen:
-SELECT module, COUNT(*) as count
+Anzahl Hände pro Modul und unterschiedliche HeroHands anzeigen:
+SELECT 
+    module,
+    COUNT(*) AS count,
+    COUNT(DISTINCT heroHandType) AS distinctHeroHandTypes
 FROM PreGeneratedHand
 GROUP BY module
 ORDER BY module;

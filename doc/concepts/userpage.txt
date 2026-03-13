@@ -1,11 +1,13 @@
-TODO
 
+Einstellungen
+- 4 color deck
+- Sprache
+
+TODO
 Account
 - Email / PW
 - Account löschen
 - Pro Upgrade
 
 Einstellungen
-- 4 color deck
-- Sprache
 - Sound

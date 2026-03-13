@@ -18,7 +18,10 @@ const MODULE_LABEL: Record<string, string> = {
   turn: "Turn: Hand vs Range",
   river: "River: Hand vs Range",
   "pot-odds": "Pot Odds",
+  "combined-pot-odds": "Hand vs Range + Pot Odds",
 };
+
+const COMBINED_BREAKEVEN_MARGIN = 0.05;
 
 // Beginner Pot Odds presets — must match BEGINNER_POT_ODDS_PRESETS in training.ts
 const BEGINNER_PRESET_LABELS = [
@@ -78,6 +81,7 @@ export default function LeakTraining({ fourColor = false }: { fourColor?: boolea
   const [calculating, setCalculating] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
   const [achievementQueue, setAchievementQueue] = useState<AchievementKey[]>([]);
+  const [callDecision, setCallDecision] = useState<"call" | "fold" | null>(null);
 
   useEffect(() => {
     loadNextHand();
@@ -88,6 +92,7 @@ export default function LeakTraining({ fourColor = false }: { fourColor?: boolea
     setGuessed(null);
     setResult(null);
     setSliderValue(0);
+    setCallDecision(null);
     const next = await getNextRepetitionHand();
     if (!next) {
       setHand(null);
@@ -150,6 +155,7 @@ export default function LeakTraining({ fourColor = false }: { fourColor?: boolea
   if (!hand) return null;
 
   const isPotOdds = hand.module === "pot-odds";
+  const isCombined = hand.module === "combined-pot-odds";
 
   function stageMessage(res: Result): string {
     if (res.newStage === 4) return tl("fixed");
@@ -179,7 +185,7 @@ export default function LeakTraining({ fourColor = false }: { fourColor?: boolea
           <h2 className="text-xl font-bold">{tl("title")}</h2>
           <p className="text-gray-500 text-sm mt-0.5">{MODULE_LABEL[hand.module] ?? hand.module}</p>
           <div className="flex items-center gap-3 mt-1 text-sm text-gray-400">
-            {!isPotOdds && (
+            {(isCombined || !isPotOdds) && (
               <>
                 <span>Villain range: Top <span className="text-white font-semibold">{hand.villainRange}%</span></span>
                 <span className="text-gray-600">|</span>
@@ -205,8 +211,8 @@ export default function LeakTraining({ fourColor = false }: { fourColor?: boolea
           </div>
         )}
 
-        {/* Community cards (equity modules) */}
-        {!isPotOdds && hand.flopCards && (
+        {/* Community cards (equity and combined modules) */}
+        {(isCombined || !isPotOdds) && hand.flopCards && (
           <div style={{ display: "flex", alignItems: "flex-end" }}>
             <div>
               <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Flop</p>
@@ -231,8 +237,8 @@ export default function LeakTraining({ fourColor = false }: { fourColor?: boolea
           </div>
         )}
 
-        {/* Hero cards (equity modules only) */}
-        {!isPotOdds && (
+        {/* Hero cards (equity and combined modules) */}
+        {(isCombined || !isPotOdds) && (
           <div>
             <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Your hand</p>
             <div className="flex gap-2">
@@ -256,6 +262,11 @@ export default function LeakTraining({ fourColor = false }: { fourColor?: boolea
           presetEquities={isPotOdds && hand.difficulty === 1 ? BEGINNER_PRESET_EQUITIES : undefined}
         />
 
+        {/* Combined: equity guess label */}
+        {isCombined && guessed === null && !calculating && (
+          <p className="text-xs text-gray-500 -mt-3">Schritt 1 von 2: Equity schätzen</p>
+        )}
+
         {calculating && <div className="text-gray-400 text-sm">{t("calculating")}</div>}
 
         {result && !calculating && (
@@ -275,6 +286,47 @@ export default function LeakTraining({ fourColor = false }: { fourColor?: boolea
               return hint ? <p className="text-xs text-gray-500">{hint}</p> : null;
             })()}
 
+            {/* Combined: step 2 call/fold after equity reveal */}
+            {isCombined && hand.potSize && hand.betSize && (() => {
+              const reqEq = hand.betSize / (hand.potSize + 2 * hand.betSize);
+              const isBreakeven = Math.abs(result.equity - reqEq) < COMBINED_BREAKEVEN_MARGIN;
+              const correctDec: "call" | "fold" = result.equity >= reqEq ? "call" : "fold";
+              const decCorrect = callDecision !== null && (isBreakeven || callDecision === correctDec);
+              return (
+                <div className="border-t border-gray-700 pt-3 flex flex-col gap-3">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">Schritt 2 von 2: Call oder Fold?</p>
+                  <div className="bg-gray-900 border border-gray-700 rounded-lg px-5 py-4 flex flex-col gap-1 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Pot (inkl. Bet)</span>
+                      <span className="text-white font-semibold">{hand.potSize + hand.betSize} BB</span>
+                    </div>
+                    <div className="flex justify-between border-t border-gray-700 mt-2 pt-2">
+                      <span className="text-gray-400">Dein Call</span>
+                      <span className="text-white font-semibold">{hand.betSize} BB</span>
+                    </div>
+                  </div>
+                  {callDecision === null ? (
+                    <div className="flex gap-3">
+                      <button onClick={() => setCallDecision("call")} className="px-6 py-2 bg-gray-700 hover:bg-lime-700 rounded text-sm font-medium transition-colors">Call</button>
+                      <button onClick={() => setCallDecision("fold")} className="px-6 py-2 bg-gray-700 hover:bg-red-800 rounded text-sm font-medium transition-colors">Fold</button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-1">
+                      {isBreakeven
+                        ? <span className="text-yellow-400 font-medium text-sm">Breakeven-Zone — beide Entscheidungen sind vertretbar</span>
+                        : decCorrect
+                        ? <span className="text-lime-400 font-medium text-sm">Richtige Entscheidung!</span>
+                        : <span className="text-red-400 font-medium text-sm">Falsche Entscheidung</span>}
+                      <span className="text-gray-400 text-sm">
+                        Benötigte Equity: <span className="text-white font-medium">{(reqEq * 100).toFixed(1)}%</span>
+                      </span>
+                      {(() => { const hint = getMemoHint(hand.potSize, hand.betSize); return hint ? <p className="text-xs text-gray-500">{hint}</p> : null; })()}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             <div
               className={`text-sm px-3 py-2 rounded ${
                 result.newStage === 4
@@ -290,12 +342,14 @@ export default function LeakTraining({ fourColor = false }: { fourColor?: boolea
               )}
             </div>
 
-            <button
-              onClick={loadNextHand}
-              className="self-start px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm"
-            >
-              {tl("nextHand")}
-            </button>
+            {(!isCombined || callDecision !== null) && (
+              <button
+                onClick={loadNextHand}
+                className="self-start px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm"
+              >
+                {tl("nextHand")}
+              </button>
+            )}
           </div>
         )}
       </div>

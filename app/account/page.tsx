@@ -6,6 +6,7 @@ import { getUserAchievements } from "@/lib/actions/achievements";
 import { ACHIEVEMENT_CONFIG } from "@/lib/achievementConfig";
 import { getFourColorDeck } from "@/lib/actions/deckStyle";
 import FourColorDeckToggle from "@/components/FourColorDeckToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default async function AccountPage() {
   const [session, t, ta, fourColor] = await Promise.all([auth(), getTranslations("account"), getTranslations("achievements"), getFourColorDeck()]);
@@ -54,7 +55,7 @@ export default async function AccountPage() {
               <div>
                 <div className="text-sm font-medium">{t("language")}</div>
               </div>
-              <span className="text-gray-500 text-sm">{t("comingSoon")}</span>
+              <LanguageSwitcher />
             </div>
 
             <div className="px-5 py-4 flex items-center justify-between">
