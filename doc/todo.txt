@@ -1,0 +1,37 @@
+- Pot Odds, besserer Ansatz: eigener Anteil am Pot statt Betgröße memorisieren, 
+da Betgröße nur bei 1vs1 gilt!
+- Streaks
+- Bug: Equity Leak, 33% richtig geklickt, aber Fehler bekommen!
+- Leaks fehlen Mobile
+- Mobile: Matrix und Info als Overlay
+- Leitfaden: Wie trainieren? Reihenfolge, Schwierigkeiten ...
+- Schwierigkeiten-Wechsel: immer auf höchster freigeschalteter einsteigen
+- Pot Odds für SB & BB
+- Wie viel Equity brauchst du mindestens? (Ergänzung: implied odds, geplante Bluffs, etc außer Acht gelassen)
+- Zeitabstände Leak Training (nur die 1h)
+- Gast Training mit Fortschritt und Übernahme aus Session!
+- Leak Training darf nicht den Score verändern!
+- versch. - Monte Carlo Tiefen schon implementiert?
+- Kartensortierung
+- Startseite
+- Pro Pläne darstellen
+- Fortschritt resetten
+- Cheat Tools
+- PW Reset
+- Glossar (auch für SEO!)
+- User Settings
+    - 4 color deck
+- Cookie Banner
+- Outs Training?
+
+LATER
+- Sounds
+- Default-Sprache für User
+- ToS, Impressum
+- Avatar (als Belohnungen!)
+- Ranglisten
+- Geschenkgutscheine
+- Zahlungsdienstleister
+
+TEXTE
+Matrix benutzen

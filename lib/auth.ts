@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
+import { checkAndGrantAchievements } from "./actions/achievements";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     providers: [
@@ -25,6 +26,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 );
 
                 if (!valid) return null;
+
+                // Retroactively grant any achievements the user has earned but not yet received
+                checkAndGrantAchievements(user.id).catch(() => {});
 
                 return { id: user.id, email: user.email, name: user.username, isPremium: user.isPremium, isAdmin: user.isAdmin };
             },

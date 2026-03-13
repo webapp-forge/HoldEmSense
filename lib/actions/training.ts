@@ -7,6 +7,8 @@ import { auth } from "../auth";
 import { drawHeroCards, getProfileForModule } from "../heroProfiles";
 import { cookies } from "next/headers";
 import { getAppConfig } from "../config";
+import { checkAndGrantAchievements } from "./achievements";
+import { revalidatePath } from "next/cache";
 
 const CLASS_COUNTS: Record<number, number> = { 1: 5, 2: 10, 3: 20, 4: 50 };
 
@@ -73,6 +75,26 @@ type HandResult = {
   betSize?: number;
 };
 
+// Modules that have a pre-generated hand pool, mapped to their pool module name
+const PRE_GENERATED_MODULES: Record<string, string> = {
+  preflop: "hand-vs-range",
+};
+
+async function drawFromPreGeneratedPool(poolModule: string): Promise<{ heroCards: { rank: string; suit: string }[]; villainRange: number } | null> {
+  const count = await prisma.preGeneratedHand.count({ where: { module: poolModule } });
+  if (count === 0) return null;
+  const skip = Math.floor(Math.random() * count);
+  const hand = await prisma.preGeneratedHand.findFirst({ where: { module: poolModule }, skip });
+  if (!hand) return null;
+  return {
+    heroCards: [
+      { rank: hand.heroCard1Rank, suit: hand.heroCard1Suit },
+      { rank: hand.heroCard2Rank, suit: hand.heroCard2Suit },
+    ],
+    villainRange: hand.villainRange,
+  };
+}
+
 export async function getOrCreateHand(difficulty: number, handModule: string): Promise<HandResult> {
   const session = await auth();
   const userId = session?.user?.id ?? null;
@@ -116,7 +138,12 @@ export async function getOrCreateHand(difficulty: number, handModule: string): P
     };
   }
 
-  const heroCards = drawHeroCards(getProfileForModule(handModule));
+  const poolModule = PRE_GENERATED_MODULES[handModule];
+  const preGen = poolModule ? await drawFromPreGeneratedPool(poolModule) : null;
+
+  const heroCards = preGen?.heroCards ?? drawHeroCards(getProfileForModule(handModule));
+  const villainRangeValue = preGen?.villainRange ?? [10, 15, 20, 25, 30, 40, 50][Math.floor(Math.random() * 7)];
+
   const hasFlopModules = ["flop", "turn", "river"];
   const flopCards = hasFlopModules.includes(handModule) ? drawCards(3, heroCards) : undefined;
   const turnCard = ["turn", "river"].includes(handModule)
@@ -125,7 +152,6 @@ export async function getOrCreateHand(difficulty: number, handModule: string): P
   const riverCard = handModule === "river"
     ? drawCards(1, [...heroCards, ...(flopCards ?? []), ...(turnCard ? [turnCard] : [])])[0]
     : undefined;
-  const villainRange = [10, 15, 20, 25, 30, 40, 50][Math.floor(Math.random() * 7)];
 
   const hand = await prisma.trainingHand.create({
     data: {
@@ -152,12 +178,12 @@ export async function getOrCreateHand(difficulty: number, handModule: string): P
         riverCardRank: riverCard.rank,
         riverCardSuit: riverCard.suit,
       }),
-      villainRange,
+      villainRange: villainRangeValue,
       difficulty,
     },
   });
 
-  return { handId: hand.id, heroCards, flopCards, turnCard, riverCard, villainRange };
+  return { handId: hand.id, heroCards, flopCards, turnCard, riverCard, villainRange: villainRangeValue };
 }
 
 export async function submitGuess(handId: string, guess: number) {
@@ -217,7 +243,12 @@ export async function submitGuess(handId: string, guess: number) {
     return { equity, pointsScored: points, unlockedDifficulty: null, progress: { count: guestHands.length, total: guestTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints } };
   }
 
-  const unlockedDifficulty = await checkAndUnlock(userId, hand.difficulty, hand.module);
+  const [unlockedDifficulty, newAchievements] = await Promise.all([
+    checkAndUnlock(userId, hand.difficulty, hand.module),
+    checkAndGrantAchievements(userId),
+  ]);
+
+  if (points >= 3) revalidatePath("/", "layout");
 
   const recentHands = await prisma.trainingHand.findMany({
     where: { userId, difficulty: hand.difficulty, module: hand.module, pointsScored: { not: null } },
@@ -231,6 +262,7 @@ export async function submitGuess(handId: string, guess: number) {
     equity,
     pointsScored: points,
     unlockedDifficulty,
+    newAchievements,
     progress: { count: recentHands.length, total: progressTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints },
   };
 }
@@ -503,6 +535,7 @@ export async function submitPotOddsGuess(handId: string, guessIndex: number): Pr
   requiredEquity: number;
   pointsScored: number;
   unlockedDifficulty: number | null;
+  newAchievements: string[];
   progress: { count: number; total: number; windowSize: number; unlockThreshold: number; maxPoints: number };
 }> {
   const session = await auth();
@@ -544,7 +577,12 @@ export async function submitPotOddsGuess(handId: string, guessIndex: number): Pr
     return { requiredEquity, pointsScored: points, unlockedDifficulty: null, progress: { count: guestHands.length, total: guestTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints } };
   }
 
-  const unlockedDifficulty = await checkAndUnlock(userId, hand.difficulty, "pot-odds");
+  const [unlockedDifficulty, newAchievements] = await Promise.all([
+    checkAndUnlock(userId, hand.difficulty, "pot-odds"),
+    checkAndGrantAchievements(userId),
+  ]);
+
+  if (points >= 3) revalidatePath("/", "layout");
 
   const recentHands = await prisma.trainingHand.findMany({
     where: { userId, difficulty: hand.difficulty, module: "pot-odds", pointsScored: { not: null } },
@@ -554,7 +592,7 @@ export async function submitPotOddsGuess(handId: string, guessIndex: number): Pr
   });
   const progressTotal = recentHands.reduce((sum, h) => sum + (h.pointsScored ?? 0), 0);
 
-  return { requiredEquity, pointsScored: points, unlockedDifficulty, progress: { count: recentHands.length, total: progressTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints } };
+  return { requiredEquity, pointsScored: points, unlockedDifficulty, newAchievements, progress: { count: recentHands.length, total: progressTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints } };
 }
 
 export async function getCorrectAnswer(handId: string): Promise<number> {
@@ -599,6 +637,7 @@ export async function getDailyStreak(): Promise<{ streak: number; trainedToday: 
     SELECT DISTINCT DATE(createdAt) AS day
     FROM TrainingHand
     WHERE userId = ${userId}
+      AND pointsScored >= 3
     ORDER BY day DESC
     LIMIT 400
   `;

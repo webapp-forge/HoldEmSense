@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AchievementToast from "@/components/AchievementToast";
+import { AchievementKey } from "@/lib/achievementConfig";
 import { getOrCreatePotOddsHand, submitPotOddsGuess, getUnlockedDifficulties, getHandProgress } from "../../../../lib/actions/training";
 import { useTranslations } from "next-intl";
 import TrainPageLayout from "../../../../components/train/TrainPageLayout";
@@ -66,6 +68,7 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
   const [pointsScored, setPointsScored] = useState<number | null>(null);
   const [progress, setProgress] = useState<{ count: number; total: number; windowSize: number; unlockThreshold: number; maxPoints: number } | null>(null);
   const [newUnlock, setNewUnlock] = useState<number | null>(null);
+  const [achievementQueue, setAchievementQueue] = useState<AchievementKey[]>([]);
   const [loading, setLoading] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
@@ -110,6 +113,7 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
     setRequiredEquity(result.requiredEquity);
     setPointsScored(result.pointsScored);
     setProgress(result.progress);
+    if (result.newAchievements?.length) setAchievementQueue((q) => [...q, ...result.newAchievements as AchievementKey[]]);
     setCalculating(false);
 
     const refreshed = await getUnlockedDifficulties("pot-odds");
@@ -125,6 +129,7 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
   if (loading || !hand) return <div className="text-gray-400">{t("dealing")}</div>;
 
   return (
+    <>
     <TrainPageLayout
       explanation={
         <div className="space-y-2">
@@ -227,24 +232,22 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
           </div>
         </div>
 
-        {/* Cheat button (admin only) */}
-        {isAdmin && guessed === null && !calculating && (
-          <button
-            onClick={() => {
-              const eq = hand.betSize / (hand.potSize + 2 * hand.betSize);
-              handleGuess(difficulty === 1 ? getBeginnerCorrectIndex(eq) : getCorrectIndex(eq, difficulty));
-            }}
-            className="self-start px-3 py-1.5 bg-red-800 hover:bg-red-700 rounded text-xs font-medium text-red-200"
-          >
-            Guess Right
-          </button>
-        )}
-
         {/* Guess buttons / slider */}
         <div>
           <p className="text-sm text-gray-400 mb-3">Wie viel Equity brauchst du mindestens?</p>
           {difficulty === 1 ? (
             <div className="flex flex-wrap gap-2">
+              {isAdmin && guessed === null && !calculating && (
+                <button
+                  onClick={() => {
+                    const eq = hand.betSize / (hand.potSize + 2 * hand.betSize);
+                    handleGuess(getBeginnerCorrectIndex(eq));
+                  }}
+                  className="px-3 py-2 bg-red-800 hover:bg-red-700 rounded text-sm font-medium text-red-200"
+                >
+                  Guess Right
+                </button>
+              )}
               {BEGINNER_PRESET_LABELS.map((label, i) => {
                 const correctIdx = requiredEquity !== null ? getBeginnerCorrectIndex(requiredEquity) : null;
                 const isGuessed = guessed === i;
@@ -287,12 +290,25 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
                 </span>
               </div>
               {guessed === null && !calculating && (
-                <button
-                  onClick={() => handleGuess(sliderValue)}
-                  className="self-start px-4 py-2 bg-lime-600 hover:bg-lime-500 rounded text-sm font-medium"
-                >
-                  {t("submit")}
-                </button>
+                <div className="flex gap-2">
+                  {isAdmin && (
+                    <button
+                      onClick={() => {
+                        const eq = hand.betSize / (hand.potSize + 2 * hand.betSize);
+                        handleGuess(getCorrectIndex(eq, difficulty));
+                      }}
+                      className="px-3 py-2 bg-red-800 hover:bg-red-700 rounded text-sm font-medium text-red-200"
+                    >
+                      Guess Right
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleGuess(sliderValue)}
+                    className="px-4 py-2 bg-lime-600 hover:bg-lime-500 rounded text-sm font-medium"
+                  >
+                    {t("submit")}
+                  </button>
+                </div>
               )}
               {guessed !== null && !calculating && requiredEquity !== null && (
                 <div className="flex gap-2 flex-wrap text-sm">
@@ -309,6 +325,17 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
+              {isAdmin && guessed === null && !calculating && (
+                <button
+                  onClick={() => {
+                    const eq = hand.betSize / (hand.potSize + 2 * hand.betSize);
+                    handleGuess(getCorrectIndex(eq, difficulty));
+                  }}
+                  className="px-3 py-2 bg-red-800 hover:bg-red-700 rounded text-sm font-medium text-red-200"
+                >
+                  Guess Right
+                </button>
+              )}
               {equityClasses.map((label, i) => {
                 const correctIdx = requiredEquity !== null ? getCorrectIndex(requiredEquity, difficulty) : null;
                 const isGuessed = guessed === i;
@@ -374,5 +401,10 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
         )}
       </div>
     </TrainPageLayout>
+    <AchievementToast
+      queue={achievementQueue}
+      onDismiss={(key) => setAchievementQueue((q) => q.filter((k) => k !== key))}
+    />
+    </>
   );
 }

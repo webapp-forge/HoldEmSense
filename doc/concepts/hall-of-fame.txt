@@ -1,0 +1,13 @@
+Monatliche Hall of Fame:
+- Summe aller Hand Scores des Monats
+- Gewichtung nach Schwierigkeit: 1 / 1.5 / 2 / 2.5
+
+All Time Hall of Fame
+- gleiches Prinzip, über alle Hände
+
+Display
+- Medaille
+- Username
+- Chipstack
+- Anzahl Hände
+- Score

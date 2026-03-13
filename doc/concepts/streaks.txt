@@ -1,0 +1,10 @@
+Zählen der Tage, in denen mind. ein Training erfolgreich absolviert wurde. 
+Erfolgreich bedeutet 3 Punkte bekommen.
+
+Darstellung als Flamme mit einer Zahl neben dem Usernamen.
+
+Wenn heute noch kein Training erfolgreich absolviert wurde ist die Flamme grayscale
+mit der Zahl vom letzten Tag. Sobald erfolgreich trainiert aktualisiert sich die
+Flamme sofort ohne Reload durch User.
+
+Wird ein Tag ausgelassen verfällt der Streak.

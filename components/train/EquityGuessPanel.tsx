@@ -33,6 +33,8 @@ type Props = {
   /** When provided, show these fixed buttons instead of class-based buttons/slider */
   presetLabels?: string[];
   presetEquities?: number[];
+  /** Admin shortcut: called when admin clicks "Guess Right" */
+  onAdminGuess?: () => void;
 };
 
 export default function EquityGuessPanel({
@@ -46,6 +48,7 @@ export default function EquityGuessPanel({
   prompt,
   presetLabels,
   presetEquities,
+  onAdminGuess,
 }: Props) {
   const t = useTranslations("train");
 
@@ -55,6 +58,14 @@ export default function EquityGuessPanel({
       <div>
         <p className="text-sm text-gray-400 mb-3">{prompt}</p>
         <div className="flex flex-wrap gap-2">
+          {onAdminGuess && guessed === null && !calculating && (
+            <button
+              onClick={onAdminGuess}
+              className="px-3 py-2 bg-red-800 hover:bg-red-700 rounded text-sm font-medium text-red-200"
+            >
+              Guess Right
+            </button>
+          )}
           {presetLabels.map((label, i) => {
             const isGuessed = guessed === i;
             const isCorrect = correctIdx === i;
@@ -106,12 +117,22 @@ export default function EquityGuessPanel({
             </span>
           </div>
           {guessed === null && !calculating && (
-            <button
-              onClick={() => onGuess(sliderValue)}
-              className="self-start px-4 py-2 bg-lime-600 hover:bg-lime-500 rounded text-sm font-medium"
-            >
-              {t("submit")}
-            </button>
+            <div className="flex gap-2">
+              {onAdminGuess && (
+                <button
+                  onClick={onAdminGuess}
+                  className="px-3 py-2 bg-red-800 hover:bg-red-700 rounded text-sm font-medium text-red-200"
+                >
+                  Guess Right
+                </button>
+              )}
+              <button
+                onClick={() => onGuess(sliderValue)}
+                className="px-4 py-2 bg-lime-600 hover:bg-lime-500 rounded text-sm font-medium"
+              >
+                {t("submit")}
+              </button>
+            </div>
           )}
           {guessed !== null && !calculating && actualEquity !== null && (
             <div className="flex gap-2 flex-wrap text-sm">
@@ -132,6 +153,14 @@ export default function EquityGuessPanel({
         </div>
       ) : (
         <div className="flex flex-wrap gap-2">
+          {onAdminGuess && guessed === null && !calculating && (
+            <button
+              onClick={onAdminGuess}
+              className="px-3 py-2 bg-red-800 hover:bg-red-700 rounded text-sm font-medium text-red-200"
+            >
+              Guess Right
+            </button>
+          )}
           {equityClasses.map((label, i) => {
             const correctIdx = actualEquity !== null ? getCorrectIndex(actualEquity, difficulty) : null;
             const isGuessed = guessed === i;

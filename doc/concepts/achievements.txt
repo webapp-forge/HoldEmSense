@@ -1,0 +1,41 @@
+- Achievements verdienen in Form von Poker Chip SVGs
+- Jedes Achievement kann nur einmal ausgelöst werden
+- Achievements müssen auch rückwirkend vergeben werden. Check bei Login?
+
+A) Absolvieren von Trainingsgruppen:
+
+Trainingsgruppe 1: 
+Equity & Pot Odds -> Hand vs Range
+Equity & Pot Odds -> Flop: Hand vs Range
+Equity & Pot Odds -> Turn: Hand vs Range
+Equity & Pot Odds -> River: Hand vs Range
+
+Achievement Table für Trainingsgruppe 1 (Farbe: blau)
+
+Achievement                             Wert
+1 Hand in jeden Modul korrekt gelöst    1
+Beginner Level absolviert               5
+Intermediate Level absolviert           10
+Advanced Level absolviert               25
+Expert Level absolviert                 100
+
+Anmerkung: Absolviert bedeutet, es einmalig geschafft zu haben:
+    - unabhängig vom aktuellen Score, der ja wieder fallen kann
+    - unabhängig davon ab der nächste Level accessible ist (z.B. weil dafür erst Premium freigeschaltet werden muss)
+
+B) Streaks erreichen (Farbe: feurig, evtl 2-farbig rot/orange)
+
+Achievement                         Wert
+Streak gestartet (zum ersten Mal)   1
+Streak 3                            5
+Streak 7                            10
+Streak 30                           25
+Streak 90                           50
+Streak 365                          100
+Streak 2 Jahre                      500
+Streak 5 Jahre                      1000
+
+TODO
+- Was passiert bei Gast-Accounts?
+- Streak Achievement
+- weitere Achievements

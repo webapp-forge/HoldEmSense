@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AchievementToast from "@/components/AchievementToast";
+import { AchievementKey } from "@/lib/achievementConfig";
 import {
   getOrCreateHand,
   submitGuess,
@@ -138,6 +140,7 @@ export default function EquityTraining({
     maxPoints: number;
   } | null>(null);
   const [newUnlock, setNewUnlock] = useState<number | null>(null);
+  const [achievementQueue, setAchievementQueue] = useState<AchievementKey[]>([]);
   const [loading, setLoading] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
@@ -182,6 +185,7 @@ export default function EquityTraining({
     setActualEquity(result.equity);
     setPointsScored(result.pointsScored);
     setProgress(result.progress);
+    if (result.newAchievements?.length) setAchievementQueue((q) => [...q, ...result.newAchievements as AchievementKey[]]);
     setCalculating(false);
 
     const refreshed = await getUnlockedDifficulties(handModule);
@@ -194,6 +198,11 @@ export default function EquityTraining({
   if (loading || !hand) return <div className="text-gray-400">{t("dealing")}</div>;
 
   return (
+    <>
+    <AchievementToast
+      queue={achievementQueue}
+      onDismiss={(key) => setAchievementQueue((q) => q.filter((k) => k !== key))}
+    />
     <TrainPageLayout
       info={<RangeMatrix villainRange={hand.villainRange} heroCards={hand.heroCards} />}
       explanation={<ModuleExplanation handModule={handModule} />}
@@ -303,18 +312,6 @@ export default function EquityTraining({
           </div>
         </div>
 
-        {isAdmin && guessed === null && !calculating && (
-          <button
-            onClick={async () => {
-              const idx = await getCorrectAnswer(hand.handId);
-              handleGuess(idx);
-            }}
-            className="self-start px-3 py-1.5 bg-red-800 hover:bg-red-700 rounded text-xs font-medium text-red-200"
-          >
-            Guess Right
-          </button>
-        )}
-
         <EquityGuessPanel
           difficulty={difficulty}
           guessed={guessed}
@@ -324,6 +321,10 @@ export default function EquityTraining({
           sliderValue={sliderValue}
           onSliderChange={setSliderValue}
           prompt={t("whatIsYourEquity")}
+          onAdminGuess={isAdmin ? async () => {
+            const idx = await getCorrectAnswer(hand.handId);
+            handleGuess(idx);
+          } : undefined}
         />
 
         {calculating && <div className="text-gray-400 text-sm">{t("calculating")}</div>}
@@ -356,5 +357,6 @@ export default function EquityTraining({
         )}
       </div>
     </TrainPageLayout>
+    </>
   );
 }

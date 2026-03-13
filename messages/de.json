@@ -1,4 +1,30 @@
 {
+  "account": {
+    "chipStack": "Chip Stack",
+    "chipStackSubtitle": "Achievements, die du dir verdient hast.",
+    "settings": "Einstellungen",
+    "language": "Sprache",
+    "changePassword": "Passwort ändern",
+    "deleteAccount": "Account löschen",
+    "comingSoon": "Demnächst",
+    "noChipsYet": "Noch keine Chips — fang an zu trainieren!"
+  },
+  "achievements": {
+    "unlocked": "Achievement freigeschaltet!",
+    "group1_first_hand": "Erste Hand — 1 Hand korrekt in jedem Hand vs Range Modul gelöst",
+    "group1_beginner": "Beginner — Beginner Level in allen Hand vs Range Modulen abgeschlossen",
+    "group1_intermediate": "Intermediate — Intermediate Level in allen Hand vs Range Modulen abgeschlossen",
+    "group1_advanced": "Advanced — Advanced Level in allen Hand vs Range Modulen abgeschlossen",
+    "group1_expert": "Expert — Expert Level in allen Hand vs Range Modulen abgeschlossen",
+    "streak_started": "Erster Streak — zum ersten Mal an aufeinanderfolgenden Tagen erfolgreich trainiert",
+    "streak_3": "3-Tage-Streak",
+    "streak_7": "7-Tage-Streak",
+    "streak_30": "30-Tage-Streak",
+    "streak_90": "90-Tage-Streak",
+    "streak_365": "365-Tage-Streak — ein ganzes Jahr!",
+    "streak_2y": "2-Jahres-Streak",
+    "streak_5y": "5-Jahres-Streak — legendär!"
+  },
   "nav": {
     "train": "Training",
     "glossary": "Leitfaden",
@@ -128,6 +154,7 @@
     "emptyAllTime": "Noch keine H\u00e4nde gespielt.",
     "allTime": "Gesamt",
     "colPlayer": "Spieler",
+    "colChips": "Chips",
     "colHands": "H\u00e4nde",
     "colScore": "Score*",
     "you": "du",

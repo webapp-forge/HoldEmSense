@@ -1,0 +1,87 @@
+POKER RANGE TRAINER
+
+Zielgruppe:
+- Amateure die insbesondere Live Games (Casino, Homegames, Clubs) gegen andere Amateure spielen wo sie keine exakten Statistiken abrufen können.
+
+Trainingsziele: 
+- Intuition schulen
+- in Klassen denken statt in exakten Zahlen
+- Exploits statt GTO
+
+Aufmachung:
+- Lebendige Situation mit einzelnen Denkschritten statt trockener Tabellen / Solver
+- eher wie in einem Buch eine Hand analysiert wird, aber zum selber spielen.
+- AI Erklärungen in natürlicher Sprache
+
+Zwei Hauptmodule:
+- Hand vs villain range
+- Hero range vs villain range
+
+Oberfläche & Funktionen:
+- Tisch konfigurierbar mit 2-9 Sitzen
+- Hero sitzt unten in der Mitte
+- Platz für verschiedene Info-Boxen abhänging von der Trainingseinstellung, z.B.
+	- Einstellungen zum Gegner-Typ, z.B. (Am besten als frei kombinierbare Tags sofern sie sich nicht gegenseitig ausschließen, müsste entsprechend designt werden)
+		- Calling Station
+		- foldet viel
+		- blufft viel
+		- blufft wenig
+		- Nit
+		- Lag
+		- Näherungswerte in Prozent-Klassen z.B. für (VPIP, ATS, CB, ...)
+		- ...
+	- Anzeige der Gegner-Range in der jeweiligen Situation
+		- evtl. auch als "Quiz-Modul" 
+	- Nut Advantage & Range Advantage
+		- evtl. auch als Quiz Modul
+	- EV in Kombination mit Pot Odds 
+		-> ableiten: Wann ist Call profitabel
+			-> dabei berücksichtigen: Marginale +ev in Turnieren nicht mitnehmen wenn es den Stack zu sehr dezimiert also CG vs Tournament berücksichtigen
+	- Equity-Trainer
+		- evenfalls als Quizmodul, Hand vs Range oder Range vs Range
+- weitere zu berücksichtigende Faktoren
+	- Stackgrößen
+		- Hero
+		- Villain
+		- Average
+	- Equity
+	- Images
+		- Hero
+		- Villain
+		
+- Architektur
+	- Login
+	- Speichern und Auswertung von Trainingssessions
+	- Vorgefertigte Trainingspatterns (z.B. was alles berücksichtigt wird, für verschiedene Schwierigkeitslevel)
+
+- Ausblick
+	- Erweiterung um weitere Module, sortiert nach Schwierigkeit
+		- z.B. ein 5-Stufen-System
+	- Abo-Möglichkeit
+
+- Gast-User, Registrierte User & Premium-User (Abo)
+
+Gäste:
+- Training Hand vs Range Preflop und Flop
+- nur Stufe Beginner (Überlegung: Wenn ein Gast nun 100 Hände mit 250 Punkten geschafft hat und upgraden möchte, können wir dann seine Hände aus der Session in den Account übernehmen? Vielleicht sollten wir eine Gast-ID vergeben mit der er sich identifizieren kann? Es sicher sehr demotivierend wenn man da spielt, bereit ist den nächsten Schritt zu gehen und dann den ganzen Fortschritt verliert.)
+
+Registrierte User:
+- zusätzlich Training Turn & River
+- zusätzlich Stufe Intermediate
+
+Premium User:
+- alle Trainings
+- alle Stufen
+- Leak Training
+
+HÄNDE GENERIEREN
+vorgefertigte Hände in die DB, ungewichtet
+npx tsx scripts/generate-preflop-hands.ts
+
+ACHIEVEMENTS
+
+
+
+		
+
+

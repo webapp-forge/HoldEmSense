@@ -1,0 +1,10 @@
+TODO
+
+Account
+- Email / PW
+- Account löschen
+- Pro Upgrade
+
+Einstellungen
+- Sprache
+- Sound

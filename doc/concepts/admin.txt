@@ -1,0 +1,2 @@
+Cheat Button für Admins: "guess right"
+    - angezeigt in allen Trainingsmodulen, entspricht immer der korrekten Lösung

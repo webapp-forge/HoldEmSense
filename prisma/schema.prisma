@@ -17,6 +17,18 @@ model User {
   createdAt     DateTime        @default(now())
   trainingHands TrainingHand[]
   progress      UserProgress[]
+  achievements  Achievement[]
+}
+
+model Achievement {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  key      String
+  earnedAt DateTime @default(now())
+
+  @@unique([userId, key])
+  @@index([userId])
 }
 
 model TrainingHand {
@@ -49,6 +61,22 @@ model TrainingHand {
   repetitionAvailableAt DateTime?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+}
+
+model PreGeneratedHand {
+  id           String   @id @default(cuid())
+  module       String
+  heroHandType String
+  heroCard1Rank String
+  heroCard1Suit String
+  heroCard2Rank String
+  heroCard2Suit String
+  villainRange  Int
+  equity        Float
+  iterations    Int
+  createdAt     DateTime @default(now())
+
+  @@index([module, heroHandType])
 }
 
 model AppConfig {

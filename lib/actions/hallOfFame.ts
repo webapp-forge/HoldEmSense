@@ -1,12 +1,20 @@
 "use server";
 
 import { prisma } from "../prisma";
+import { ACHIEVEMENT_CONFIG, AchievementKey } from "../achievementConfig";
+
+export type ChipData = {
+  key: string;
+  color: string;
+  value: number;
+};
 
 export type LeaderboardEntry = {
   rank: number;
   username: string;
   score: number;
   handsPlayed: number;
+  chips: ChipData[];
 };
 
 async function computeLeaderboard(
@@ -48,11 +56,30 @@ async function computeLeaderboard(
 
   scores.sort((a, b) => b.score - a.score);
 
-  return scores.slice(0, 20).map((entry, i) => ({
+  const top20 = scores.slice(0, 20);
+  const topUserIds = top20.map((e) => e.userId);
+
+  const achievements = await prisma.achievement.findMany({
+    where: { userId: { in: topUserIds } },
+    select: { userId: true, key: true },
+    orderBy: { earnedAt: "asc" },
+  });
+
+  const chipMap = new Map<string, ChipData[]>();
+  for (const a of achievements) {
+    const config = ACHIEVEMENT_CONFIG[a.key as AchievementKey];
+    if (!config) continue;
+    const arr = chipMap.get(a.userId) ?? [];
+    arr.push({ key: a.key, color: config.color, value: config.value });
+    chipMap.set(a.userId, arr);
+  }
+
+  return top20.map((entry, i) => ({
     rank: i + 1,
     username: entry.username,
     score: entry.score,
     handsPlayed: entry.handsPlayed,
+    chips: chipMap.get(entry.userId) ?? [],
   }));
 }
 

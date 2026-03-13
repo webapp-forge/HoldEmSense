@@ -30,7 +30,7 @@ export default function NavMenu({ username, logoutAction, streak = 0, trainedTod
       <div className="hidden md:flex items-center gap-5">
         {username ? (
           <>
-            <span className="text-gray-400 text-sm flex items-center gap-2">
+            <Link href="/account" className="text-gray-400 hover:text-white text-sm flex items-center gap-2">
               <span
                 title={streak === 0 ? t("streakStart") : trainedToday ? t("streakDays", { days: streak }) : t("streakKeep")}
                 className={`relative inline-flex items-end justify-center w-7 h-9 transition-all duration-700 ${trainedToday ? "" : "grayscale"}`}
@@ -41,7 +41,7 @@ export default function NavMenu({ username, logoutAction, streak = 0, trainedTod
                 )}
               </span>
               {username}
-            </span>
+            </Link>
             <form action={logoutAction}>
               <button type="submit" className="hover:text-lime-400 text-sm">{t("logout")}</button>
             </form>
@@ -89,7 +89,7 @@ export default function NavMenu({ username, logoutAction, streak = 0, trainedTod
             <div className="border-t border-gray-700 my-1" />
             {username ? (
               <>
-                <span className="block px-4 py-2 text-sm text-gray-400 flex items-center gap-2">
+                <Link href="/account" onClick={() => setOpen(false)} className="block px-4 py-2 text-sm text-gray-400 hover:text-white flex items-center gap-2">
                   <span className={`relative inline-flex items-end justify-center w-7 h-8 transition-all duration-700 ${trainedToday ? "" : "grayscale"}`}>
                     <span className="text-3xl leading-none absolute top-0">🔥</span>
                     {streak > 0 && (
@@ -97,7 +97,7 @@ export default function NavMenu({ username, logoutAction, streak = 0, trainedTod
                     )}
                   </span>
                   {username}
-                </span>
+                </Link>
                 <form action={logoutAction}>
                   <button type="submit" className="w-full text-left px-4 py-2 text-sm hover:bg-gray-700">
                     {t("logout")}

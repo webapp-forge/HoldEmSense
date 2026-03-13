@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { Oswald } from "next/font/google";
 import "./globals.css";
+
+const oswald = Oswald({ subsets: ["latin"], variable: "--font-oswald" });
 import Header from "../components/Header";
 import GlossaryDrawer from "../components/glossary/GlossaryDrawer";
 import { NextIntlClientProvider } from "next-intl";
@@ -18,7 +21,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang="en">
+    <html lang="en" className={oswald.variable}>
       <body>
         <NextIntlClientProvider messages={messages}>
           <Header />
