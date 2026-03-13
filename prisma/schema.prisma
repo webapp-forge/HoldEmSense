@@ -64,13 +64,23 @@ model TrainingHand {
 }
 
 model PreGeneratedHand {
-  id           String   @id @default(cuid())
-  module       String
-  heroHandType String
+  id            String   @id @default(cuid())
+  module        String
+  heroHandType  String
   heroCard1Rank String
   heroCard1Suit String
   heroCard2Rank String
   heroCard2Suit String
+  flopCard1Rank String?
+  flopCard1Suit String?
+  flopCard2Rank String?
+  flopCard2Suit String?
+  flopCard3Rank String?
+  flopCard3Suit String?
+  turnCardRank  String?
+  turnCardSuit  String?
+  riverCardRank String?
+  riverCardSuit String?
   villainRange  Int
   equity        Float
   iterations    Int

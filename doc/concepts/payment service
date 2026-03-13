@@ -1,0 +1,14 @@
+PADDLE?
+
+Onboarding vorbereiten
+Paddle prüft jedes Geschäftsmodell manuell — das dauert typischerweise 1–5 Werktage. Du brauchst eine fertige (oder zumindest vorzeigbare) Webseite, eine klare Beschreibung deines Produkts als "Educational Platform / Poker Strategy Training", und Unternehmensdetails (auch als Einzelperson/Freelancer möglich). Je klarer du im Onboarding kommunizierst, dass kein Echtgeld involviert ist, desto reibungsloser läuft die Genehmigung.
+Technische Integration
+Paddle bietet zwei Wege: Paddle.js für einen fertigen Checkout-Overlay direkt auf deiner Seite, oder Paddle Billing für eine tiefere API-Integration mit vollständigem Abo-Management. Für den Start reicht Paddle.js — du bindest ein Script ein, verlinkst einen Button mit deiner Plan-ID, und Paddle übernimmt den kompletten Checkout inklusive Steuer und Zahlungsabwicklung.
+Was du dir sparen kannst
+Da Paddle als Merchant of Record auftritt, brauchst du keine eigene Umsatzsteuer-Registrierung in der EU oder anderswo, kein separates Tool für Rechnungsstellung, und keine PSD2/3D-Secure-Implementierung — das ist alles Paddles Verantwortung.
+Sinnvolle nächste Schritte in der richtigen Reihenfolge:
+
+Webseite soweit fertigstellen, dass sie vorzeigbar ist
+Paddle-Konto anlegen und Onboarding-Formular ausfüllen
+Während der Prüfungsphase die Paddle.js-Integration vorbereiten
+Nach Genehmigung Pläne (Monat / Jahr) anlegen und testen

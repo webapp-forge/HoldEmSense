@@ -4,7 +4,7 @@ import { prisma } from "../prisma";
 import { drawCards } from "../deck";
 import { calculateEquity } from "../equity";
 import { auth } from "../auth";
-import { drawHeroCards, getProfileForModule } from "../heroProfiles";
+import { drawHeroCards, getProfileForModule, pickHandType } from "../heroProfiles";
 import { cookies } from "next/headers";
 import { getAppConfig } from "../config";
 import { checkAndGrantAchievements } from "./achievements";
@@ -78,20 +78,62 @@ type HandResult = {
 // Modules that have a pre-generated hand pool, mapped to their pool module name
 const PRE_GENERATED_MODULES: Record<string, string> = {
   preflop: "hand-vs-range",
+  flop: "flop-equity",
+  turn: "turn-equity",
+  river: "river-equity",
 };
 
-async function drawFromPreGeneratedPool(poolModule: string): Promise<{ heroCards: { rank: string; suit: string }[]; villainRange: number } | null> {
-  const count = await prisma.preGeneratedHand.count({ where: { module: poolModule } });
+type PreGenResult = {
+  heroCards: { rank: string; suit: string }[];
+  villainRange: number;
+  equity: number;
+  flopCards?: { rank: string; suit: string }[];
+  turnCard?: { rank: string; suit: string };
+  riverCard?: { rank: string; suit: string };
+};
+
+// Minimum entries per hand type required to apply profile-based weighting.
+// Below this threshold the full pool is used (avoids always returning the same hand).
+const MIN_POOL_PER_TYPE = 5;
+
+async function drawFromPreGeneratedPool(poolModule: string, handModule: string): Promise<PreGenResult | null> {
+  const profile = getProfileForModule(handModule);
+  const handType = pickHandType(profile);
+
+  const typeCount = await prisma.preGeneratedHand.count({ where: { module: poolModule, heroHandType: handType } });
+  const [where, count] = typeCount >= MIN_POOL_PER_TYPE
+    ? [{ module: poolModule, heroHandType: handType }, typeCount]
+    : [{ module: poolModule }, await prisma.preGeneratedHand.count({ where: { module: poolModule } })];
+
   if (count === 0) return null;
   const skip = Math.floor(Math.random() * count);
-  const hand = await prisma.preGeneratedHand.findFirst({ where: { module: poolModule }, skip });
+  const hand = await prisma.preGeneratedHand.findFirst({ where, orderBy: { id: "asc" }, skip });
   if (!hand) return null;
+
+  const flopCards = hand.flopCard1Rank
+    ? [
+        { rank: hand.flopCard1Rank, suit: hand.flopCard1Suit! },
+        { rank: hand.flopCard2Rank!, suit: hand.flopCard2Suit! },
+        { rank: hand.flopCard3Rank!, suit: hand.flopCard3Suit! },
+      ]
+    : undefined;
+  const turnCard = hand.turnCardRank
+    ? { rank: hand.turnCardRank, suit: hand.turnCardSuit! }
+    : undefined;
+  const riverCard = hand.riverCardRank
+    ? { rank: hand.riverCardRank, suit: hand.riverCardSuit! }
+    : undefined;
+
   return {
     heroCards: [
       { rank: hand.heroCard1Rank, suit: hand.heroCard1Suit },
       { rank: hand.heroCard2Rank, suit: hand.heroCard2Suit },
     ],
     villainRange: hand.villainRange,
+    equity: hand.equity,
+    flopCards,
+    turnCard,
+    riverCard,
   };
 }
 
@@ -139,19 +181,19 @@ export async function getOrCreateHand(difficulty: number, handModule: string): P
   }
 
   const poolModule = PRE_GENERATED_MODULES[handModule];
-  const preGen = poolModule ? await drawFromPreGeneratedPool(poolModule) : null;
+  const preGen = poolModule ? await drawFromPreGeneratedPool(poolModule, handModule) : null;
 
   const heroCards = preGen?.heroCards ?? drawHeroCards(getProfileForModule(handModule));
   const villainRangeValue = preGen?.villainRange ?? [10, 15, 20, 25, 30, 40, 50][Math.floor(Math.random() * 7)];
 
   const hasFlopModules = ["flop", "turn", "river"];
-  const flopCards = hasFlopModules.includes(handModule) ? drawCards(3, heroCards) : undefined;
-  const turnCard = ["turn", "river"].includes(handModule)
+  const flopCards = preGen?.flopCards ?? (hasFlopModules.includes(handModule) ? drawCards(3, heroCards) : undefined);
+  const turnCard = preGen?.turnCard ?? (["turn", "river"].includes(handModule)
     ? drawCards(1, [...heroCards, ...(flopCards ?? [])])[0]
-    : undefined;
-  const riverCard = handModule === "river"
+    : undefined);
+  const riverCard = preGen?.riverCard ?? (handModule === "river"
     ? drawCards(1, [...heroCards, ...(flopCards ?? []), ...(turnCard ? [turnCard] : [])])[0]
-    : undefined;
+    : undefined);
 
   const hand = await prisma.trainingHand.create({
     data: {
@@ -180,6 +222,7 @@ export async function getOrCreateHand(difficulty: number, handModule: string): P
       }),
       villainRange: villainRangeValue,
       difficulty,
+      ...(preGen && { actualEquity: preGen.equity }),
     },
   });
 
@@ -214,9 +257,13 @@ export async function submitGuess(handId: string, guess: number) {
       ]
     : [];
 
-  const simsByDifficulty: Record<number, number> = { 1: 1000, 2: 2000, 3: 5000, 4: 20000 };
-  const simulations = simsByDifficulty[hand.difficulty] ?? 1000;
-  const equity = calculateEquity(heroCards, hand.villainRange!, communityCards, simulations);
+  const equity = hand.actualEquity !== null && hand.actualEquity !== undefined
+    ? hand.actualEquity
+    : (() => {
+        const simsByDifficulty: Record<number, number> = { 1: 1000, 2: 2000, 3: 5000, 4: 20000 };
+        const simulations = simsByDifficulty[hand.difficulty] ?? 1000;
+        return calculateEquity(heroCards, hand.villainRange!, communityCards, simulations);
+      })();
   const points = scoreGuess(guess, equity, hand.difficulty);
 
   const { progressWindowSize, unlockThreshold, maxProgressPoints, leakBaseMinutes } = await getAppConfig();
@@ -243,10 +290,8 @@ export async function submitGuess(handId: string, guess: number) {
     return { equity, pointsScored: points, unlockedDifficulty: null, progress: { count: guestHands.length, total: guestTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints } };
   }
 
-  const [unlockedDifficulty, newAchievements] = await Promise.all([
-    checkAndUnlock(userId, hand.difficulty, hand.module),
-    checkAndGrantAchievements(userId),
-  ]);
+  const unlockedDifficulty = await checkAndUnlock(userId, hand.difficulty, hand.module);
+  const newAchievements = await checkAndGrantAchievements(userId);
 
   if (points >= 3) revalidatePath("/", "layout");
 
@@ -574,7 +619,7 @@ export async function submitPotOddsGuess(handId: string, guessIndex: number): Pr
       select: { pointsScored: true },
     });
     const guestTotal = guestHands.reduce((sum, h) => sum + (h.pointsScored ?? 0), 0);
-    return { requiredEquity, pointsScored: points, unlockedDifficulty: null, progress: { count: guestHands.length, total: guestTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints } };
+    return { requiredEquity, pointsScored: points, unlockedDifficulty: null, newAchievements: [], progress: { count: guestHands.length, total: guestTotal, windowSize: progressWindowSize, unlockThreshold, maxPoints: maxProgressPoints } };
   }
 
   const [unlockedDifficulty, newAchievements] = await Promise.all([
@@ -607,6 +652,10 @@ export async function getCorrectAnswer(handId: string): Promise<number> {
   if (hand.potSize && hand.betSize) {
     const equity = hand.betSize / (hand.potSize + 2 * hand.betSize);
     return Math.min(Math.floor(equity * classCount), classCount - 1);
+  }
+
+  if (hand.actualEquity !== null && hand.actualEquity !== undefined) {
+    return Math.min(Math.floor(hand.actualEquity * classCount), classCount - 1);
   }
 
   const heroCards = [

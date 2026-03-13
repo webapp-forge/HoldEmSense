@@ -65,7 +65,7 @@ function generateCardsForHandType(handType: string): { rank: string; suit: strin
   ];
 }
 
-export function drawHeroCards(profile: HeroProfile): { rank: string; suit: string }[] {
+export function pickHandType(profile: HeroProfile): string {
   const buckets = PROFILE_BUCKETS[profile];
   const totalWeight = buckets.reduce((s, b) => s + b.weight, 0);
 
@@ -88,5 +88,9 @@ export function drawHeroCards(profile: HeroProfile): { rank: string; suit: strin
     if (r <= 0) { handType = h; break; }
   }
 
-  return generateCardsForHandType(handType);
+  return handType;
+}
+
+export function drawHeroCards(profile: HeroProfile): { rank: string; suit: string }[] {
+  return generateCardsForHandType(pickHandType(profile));
 }

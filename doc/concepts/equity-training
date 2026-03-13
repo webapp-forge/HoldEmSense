@@ -1,0 +1,18 @@
+- Hände aus dem Pool der vorgefertigten Karten
+- Die berechnete Equity wird aus der DB gezogen und bei Submit des Users 
+    NICHT neu berechnet.
+- mehr stärkere als schwächere Hero Hands (Hero Profile realistic)
+
+
+Hero Profiles
+realistic:
+  top  0-10%: 25% Wahrscheinlichkeit
+  top 10-20%: 25%
+  top 20-30%: 25%
+  top 30-50%: 15%
+  top 50-80%: 10%
+  bottom 20%: 0%  ← kommen nie dran
+
+  TODO
+  - Mobilansicht Matrix
+  - Mobilansicht Info-Panel

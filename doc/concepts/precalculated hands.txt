@@ -1,0 +1,31 @@
+Vorgenerierte Hände für mehr Performance und Genauigkeit, da viele Iterationen möglich.
+- ohne Gewichtung, komplett zufällig
+- Gewichtung findet erst beim Ziehen aus der DB statt
+
+## Preflop (hand-vs-range)
+
+npx tsx scripts/generate-preflop-hands.ts
+
+## Flop (flop-equity)
+
+npx tsx scripts/generate-flop-hands.ts
+
+Felder: heroCard1-2, flopCard1-3, villainRange, equity
+Flop-Cards werden zufällig gezogen (kein Bias auf Board-Textur)
+
+## Turn (turn-equity)
+
+npx tsx scripts/generate-turn-hands.ts
+
+Felder: heroCard1-2, flopCard1-3, turnCard, villainRange, equity
+
+## River (river-equity)
+
+npx tsx scripts/generate-river-hands.ts
+
+Felder: heroCard1-2, flopCard1-3, turnCard, riverCard, villainRange, equity
+
+SELECT module, COUNT(*) as count
+FROM PreGeneratedHand
+GROUP BY module
+ORDER BY module;
