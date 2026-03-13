@@ -195,7 +195,12 @@ export default function EquityTraining({
     router.refresh();
   }
 
-  if (loading || !hand) return <div className="text-gray-400">{t("dealing")}</div>;
+  if (loading || !hand) return (
+    <>
+      <AchievementToast queue={achievementQueue} onDismiss={(key) => setAchievementQueue((q) => q.filter((k) => k !== key))} />
+      <div className="text-gray-400">{t("dealing")}</div>
+    </>
+  );
 
   return (
     <>

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getNextRepetitionHand, submitRepetitionGuess } from "../../lib/actions/training";
 import { useTranslations } from "next-intl";
+import AchievementToast from "@/components/AchievementToast";
+import { AchievementKey } from "@/lib/achievementConfig";
 import CardComponent from "../Card";
 import TrainPageLayout from "./TrainPageLayout";
 import RangeMatrix from "./RangeMatrix";
@@ -75,6 +77,7 @@ export default function LeakTraining() {
   const [result, setResult] = useState<Result | null>(null);
   const [calculating, setCalculating] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
+  const [achievementQueue, setAchievementQueue] = useState<AchievementKey[]>([]);
 
   useEffect(() => {
     loadNextHand();
@@ -120,21 +123,27 @@ export default function LeakTraining() {
       prevStage: hand.stage,
       newStage: res.newStage,
     });
+    if (res.newAchievements?.length) setAchievementQueue((q) => [...q, ...res.newAchievements as AchievementKey[]]);
     setCalculating(false);
     router.refresh();
     window.dispatchEvent(new Event("leak-processed"));
   }
 
-  if (loading) return <div className="text-gray-400">{t("dealing")}</div>;
+  const toast = <AchievementToast queue={achievementQueue} onDismiss={(key) => setAchievementQueue((q) => q.filter((k) => k !== key))} />;
+
+  if (loading) return <>{toast}<div className="text-gray-400">{t("dealing")}</div></>;
 
   if (empty) {
     return (
-      <TrainPageLayout info={null} explanation={null}>
-        <div className="flex flex-col gap-4 max-w-2xl">
-          <h2 className="text-xl font-bold">{tl("title")}</h2>
-          <p className="text-gray-400">{tl("noLeaks")}</p>
-        </div>
-      </TrainPageLayout>
+      <>
+        {toast}
+        <TrainPageLayout info={null} explanation={null}>
+          <div className="flex flex-col gap-4 max-w-2xl">
+            <h2 className="text-xl font-bold">{tl("title")}</h2>
+            <p className="text-gray-400">{tl("noLeaks")}</p>
+          </div>
+        </TrainPageLayout>
+      </>
     );
   }
 
@@ -159,6 +168,8 @@ export default function LeakTraining() {
   const actualEquity = result?.equity ?? null;
 
   return (
+    <>
+    {toast}
     <TrainPageLayout
       info={isPotOdds ? null : <RangeMatrix villainRange={hand.villainRange} heroCards={hand.heroCards} />}
       explanation={null}
@@ -289,5 +300,6 @@ export default function LeakTraining() {
         )}
       </div>
     </TrainPageLayout>
+    </>
   );
 }

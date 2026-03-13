@@ -446,13 +446,15 @@ export async function submitRepetitionGuess(handId: string, guess: number) {
     data: { repetitionStage: newStage, repetitionAvailableAt: newAvailableAt },
   });
 
+  const newAchievements = await checkAndGrantAchievements(session.user.id);
+
   // For beginner pot-odds, return the preset equity so the displayed value matches the button label
   const displayEquity = (hand.module === "pot-odds" && hand.difficulty === 1)
     ? BEGINNER_POT_ODDS_EQUITIES[BEGINNER_POT_ODDS_EQUITIES.reduce((best, eq, i) =>
         Math.abs(eq - equity) < Math.abs(BEGINNER_POT_ODDS_EQUITIES[best] - equity) ? i : best, 0)]
     : equity;
 
-  return { equity: displayEquity, pointsScored: points, correct, newStage };
+  return { equity: displayEquity, pointsScored: points, correct, newStage, newAchievements };
 }
 
 export async function getRepetitionCount(): Promise<number> {

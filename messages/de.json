@@ -23,7 +23,14 @@
     "streak_90": "90-Tage-Streak",
     "streak_365": "365-Tage-Streak — ein ganzes Jahr!",
     "streak_2y": "2-Jahres-Streak",
-    "streak_5y": "5-Jahres-Streak — legendär!"
+    "streak_5y": "5-Jahres-Streak — legendär!",
+    "leak_first_trained": "Erstes Leak trainiert — zum ersten Mal ein Leak auf Stufe 1 korrekt gelöst",
+    "leak_first_fixed": "Leak besiegt — erstes Leak dauerhaft beseitigt",
+    "leak_10_fixed": "Leak-Jäger — 10 Leaks dauerhaft beseitigt",
+    "leak_100_fixed": "Leak-Brecher — 100 Leaks dauerhaft beseitigt",
+    "leak_500_fixed": "Leak-Vernichter — 500 Leaks dauerhaft beseitigt",
+    "leak_1000_fixed": "Leak-Meister — 1.000 Leaks dauerhaft beseitigt",
+    "leak_5000_fixed": "Leak-Legende — 5.000 Leaks dauerhaft beseitigt"
   },
   "nav": {
     "train": "Training",

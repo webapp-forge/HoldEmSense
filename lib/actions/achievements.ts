@@ -88,6 +88,21 @@ async function getCurrentStreak(userId: string): Promise<number> {
   return streak;
 }
 
+async function checkLeakFirstTrained(userId: string): Promise<boolean> {
+  // "Richtig gelöst auf stage 1" = hand advanced past stage 1 (now at stage 2, 3, or 4)
+  const count = await prisma.trainingHand.count({
+    where: { userId, repetitionStage: { gte: 2 } },
+  });
+  return count > 0;
+}
+
+async function checkLeaksFixed(userId: string, threshold: number): Promise<boolean> {
+  const count = await prisma.trainingHand.count({
+    where: { userId, repetitionStage: 4 },
+  });
+  return count >= threshold;
+}
+
 async function isAlreadyEarned(userId: string, key: AchievementKey): Promise<boolean> {
   const existing = await prisma.achievement.findUnique({
     where: { userId_key: { userId, key } },
@@ -114,6 +129,13 @@ export async function checkAndGrantAchievements(userId: string): Promise<Achieve
       key,
       check: async () => streak >= days,
     })),
+    { key: "leak_first_trained" as AchievementKey, check: () => checkLeakFirstTrained(userId) },
+    { key: "leak_first_fixed"   as AchievementKey, check: () => checkLeaksFixed(userId, 1) },
+    { key: "leak_10_fixed"      as AchievementKey, check: () => checkLeaksFixed(userId, 10) },
+    { key: "leak_100_fixed"     as AchievementKey, check: () => checkLeaksFixed(userId, 100) },
+    { key: "leak_500_fixed"     as AchievementKey, check: () => checkLeaksFixed(userId, 500) },
+    { key: "leak_1000_fixed"    as AchievementKey, check: () => checkLeaksFixed(userId, 1000) },
+    { key: "leak_5000_fixed"    as AchievementKey, check: () => checkLeaksFixed(userId, 5000) },
   ];
 
   const newlyEarned: AchievementKey[] = [];

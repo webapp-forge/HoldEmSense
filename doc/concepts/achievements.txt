@@ -35,7 +35,29 @@ Streak 365                          100
 Streak 2 Jahre                      500
 Streak 5 Jahre                      1000
 
+C) Leaks trainieren (Farbe: grün)
+Achievement                                         Wert
+Erstes Leak trainiert (richtig gelöst auf stage 1)  1              1
+Erstes Leak dauerhaft beseitigt                     5
+10 Leaks dauerhaft beseitigt                        25
+100 Leaks dauerhaft beseitigt                       50
+500 Leaks dauerhaft beseitigt                       100
+1000 Leaks dauerhaft beseitigt                      500
+5000 Leaks dauerhaft beseitigt                      1000
+
+
 TODO
-- Was passiert bei Gast-Accounts?
-- Streak Achievement
 - weitere Achievements
+
+## Relevante Dateien
+
+| Datei | Beschreibung |
+|-------|-------------|
+| lib/achievementConfig.ts | AchievementKey-Typ, ACHIEVEMENT_CONFIG, STREAK_THRESHOLDS |
+| lib/actions/achievements.ts | checkAndGrantAchievements, getUserAchievements, Check-Funktionen |
+| lib/actions/training.ts | submitGuess, submitPotOddsGuess, submitRepetitionGuess — rufen checkAndGrantAchievements auf |
+| components/train/LeakTraining.tsx | Leak-Training UI: AchievementToast, Queue-State |
+| components/train/EquityTraining.tsx | Equity-Training UI: AchievementToast, Queue-State |
+| components/AchievementToast.tsx | Toast-Komponente zur Anzeige neu verdienteter Achievements |
+| prisma/schema.prisma | Achievement-Modell (userId, key, earnedAt) |
+| messages/en.json + de.json | i18n-Keys unter „achievements" |
