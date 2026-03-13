@@ -7,7 +7,9 @@
     "changePassword": "Passwort ändern",
     "deleteAccount": "Account löschen",
     "comingSoon": "Demnächst",
-    "noChipsYet": "Noch keine Chips — fang an zu trainieren!"
+    "noChipsYet": "Noch keine Chips — fang an zu trainieren!",
+    "fourColorDeck": "4-Farben-Blatt",
+    "fourColorDeckHint": "♠ schwarz  ♥ rot  ♦ blau  ♣ grün"
   },
   "achievements": {
     "unlocked": "Achievement freigeschaltet!",

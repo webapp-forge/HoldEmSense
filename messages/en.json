@@ -7,7 +7,9 @@
     "changePassword": "Change Password",
     "deleteAccount": "Delete Account",
     "comingSoon": "Coming soon",
-    "noChipsYet": "No chips yet — start training!"
+    "noChipsYet": "No chips yet — start training!",
+    "fourColorDeck": "4-Color Deck",
+    "fourColorDeckHint": "♠ black  ♥ red  ♦ blue  ♣ green"
   },
   "achievements": {
     "unlocked": "Achievement unlocked!",

@@ -64,7 +64,7 @@ type Result = {
   newStage: number;
 };
 
-export default function LeakTraining() {
+export default function LeakTraining({ fourColor = false }: { fourColor?: boolean }) {
   const t = useTranslations("train");
   const tl = useTranslations("leakFixing");
   const router = useRouter();
@@ -212,20 +212,20 @@ export default function LeakTraining() {
               <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Flop</p>
               <div className="flex gap-2">
                 {hand.flopCards.map((card, i) => (
-                  <CardComponent key={i} rank={card.rank} suit={card.suit} />
+                  <CardComponent key={i} rank={card.rank} suit={card.suit} fourColor={fourColor} />
                 ))}
               </div>
             </div>
             {hand.turnCard && (
               <div style={{ marginLeft: "1.3rem" }}>
                 <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Turn</p>
-                <CardComponent rank={hand.turnCard.rank} suit={hand.turnCard.suit} />
+                <CardComponent rank={hand.turnCard.rank} suit={hand.turnCard.suit} fourColor={fourColor} />
               </div>
             )}
             {hand.riverCard && (
               <div style={{ marginLeft: "1.3rem" }}>
                 <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">River</p>
-                <CardComponent rank={hand.riverCard.rank} suit={hand.riverCard.suit} />
+                <CardComponent rank={hand.riverCard.rank} suit={hand.riverCard.suit} fourColor={fourColor} />
               </div>
             )}
           </div>
@@ -237,7 +237,7 @@ export default function LeakTraining() {
             <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Your hand</p>
             <div className="flex gap-2">
               {hand.heroCards.map((card, i) => (
-                <CardComponent key={i} rank={card.rank} suit={card.suit} />
+                <CardComponent key={i} rank={card.rank} suit={card.suit} fourColor={fourColor} />
               ))}
             </div>
           </div>

@@ -2,9 +2,10 @@ import { auth } from "../../../../lib/auth";
 import TrainPageLayout from "../../../../components/train/TrainPageLayout";
 import LeakTraining from "../../../../components/train/LeakTraining";
 import { getTranslations } from "next-intl/server";
+import { getFourColorDeck } from "../../../../lib/actions/deckStyle";
 
 export default async function EquityLeaksPage() {
-  const session = await auth();
+  const [session, fourColor] = await Promise.all([auth(), getFourColorDeck()]);
   const isPremium = (session?.user as any)?.isPremium === true;
   const t = await getTranslations("leakInfo");
 
@@ -74,5 +75,5 @@ export default async function EquityLeaksPage() {
     );
   }
 
-  return <LeakTraining />;
+  return <LeakTraining fourColor={fourColor} />;
 }

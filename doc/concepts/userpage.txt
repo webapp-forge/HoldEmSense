@@ -6,5 +6,6 @@ Account
 - Pro Upgrade
 
 Einstellungen
+- 4 color deck
 - Sprache
 - Sound

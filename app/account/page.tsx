@@ -4,9 +4,11 @@ import { getTranslations } from "next-intl/server";
 import PokerChip from "@/components/PokerChip";
 import { getUserAchievements } from "@/lib/actions/achievements";
 import { ACHIEVEMENT_CONFIG } from "@/lib/achievementConfig";
+import { getFourColorDeck } from "@/lib/actions/deckStyle";
+import FourColorDeckToggle from "@/components/FourColorDeckToggle";
 
 export default async function AccountPage() {
-  const [session, t, ta] = await Promise.all([auth(), getTranslations("account"), getTranslations("achievements")]);
+  const [session, t, ta, fourColor] = await Promise.all([auth(), getTranslations("account"), getTranslations("achievements"), getFourColorDeck()]);
 
   if (!session?.user) redirect("/login");
 
@@ -53,6 +55,14 @@ export default async function AccountPage() {
                 <div className="text-sm font-medium">{t("language")}</div>
               </div>
               <span className="text-gray-500 text-sm">{t("comingSoon")}</span>
+            </div>
+
+            <div className="px-5 py-4 flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium">{t("fourColorDeck")}</div>
+                <div className="text-xs text-gray-500 mt-0.5">{t("fourColorDeckHint")}</div>
+              </div>
+              <FourColorDeckToggle enabled={fourColor} />
             </div>
 
             <div className="px-5 py-4 flex items-center justify-between">
