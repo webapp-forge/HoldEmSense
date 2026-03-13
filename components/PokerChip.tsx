@@ -36,6 +36,12 @@ const COLOR_THEMES: Record<string, ChipColor> = {
     stripe: "#fde047",
     text: "#ffffff",
   },
+  purple: {
+    outer: "#6b21a8",
+    middle: "#9333ea",
+    stripe: "#d8b4fe",
+    text: "#ffffff",
+  },
 };
 
 type Props = {

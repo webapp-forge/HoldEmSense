@@ -23,7 +23,7 @@ Trainingsgruppe 2:
 Equity & Pot Odds -> Pot Odds
 Equity & Pot Odds -> Hand vs Range + Pot Odds
 
-Achievement Table für Trainingsgruppe 1 (Farbe: blau)
+Achievement Table für Trainingsgruppe 2 (Farbe: lila)
 
 Achievement                             Wert
 1 Hand in jeden Modul korrekt gelöst    1

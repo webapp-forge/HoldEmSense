@@ -4,6 +4,11 @@ export type AchievementKey =
   | "group1_intermediate"
   | "group1_advanced"
   | "group1_expert"
+  | "group2_first_hand"
+  | "group2_beginner"
+  | "group2_intermediate"
+  | "group2_advanced"
+  | "group2_expert"
   | "streak_started"
   | "streak_3"
   | "streak_7"
@@ -31,6 +36,11 @@ export const ACHIEVEMENT_CONFIG: Record<
   group1_intermediate:  { color: "blue", value: 10,   labelKey: "group1Intermediate" },
   group1_advanced:      { color: "blue", value: 25,   labelKey: "group1Advanced" },
   group1_expert:        { color: "blue", value: 100,  labelKey: "group1Expert" },
+  group2_first_hand:    { color: "purple", value: 1,    labelKey: "group2FirstHand" },
+  group2_beginner:      { color: "purple", value: 5,    labelKey: "group2Beginner" },
+  group2_intermediate:  { color: "purple", value: 10,   labelKey: "group2Intermediate" },
+  group2_advanced:      { color: "purple", value: 25,   labelKey: "group2Advanced" },
+  group2_expert:        { color: "purple", value: 100,  labelKey: "group2Expert" },
   streak_started:       { color: "fire", value: 1,    labelKey: "streakStarted" },
   streak_3:             { color: "fire", value: 5,    labelKey: "streak3" },
   streak_7:             { color: "fire", value: 10,   labelKey: "streak7" },
@@ -69,3 +79,6 @@ export const GROUP1_PROGRESS_MODULES = [
   "hand-vs-range-turn",
   "hand-vs-range-river",
 ] as const;
+
+// Trainingsgruppe 2: Pot Odds + Combined Pot Odds
+export const GROUP2_MODULES = ["pot-odds", "combined-pot-odds"] as const;

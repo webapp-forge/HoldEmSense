@@ -7,6 +7,7 @@ import {
   AchievementKey,
   GROUP1_HAND_MODULES,
   GROUP1_PROGRESS_MODULES,
+  GROUP2_MODULES,
   STREAK_THRESHOLDS,
 } from "../achievementConfig";
 
@@ -41,6 +42,49 @@ async function checkGroup1Expert(userId: string): Promise<boolean> {
 
   const results = await Promise.all(
     GROUP1_HAND_MODULES.map(async (mod) => {
+      const hands = await prisma.trainingHand.findMany({
+        where: { userId, module: mod, difficulty: 4, pointsScored: { not: null } },
+        orderBy: { createdAt: "desc" },
+        take: progressWindowSize,
+        select: { pointsScored: true },
+      });
+      if (hands.length < progressWindowSize) return false;
+      const total = hands.reduce((sum, h) => sum + (h.pointsScored ?? 0), 0);
+      return total >= unlockThreshold;
+    })
+  );
+  return results.every(Boolean);
+}
+
+async function checkGroup2FirstHand(userId: string): Promise<boolean> {
+  const counts = await Promise.all(
+    GROUP2_MODULES.map((mod) =>
+      prisma.trainingHand.count({
+        where: { userId, module: mod, pointsScored: { equals: 3 } },
+      })
+    )
+  );
+  return counts.every((c) => c > 0);
+}
+
+async function checkGroup2LevelUnlocked(userId: string, difficulty: number): Promise<boolean> {
+  const records = await prisma.userProgress.findMany({
+    where: {
+      userId,
+      module: { in: [...GROUP2_MODULES] },
+      difficulty: difficulty + 1,
+    },
+    select: { module: true },
+  });
+  const unlockedModules = new Set(records.map((r) => r.module));
+  return GROUP2_MODULES.every((m) => unlockedModules.has(m));
+}
+
+async function checkGroup2Expert(userId: string): Promise<boolean> {
+  const { progressWindowSize, unlockThreshold } = await getAppConfig();
+
+  const results = await Promise.all(
+    GROUP2_MODULES.map(async (mod) => {
       const hands = await prisma.trainingHand.findMany({
         where: { userId, module: mod, difficulty: 4, pointsScored: { not: null } },
         orderBy: { createdAt: "desc" },
@@ -125,6 +169,11 @@ export async function checkAndGrantAchievements(userId: string): Promise<Achieve
     { key: "group1_intermediate", check: () => checkGroup1LevelUnlocked(userId, 2) },
     { key: "group1_advanced",     check: () => checkGroup1LevelUnlocked(userId, 3) },
     { key: "group1_expert",       check: () => checkGroup1Expert(userId) },
+    { key: "group2_first_hand",   check: () => checkGroup2FirstHand(userId) },
+    { key: "group2_beginner",     check: () => checkGroup2LevelUnlocked(userId, 1) },
+    { key: "group2_intermediate", check: () => checkGroup2LevelUnlocked(userId, 2) },
+    { key: "group2_advanced",     check: () => checkGroup2LevelUnlocked(userId, 3) },
+    { key: "group2_expert",       check: () => checkGroup2Expert(userId) },
     ...STREAK_THRESHOLDS.map(({ key, days }) => ({
       key,
       check: async () => streak >= days,
