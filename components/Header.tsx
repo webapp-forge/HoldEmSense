@@ -18,7 +18,7 @@ export default async function Header() {
 
 
   return (
-    <header className="relative flex items-center px-6 py-4 bg-gray-900 text-white">
+    <header className="sticky top-0 z-40 flex items-center px-6 py-4 bg-gray-900 text-white">
       {/* Left: Logo */}
       <Link href={session ? "/train/equity/hand-vs-range" : "/"} className="flex-none">
         <Logo size="md" />

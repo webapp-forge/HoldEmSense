@@ -121,7 +121,9 @@
     "whatIsYourEquity": "Wie hoch ist deine Equity?",
     "submit": "Bestätigen",
     "readyToUnlock": "{name} kann jetzt freigeschaltet werden!",
-    "ptsNeeded": "Noch {pts} Punkte zum Freischalten von {name}"
+    "ptsNeeded": "Noch {pts} Punkte zum Freischalten von {name}",
+    "showMatrix": "Range Matrix",
+    "showInfo": "Info"
   },
   "sidebar": {
     "equityTraining": "Equity & Pot Odds",

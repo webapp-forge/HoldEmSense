@@ -1,0 +1,55 @@
+DESKTOP
+- Topbar
+  - Links: Train, Guide, Hall of Fame in der Mitte
+  - Account rechts
+- Sidebar mit Trainingsmodulen
+- Hauptansicht
+  links: Trainings-Bereich
+  Mitte: Tools, z.B. Matrix
+  rechts: Info-Panel
+
+
+BREAKPOINTS (Trainingsseiten)
+
+< 768px (Mobile)
+  - Header sichtbar (sticky)
+  - Sidebar ausgeblendet
+  - Nur Trainings-Bereich sichtbar
+  - Matrix und Info-Panel: Drawer-Overlay (von rechts, Icon+Textlink)
+
+768px – 1400px (Tablet / kleines Desktop)
+  - Header sticky
+  - Sidebar sichtbar (w-64)
+  - Trainings-Bereich + Sidebar nebeneinander
+  - Matrix und Info-Panel: Drawer-Overlay
+
+1400px – 1700px (Mittleres Desktop)
+  - Sidebar + Trainings-Bereich + Matrix inline nebeneinander
+  - Info-Panel: Drawer-Overlay (Icon+Textlink unterhalb des Trainingsbereichs)
+
+≥ 1700px (Großes Desktop)
+  - Alle drei Bereiche inline: Trainings | Matrix | Info-Panel
+  - Info-Panel rechts ein-/ausklappbar (Tab-Button)
+
+
+MOBILE (Overlay-Verhalten)
+- Drawer öffnet von rechts
+- Backdrop (60% schwarz) links — Klick schließt
+- Matrix-Drawer: w-fit (passt sich Matrixgröße an)
+- Info-Drawer: w-80 (320px, gute Lesebreite)
+- Beide: max-w-[90vw] (Sicherheit für sehr kleine Screens)
+
+
+TODO
+- ✅ Fixed Header
+
+
+## Relevante Dateien
+
+| Datei | Beschreibung |
+|-------|-------------|
+| components/Header.tsx | Sticky Header (z-40), Logo, Nav, Account |
+| components/train/Sidebar.tsx | Sidebar, hidden md:block, w-64 |
+| app/train/layout.tsx | Train-Layout: flex-col md:flex-row, Sidebar + main |
+| components/train/TrainPageLayout.tsx | Dreispaltiges Layout mit Breakpoints + Drawer-Overlays |
+| app/layout.tsx | Root-Layout: Header + children + GlossaryDrawer |

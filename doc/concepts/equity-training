@@ -14,5 +14,23 @@ realistic:
   bottom 20%: 0%  ← kommen nie dran
 
   TODO
-  - Mobilansicht Matrix
-  - Mobilansicht Info-Panel
+  - ✅ Mobilansicht Matrix (Overlay-Button)
+  - ✅ Mobilansicht Info-Panel (Overlay-Button)
+
+## Relevante Dateien
+
+| Datei | Beschreibung |
+|-------|-------------|
+| components/train/EquityTraining.tsx | Hauptkomponente: State, Hand-Logik, Rendering |
+| components/train/TrainPageLayout.tsx | Layout: Matrix ab 1400px inline, Info-Panel ab 1700px inline, darunter Drawer-Overlays |
+| components/train/RangeMatrix.tsx | Range-Matrix-Visualisierung (13×13 Grid) |
+| components/train/EquityGuessPanel.tsx | Schätz-UI: Buttons (easy) oder Slider (hard) |
+| components/train/MatrixTip.tsx | Tipp-Hinweis zur Matrix im Info-Panel |
+| lib/actions/training.ts | Server Actions: getOrCreateHand, submitGuess, … |
+| lib/heroProfiles.ts | Gewichtung starker Hände (realistic profile) |
+| prisma/schema.prisma | PregeneratedHand-Tabelle mit equity-Feldern |
+| app/train/equity/hand-vs-range/page.tsx | Route: Preflop |
+| app/train/equity/hand-vs-range-flop/page.tsx | Route: Flop |
+| app/train/equity/hand-vs-range-turn/page.tsx | Route: Turn |
+| app/train/equity/hand-vs-range-river/page.tsx | Route: River |
+| messages/en.json + de.json | i18n-Keys unter „train" |

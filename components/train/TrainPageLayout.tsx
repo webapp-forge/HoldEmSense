@@ -20,49 +20,47 @@ export default function TrainPageLayout({ children, info, explanation }: Props) 
       <div className="flex-none max-w-2xl w-full">
         {children}
 
-        {/* Mobile buttons — visible below lg (matrix) / xl (matrix only on xl) */}
+        {/* Overlay buttons:
+              matrix button: visible below 1400px (inline above)
+              info button:   visible below 1700px (inline above) */}
         {(info || explanation) && (
-          <div className="flex gap-2 mt-6 lg:hidden">
+          <div className="flex gap-4 mt-6 min-[1700px]:hidden">
             {info && (
               <button
                 onClick={() => setMobileOverlay("matrix")}
-                className="px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm text-white"
+                className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors min-[1400px]:hidden"
               >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+                </svg>
                 {t("showMatrix")}
               </button>
             )}
             {explanation && (
               <button
                 onClick={() => setMobileOverlay("info")}
-                className="px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm text-white"
+                className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
               >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <circle cx="12" cy="12" r="9" /><line x1="12" y1="8" x2="12" y2="8.5" strokeLinecap="round" strokeWidth="2" />
+                  <line x1="12" y1="11" x2="12" y2="16" strokeLinecap="round" />
+                </svg>
                 {t("showInfo")}
               </button>
             )}
           </div>
         )}
-        {/* Show matrix button between lg and xl (explanation is visible, matrix still hidden) */}
-        {info && (
-          <div className="hidden lg:flex xl:hidden mt-6">
-            <button
-              onClick={() => setMobileOverlay("matrix")}
-              className="px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm text-white"
-            >
-              {t("showMatrix")}
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* Middle: module info */}
-      <div className="hidden xl:block flex-1 min-w-0">
+      {/* Middle: matrix — inline from 1400px, all three panels from 1700px */}
+      <div className="hidden min-[1400px]:block flex-1 min-w-0">
         {info}
       </div>
 
-      {/* Right: explanation (collapsible) */}
+      {/* Right: explanation — only when enough space for all three panels */}
       {explanation && (
-        <div className="hidden lg:flex flex-none items-start">
-          {/* Toggle tab */}
+        <div className="hidden min-[1700px]:flex flex-none items-start">
           <button
             onClick={() => setOpen(!open)}
             className="flex items-center justify-center w-5 self-stretch bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-l transition-colors"
@@ -72,8 +70,6 @@ export default function TrainPageLayout({ children, info, explanation }: Props) 
               {open ? "▶" : "◀"}
             </span>
           </button>
-
-          {/* Panel content */}
           <div
             className="overflow-hidden transition-all duration-300"
             style={{ width: open ? "18rem" : "0", opacity: open ? 1 : 0 }}
@@ -85,28 +81,32 @@ export default function TrainPageLayout({ children, info, explanation }: Props) 
         </div>
       )}
 
-      {/* Mobile overlays */}
+      {/* Side drawer overlays */}
       {mobileOverlay && (
         <div
-          className="fixed inset-0 bg-black/70 z-50 flex items-end"
+          className="fixed inset-0 bg-black/60 z-50 flex justify-end"
           onClick={() => setMobileOverlay(null)}
         >
           <div
-            className="w-full bg-gray-900 rounded-t-xl p-4 max-h-[80vh] overflow-y-auto"
+            className={`relative h-full bg-gray-900 overflow-y-auto flex flex-col ${
+              mobileOverlay === "matrix" ? "w-fit max-w-[90vw]" : "w-80 max-w-[90vw]"
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-4">
-              <span className="font-semibold text-white">
+            <div className="flex justify-between items-center px-4 pt-4 pb-3 border-b border-gray-800">
+              <span className="font-semibold text-white text-sm">
                 {mobileOverlay === "matrix" ? t("showMatrix") : t("showInfo")}
               </span>
               <button
                 onClick={() => setMobileOverlay(null)}
-                className="text-gray-400 hover:text-white text-xl leading-none px-1"
+                className="text-gray-400 hover:text-white text-xl leading-none pl-4"
               >
                 ✕
               </button>
             </div>
-            {mobileOverlay === "matrix" ? info : explanation}
+            <div className="p-4 text-sm text-gray-300 leading-relaxed">
+              {mobileOverlay === "matrix" ? info : explanation}
+            </div>
           </div>
         </div>
       )}
