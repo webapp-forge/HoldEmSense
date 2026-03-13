@@ -113,6 +113,7 @@ export default function CombinedPotOddsTraining({
     const result = await getOrCreateCombinedHand(d);
     setHand({ ...result, difficulty: d });
     setLoading(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function handleEquityGuess(classIndex: number) {

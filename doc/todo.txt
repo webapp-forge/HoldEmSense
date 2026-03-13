@@ -1,6 +1,5 @@
+- Zeitabstände im Leak Training sind keine echten Parameter (Ausgabe ist immer 1 hour)
 - Odds and Outs?
-- Pot Odds, besserer Ansatz: eigener Anteil am Pot statt Betgröße memorisieren, 
-da Betgröße nur bei 1vs1 gilt!
 - Streaks
 - Bug: Equity Leak, 33% richtig geklickt, aber Fehler bekommen!
 - Leaks fehlen Mobile

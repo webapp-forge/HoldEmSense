@@ -1,2 +1,11 @@
 Cheat Button für Admins: "guess right"
     - angezeigt in allen Trainingsmodulen, entspricht immer der korrekten Lösung
+
+Relevante Dateien:
+    - components/train/EquityGuessPanel.tsx   — rendert den Button wenn onAdminGuess prop gesetzt ist
+    - components/train/EquityTraining.tsx     — übergibt onAdminGuess an EquityGuessPanel (isAdmin prop)
+    - components/train/LeakTraining.tsx       — übergibt onAdminGuess an EquityGuessPanel (isAdmin prop)
+    - app/train/leak-fixing/equity/page.tsx  — liest isAdmin aus Session, reicht es an LeakTraining weiter
+    - app/train/equity/*/page.tsx            — lesen isAdmin aus Session, reichen es an EquityTraining weiter
+    - lib/actions/training.ts                — getCorrectAnswer(handId): gibt korrekten Class-Index zurück
+    - lib/auth.ts                            — isAdmin wird in Session/Token gespeichert

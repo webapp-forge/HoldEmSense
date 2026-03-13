@@ -7,6 +7,7 @@ import { getFourColorDeck } from "../../../../lib/actions/deckStyle";
 export default async function EquityLeaksPage() {
   const [session, fourColor] = await Promise.all([auth(), getFourColorDeck()]);
   const isPremium = (session?.user as any)?.isPremium === true;
+  const isAdmin = (session?.user as any)?.isAdmin === true;
   const t = await getTranslations("leakInfo");
 
   if (!session) {
@@ -75,5 +76,5 @@ export default async function EquityLeaksPage() {
     );
   }
 
-  return <LeakTraining fourColor={fourColor} />;
+  return <LeakTraining fourColor={fourColor} isAdmin={isAdmin} />;
 }

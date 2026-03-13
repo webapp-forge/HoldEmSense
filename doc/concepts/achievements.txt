@@ -19,6 +19,19 @@ Intermediate Level absolviert           10
 Advanced Level absolviert               25
 Expert Level absolviert                 100
 
+Trainingsgruppe 2: 
+Equity & Pot Odds -> Pot Odds
+Equity & Pot Odds -> Hand vs Range + Pot Odds
+
+Achievement Table für Trainingsgruppe 1 (Farbe: blau)
+
+Achievement                             Wert
+1 Hand in jeden Modul korrekt gelöst    1
+Beginner Level absolviert               5
+Intermediate Level absolviert           10
+Advanced Level absolviert               25
+Expert Level absolviert                 100
+
 Anmerkung: Absolviert bedeutet, es einmalig geschafft zu haben:
     - unabhängig vom aktuellen Score, der ja wieder fallen kann
     - unabhängig davon ab der nächste Level accessible ist (z.B. weil dafür erst Premium freigeschaltet werden muss)
@@ -44,6 +57,7 @@ Erstes Leak dauerhaft beseitigt                     5
 500 Leaks dauerhaft beseitigt                       100
 1000 Leaks dauerhaft beseitigt                      500
 5000 Leaks dauerhaft beseitigt                      1000
+
 
 
 TODO

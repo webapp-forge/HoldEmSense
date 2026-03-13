@@ -470,6 +470,90 @@ export async function submitRepetitionGuess(handId: string, guess: number) {
   return { equity: displayEquity, pointsScored: points, correct, newStage, newAchievements };
 }
 
+export async function submitRepetitionCombinedEquity(handId: string, guessIndex: number): Promise<{
+  equity: number;
+  equityPoints: number;
+  requiredEquity: number;
+  potSize: number;
+  betSize: number;
+}> {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Not authenticated");
+
+  const hand = await prisma.trainingHand.findUnique({ where: { id: handId } });
+  if (!hand) throw new Error("Hand not found");
+  if (hand.userId !== session.user.id) throw new Error("Unauthorized");
+  if (!hand.repetitionStage || hand.repetitionStage < 1 || hand.repetitionStage > 3)
+    throw new Error("Hand not in repetition");
+  if (hand.actualEquity === null || hand.actualEquity === undefined) throw new Error("Missing equity");
+  if (!hand.potSize || !hand.betSize) throw new Error("Missing pot/bet data");
+
+  const equityPoints = scoreCombinedEquityGuess(guessIndex, hand.actualEquity, hand.difficulty);
+  const requiredEquity = hand.betSize / (hand.potSize + 2 * hand.betSize);
+
+  await prisma.trainingHand.update({
+    where: { id: handId },
+    data: { equityGuessIndex: guessIndex },
+  });
+
+  return { equity: hand.actualEquity, equityPoints, requiredEquity, potSize: hand.potSize, betSize: hand.betSize };
+}
+
+export async function submitRepetitionCombinedDecision(handId: string, callDecision: boolean): Promise<{
+  totalPoints: number;
+  equityPoints: number;
+  decisionPoints: number;
+  isBreakeven: boolean;
+  correct: boolean;
+  newStage: number;
+  newAchievements: string[];
+}> {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Not authenticated");
+
+  const hand = await prisma.trainingHand.findUnique({ where: { id: handId } });
+  if (!hand) throw new Error("Hand not found");
+  if (hand.userId !== session.user.id) throw new Error("Unauthorized");
+  if (!hand.repetitionStage || hand.repetitionStage < 1 || hand.repetitionStage > 3)
+    throw new Error("Hand not in repetition");
+  if (hand.equityGuessIndex === null || hand.equityGuessIndex === undefined) throw new Error("Equity guess not submitted yet");
+  if (hand.actualEquity === null || hand.actualEquity === undefined) throw new Error("Missing equity");
+  if (!hand.potSize || !hand.betSize) throw new Error("Missing pot/bet data");
+
+  const stage = hand.repetitionStage;
+  const equity = hand.actualEquity;
+  const requiredEquity = hand.betSize / (hand.potSize + 2 * hand.betSize);
+  const isBreakeven = Math.abs(equity - requiredEquity) < COMBINED_BREAKEVEN_MARGIN;
+  const correctDecision = equity >= requiredEquity;
+  const decisionPoints = isBreakeven || callDecision === correctDecision ? 1 : 0;
+  const equityPoints = scoreCombinedEquityGuess(hand.equityGuessIndex, equity, hand.difficulty);
+  const totalPoints = equityPoints + decisionPoints;
+  const correct = totalPoints === 3;
+
+  const { leakBaseMinutes } = await getAppConfig();
+  const stageMs = getStageNextAvailableMS(leakBaseMinutes);
+
+  let newStage: number;
+  let newAvailableAt: Date | null;
+
+  if (correct) {
+    newStage = stage + 1;
+    newAvailableAt = newStage <= 3 ? new Date(Date.now() + stageMs[newStage]) : null;
+  } else {
+    newStage = Math.max(stage - 1, 1);
+    newAvailableAt = new Date(Date.now() + stageMs[newStage]);
+  }
+
+  await prisma.trainingHand.update({
+    where: { id: handId },
+    data: { repetitionStage: newStage, repetitionAvailableAt: newAvailableAt },
+  });
+
+  const newAchievements = await checkAndGrantAchievements(session.user.id);
+
+  return { totalPoints, equityPoints, decisionPoints, isBreakeven, correct, newStage, newAchievements };
+}
+
 export async function getRepetitionCount(): Promise<number> {
   const session = await auth();
   if (!session?.user?.id) return 0;
