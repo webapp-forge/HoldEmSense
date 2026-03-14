@@ -1,6 +1,7 @@
 Vorgenerierte Hände für mehr Performance und Genauigkeit, da viele Iterationen möglich.
 - ohne Gewichtung, komplett zufällig
-- Gewichtung findet erst beim Ziehen aus der DB statt
+- Gewichtung findet erst beim Ziehen aus der DB statt (nach heroHandType)
+- Wenn < 5 Hände eines Typs vorhanden, wird aus dem vollen Pool gezogen
 
 ## Preflop (hand-vs-range)
 
@@ -26,10 +27,23 @@ npx tsx scripts/generate-river-hands.ts
 Felder: heroCard1-2, flopCard1-3, turnCard, riverCard, villainRange, equity
 
 Anzahl Hände pro Modul und unterschiedliche HeroHands anzeigen:
-SELECT 
+SELECT
     module,
     COUNT(*) AS count,
     COUNT(DISTINCT heroHandType) AS distinctHeroHandTypes
 FROM PreGeneratedHand
 GROUP BY module
 ORDER BY module;
+
+---
+
+RELEVANTE DATEIEN:
+
+  scripts/generate-preflop-hands.ts  – Generierung Preflop-Pool
+  scripts/generate-flop-hands.ts     – Generierung Flop-Pool
+  scripts/generate-turn-hands.ts     – Generierung Turn-Pool
+  scripts/generate-river-hands.ts    – Generierung River-Pool
+  lib/actions/training.ts            – drawFromPreGeneratedPool(), PRE_GENERATED_MODULES
+                                       (Mapping handModule → poolModule)
+  prisma/schema.prisma               – PreGeneratedHand-Modell
+                                       (module, heroHandType, equity, iterations, ...)

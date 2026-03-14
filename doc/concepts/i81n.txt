@@ -1,5 +1,32 @@
-TODO
-- weitere Sprachen
+Framework: next-intl
+Sprachen: en (default), de, es, pt
 
-TODO LATER
-- Muttersprachler Translation commits
+Locale-Erkennung: Cookie "locale", Fallback auf "en"
+
+Verwendung:
+  Client Components:  useTranslations("namespace")
+  Server Components:  getTranslations("namespace")   (async)
+  Datum/Zahlen:       getLocale() + .toLocaleString(locale, ...)
+  Monatsnamen etc.:   NICHT als Array hardcoden – immer toLocaleString
+
+Message-Namespaces (Auswahl):
+  nav, sidebar, account, achievements, train, home,
+  login, register, combinedPotOdds, leakFixing, leakInfo
+
+TODO:
+- weitere Sprachen
+TODO LATER:
+- Muttersprachler Translation-Commits
+
+---
+
+RELEVANTE DATEIEN:
+
+  i18n/request.ts          – Locale aus Cookie lesen, messages dynamisch importieren
+  middleware.ts            – setzt guestId-Cookie (kein i18n-Routing)
+  messages/en.json         – englische Übersetzungen (Referenz)
+  messages/de.json         – deutsche Übersetzungen
+  messages/es.json         – spanische Übersetzungen
+  messages/pt.json         – portugiesische Übersetzungen
+  next.config.ts           – createNextIntlPlugin("./i18n/request.ts")
+  app/layout.tsx           – NextIntlClientProvider mit messages

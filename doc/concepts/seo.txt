@@ -1,2 +1,20 @@
-TODO
-- Bei Konzepten immer Bezug nehmen auf Training-KWs und die App
+SEO ist aktuell minimal implementiert.
+
+Vorhanden:
+- Statische Metadata in app/layout.tsx (title, description)
+- Metadata in app/glossary/page.tsx
+
+Fehlt noch (TODO):
+- sitemap.ts / sitemap.xml
+- robots.txt
+- Dynamische Metadata pro Seite (generateMetadata)
+- OpenGraph Tags
+- Structured Data (JSON-LD)
+- Bei Konzept-Seiten immer Bezug nehmen auf Training-Keywords und die App
+
+---
+
+RELEVANTE DATEIEN:
+
+  app/layout.tsx           – Root-Metadata (title, description)
+  app/glossary/page.tsx    – Seiten-spezifische Metadata

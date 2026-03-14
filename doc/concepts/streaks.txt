@@ -1,10 +1,42 @@
-Zählen der Tage, in denen mind. ein Training erfolgreich absolviert wurde. 
+Zählen der Tage, in denen mind. ein Training erfolgreich absolviert wurde.
 Erfolgreich bedeutet 3 Punkte bekommen.
 
 Darstellung als Flamme mit einer Zahl neben dem Usernamen.
 
 Wenn heute noch kein Training erfolgreich absolviert wurde ist die Flamme grayscale
 mit der Zahl vom letzten Tag. Sobald erfolgreich trainiert aktualisiert sich die
-Flamme sofort ohne Reload durch User.
+Flamme sofort ohne Reload durch User (revalidatePath + router.refresh()).
 
 Wird ein Tag ausgelassen verfällt der Streak.
+
+getOrCreate*Hand liefert nur Hände vom heutigen UTC-Tag zurück, damit createdAt
+immer dem Abgabetag entspricht (Basis der Streak-Berechnung via DATE(createdAt)).
+
+---
+
+RELEVANTE DATEIEN:
+
+Anzeige:
+  components/Header.tsx          – Server Component; ruft getDailyStreak() auf und
+                                   übergibt streak + trainedToday an NavMenu
+  components/NavMenu.tsx         – Client Component; zeigt Flamme (🔥) mit Zahl,
+                                   grayscale wenn !trainedToday
+
+Berechnung:
+  lib/actions/training.ts        – getDailyStreak(): gibt { streak, trainedToday } zurück
+                                 – getOrCreateHand(), getOrCreatePotOddsHand(),
+                                   getOrCreateCombinedHand(): createdAt-Filter auf heute
+                                 – submitGuess() / submitPotOddsGuess() /
+                                   submitCombinedPotOddsGuess(): revalidatePath wenn
+                                   points >= 3
+
+  lib/actions/achievements.ts    – getCurrentStreak(): Streak-Länge für Achievement-Checks
+                                 – checkAndGrantAchievements(): vergibt Streak-Achievements
+
+Konfiguration:
+  lib/achievementConfig.ts       – STREAK_THRESHOLDS: Achievement-Keys und Schwellenwerte
+                                   (1, 3, 7, 30, 90, 365, 730, 1825 Tage)
+
+Datenbankmodell:
+  prisma/schema.prisma           – TrainingHand.pointsScored: Basis für Streak-Zählung
+                                 – Achievement.key: speichert vergebene Streak-Achievements

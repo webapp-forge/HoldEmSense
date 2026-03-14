@@ -157,9 +157,12 @@ export async function getOrCreateHand(difficulty: number, handModule: string): P
 
   if (!userId && !guestId) throw new Error("No identity");
 
+  const startOfToday = new Date();
+  startOfToday.setUTCHours(0, 0, 0, 0);
+
   const where = userId
-    ? { userId, difficulty, module: handModule, pointsScored: null }
-    : { guestId, difficulty, module: handModule, pointsScored: null };
+    ? { userId, difficulty, module: handModule, pointsScored: null, createdAt: { gte: startOfToday } }
+    : { guestId, difficulty, module: handModule, pointsScored: null, createdAt: { gte: startOfToday } };
 
   const existing = await prisma.trainingHand.findFirst({
     where,
@@ -646,9 +649,12 @@ export async function getOrCreatePotOddsHand(difficulty: number): Promise<{ hand
   const guestId = userId ? null : ((await cookies()).get("guestId")?.value ?? null);
   if (!userId && !guestId) throw new Error("No identity");
 
+  const startOfToday = new Date();
+  startOfToday.setUTCHours(0, 0, 0, 0);
+
   const where = userId
-    ? { userId, difficulty, module: "pot-odds", pointsScored: null }
-    : { guestId, difficulty, module: "pot-odds", pointsScored: null };
+    ? { userId, difficulty, module: "pot-odds", pointsScored: null, createdAt: { gte: startOfToday } }
+    : { guestId, difficulty, module: "pot-odds", pointsScored: null, createdAt: { gte: startOfToday } };
 
   const existing = await prisma.trainingHand.findFirst({
     where,
@@ -745,9 +751,12 @@ export async function getOrCreateCombinedHand(difficulty: number): Promise<HandR
   const guestId = userId ? null : ((await cookies()).get("guestId")?.value ?? null);
   if (!userId && !guestId) throw new Error("No identity");
 
+  const startOfToday = new Date();
+  startOfToday.setUTCHours(0, 0, 0, 0);
+
   const where = userId
-    ? { userId, difficulty, module: "combined-pot-odds", pointsScored: null }
-    : { guestId, difficulty, module: "combined-pot-odds", pointsScored: null };
+    ? { userId, difficulty, module: "combined-pot-odds", pointsScored: null, createdAt: { gte: startOfToday } }
+    : { guestId, difficulty, module: "combined-pot-odds", pointsScored: null, createdAt: { gte: startOfToday } };
 
   const existing = await prisma.trainingHand.findFirst({ where, orderBy: { createdAt: "desc" } });
 

@@ -1,2 +1,40 @@
-TODO
-- Kombinierte Equity + Pot Odds schon korrekt implementiert?
+Spaced-Repetition-System für falsch gelöste Hände (pointsScored < 3).
+Nur für Premium-User. Route: /train/leak-fixing/equity
+
+Funktionsweise:
+- Jede falsch gelöste Hand wird automatisch als "Leak" eingetragen (repetitionStage = 1)
+- User wiederholt die Hand nach einem Zeitintervall
+- Nur perfekte Lösung (3 Punkte) lässt die Stage steigen
+- Fehler setzt Stage zurück (Stage - 1, mindestens 1)
+- Stage 3 korrekt gelöst → Leak dauerhaft beseitigt (repetitionStage = 4 / "cleared")
+
+Stages und Intervalle (basierend auf leakBaseMinutes, Default 60 min):
+  Stage 1 → nächste Wiederholung in:  1× leakBaseMinutes  (≈ 1 Stunde)
+  Stage 2 → nächste Wiederholung in: 24× leakBaseMinutes  (≈ 1 Tag)
+  Stage 3 → nächste Wiederholung in: 7× 24× leakBaseMinutes (≈ 1 Woche)
+
+Combined-Modul (Equity + Pot Odds):
+- Leak-Wiederholung zeigt ebenfalls den 2-stufigen Flow
+- Equity-Schätzung server-seitig, Call/Fold-Entscheidung client-seitig (kein Extra-Scoring)
+
+TODO:
+- Kombinierte Equity + Pot Odds korrekt im Leak implementiert? (prüfen)
+
+---
+
+RELEVANTE DATEIEN:
+
+  app/train/leak-fixing/equity/page.tsx  – Server Component, Paywall für Nicht-Premium,
+                                           lädt nächste fällige Hand
+  components/train/LeakTraining.tsx      – Client Component für Leak-Wiederholung
+                                           (Equity- und Combined-Pfad)
+  lib/actions/training.ts                – getNextRepetitionHand(),
+                                           submitRepetitionGuess(),
+                                           submitRepetitionCombinedEquity(),
+                                           submitRepetitionCombinedDecision(),
+                                           getOpenLeakCount()
+  lib/config.ts                          – leakBaseMinutes (konfigurierbares Intervall)
+  prisma/schema.prisma                   – TrainingHand: repetitionStage Int?,
+                                           repetitionAvailableAt DateTime?
+  lib/actions/achievements.ts            – Leak-Achievements: leak_first_trained,
+                                           leak_first_fixed, leak_10/100/500/1000/5000_fixed

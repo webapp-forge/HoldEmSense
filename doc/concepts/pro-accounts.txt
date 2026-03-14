@@ -1,4 +1,38 @@
-Referral Programm:
+Drei Rollen: guest / registered / premium
+
+Feature-Zugang nach Rolle:
+
+  Feature                          Guest   Registered   Premium
+  ─────────────────────────────────────────────────────────────
+  Preflop & Flop Training            ✓          ✓          ✓
+  Turn & River Training              –          ✓          ✓
+  Pot Odds Training                  –          ✓          ✓
+  Difficulty 1 (Beginner)            ✓          ✓          ✓
+  Difficulty 2 (Intermediate)        –          ✓          ✓
+  Difficulty 3 (Advanced)            –          –          ✓
+  Difficulty 4 (Expert)              –          –          ✓
+  Leak Training                      –          –          ✓
+  Fortschritt gespeichert            –          ✓          ✓
+
+Rolle wird pro Request bestimmt:
+  !session            → "guest"
+  session.isPremium   → "premium"
+  sonst               → "registered"
+
+Referral Programm (geplant):
 - Für je zwei Monate die ein Freund ein Pro-Abo zahlt bekommt der Empfehlende 1 Monat gratis
-- Cap auf 6 Gratis-Monate pro Freund. 
-- Gratis-Monate werden im Account angesammelt und können zu einem beliebigen Zeitpunkt eingelöst werden.
+- Cap auf 6 Gratis-Monate pro Freund
+- Gratis-Monate werden im Account angesammelt und können zu einem beliebigen Zeitpunkt eingelöst werden
+
+---
+
+RELEVANTE DATEIEN:
+
+  lib/auth.ts                           – isPremium, isAdmin in JWT/Session gespeichert
+  lib/actions/auth.ts                   – Register/Login Actions
+  prisma/schema.prisma                  – User-Modell: isPremium Boolean, isAdmin Boolean
+  components/train/DifficultySelector.tsx – zeigt "REG"/"PRO"-Badges je nach Rolle
+  lib/actions/training.ts               – checkAndUnlock() blockiert D2+ ohne isPremium;
+                                          getOrCreateHand() gibt Rolle an Hand weiter
+  app/train/leak-fixing/equity/page.tsx – zeigt Paywall für Nicht-Premium
+  app/train/equity/*/page.tsx           – bestimmen role und reichen sie an Komponenten

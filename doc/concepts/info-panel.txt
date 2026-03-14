@@ -1,11 +1,25 @@
-TODO
+Aufklappbares Panel rechts neben dem Trainingsbereich mit:
+1. Range Matrix – visuelle Darstellung der Hero-Hand vs. Villain-Range
+2. Erklärungstext – modulspezifische Lerntipps und Anwendungshinweise
 
-Sektion: Wie kann ich das Wissen anwenden?
+Sektion "Wie kann ich das Wissen anwenden?":
+  Equity Training:
+    - Gegner auf eine Range setzen (Opening Range, Showdown-Beobachtungen)
+    - Mit trainiertem Equity-Gefühl einschätzen, ob man zu oft oder zu selten foldet
 
-Equity Training:
-    - versuche deinen Gegner auf eine Range zu setzen. 
-    Am einfachsten ist die opening Range, beobachte wie oft der Gegner openraised,
-    und im Idealfall siehst du beim Show-Down ab und zu womit. 
-    Für deine Equity hast du ein Gefühl entwickelt wenn du hier fleißig trainierst.
-    Wenn du deutlich öfter oder seltener foldest als es die Equity vorgibt solltest
-    du deinen Stil überarbeiten.
+Responsive-Verhalten (siehe auch layout.txt):
+  < 1400px:  Panel als Drawer-Overlay (Button im Trainingsbereich)
+  ≥ 1400px:  Matrix inline sichtbar
+  ≥ 1700px:  Matrix + Erklärungstext beide inline, Erklärung ein-/ausklappbar
+
+---
+
+RELEVANTE DATEIEN:
+
+  components/train/TrainPageLayout.tsx   – Layout-Manager mit Breakpoints und
+                                           Drawer-Logik für Matrix + Info
+  components/train/RangeMatrix.tsx       – Range-Matrix-Komponente
+                                           (heroCards vs. villainRange)
+  components/train/ModuleExplanation.tsx – Modulspezifische Erklärungstexte
+                                           mit Glossar-Links
+  messages/en.json + de.json             – Texte unter "leakInfo", "train", etc.

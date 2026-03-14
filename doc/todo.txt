@@ -1,3 +1,4 @@
+- Mobile: bei next hand nach oben scrollen
 - Streak in Mobile sieht komisch aus + woanders platzieren?
 - Pot Odds Training: dieser Hinweis ist noch irreführend: 
     2x Pot — dein Call = 2/5 des Endpots (40,0%) 
@@ -23,10 +24,9 @@
 - Cheat Tools
 - PW Reset
 - Glossar (auch für SEO!)
-- User Settings
-    - 4 color deck
 - Cookie Banner
 - Outs Training?
+- Idee: eigene Trainingsziele setzen
 
 LATER
 - Sounds

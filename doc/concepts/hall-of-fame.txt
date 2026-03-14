@@ -2,12 +2,26 @@ Monatliche Hall of Fame:
 - Summe aller Hand Scores des Monats
 - Gewichtung nach Schwierigkeit: 1 / 1.5 / 2 / 2.5
 
-All Time Hall of Fame
+All Time Hall of Fame:
 - gleiches Prinzip, über alle Hände
 
-Display
-- Medaille
+Display (pro Eintrag):
+- Medaille (Top 3)
 - Username
-- Chipstack
+- Chipstack (verdiente Achievements als Chips)
 - Anzahl Hände
-- Score
+- Gewichteter Score
+
+Top 20 pro Kategorie. Toggle zwischen Monat und All Time im Client.
+
+---
+
+RELEVANTE DATEIEN:
+
+  lib/actions/hallOfFame.ts       – computeLeaderboard(), getHallOfFameMonth(),
+                                    getHallOfFameAllTime()
+  app/hall-of-fame/page.tsx       – Server Component, lädt beide Leaderboards
+  components/HallOfFameBoard.tsx  – Client Component, Toggle Monat/All Time,
+                                    Chip-Darstellung
+  prisma/schema.prisma            – TrainingHand (userId, pointsScored, difficulty,
+                                    createdAt), Achievement

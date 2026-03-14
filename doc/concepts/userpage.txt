@@ -1,13 +1,27 @@
+Account-Seite für eingeloggte User. Redirect auf /login wenn nicht eingeloggt.
 
-Einstellungen
-- 4 color deck
-- Sprache
+Aktuell implementiert:
+- Profil-Header: Username, E-Mail
+- Chipstack: alle verdienten Achievements als Poker-Chips
+- Einstellungen:
+  - Sprache (en / de / es / pt)
+  - 4-Color Deck (♠ schwarz, ♥ rot, ♦ blau, ♣ grün)
 
-TODO
-Account
-- Email / PW
+TODO:
+- E-Mail / Passwort ändern
 - Account löschen
-- Pro Upgrade
+- Pro-Upgrade / Abo-Verwaltung
+- Sound-Einstellungen
 
-Einstellungen
-- Sound
+---
+
+RELEVANTE DATEIEN:
+
+  app/account/page.tsx                   – Server Component, Auth-Check, lädt
+                                           Achievements + Deck-Einstellung
+  lib/actions/achievements.ts            – getUserAchievements(userId)
+  lib/actions/deckStyle.ts               – getFourColorDeck(), setFourColorDeck()
+  lib/actions/locale.ts                  – setLocale()
+  components/PokerChip.tsx               – Chip-Darstellung (Farbe, Wert, Hover-Popup)
+  components/FourColorDeckToggle.tsx     – Toggle-Komponente für Deck-Einstellung
+  components/LanguageSwitcher.tsx        – Sprachauswahl
