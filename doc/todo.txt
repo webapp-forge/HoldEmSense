@@ -1,3 +1,8 @@
+- Equities werden evtl. falsch berechnet
+    - weichen stark ab von App
+    - Matrix sieht ganz anders aus. 
+    - Sind die Verteilungen berücksichtigt?
+
 - Mobile: bei next hand nach oben scrollen
 - Streak in Mobile sieht komisch aus + woanders platzieren?
 - Pot Odds Training: dieser Hinweis ist noch irreführend: 

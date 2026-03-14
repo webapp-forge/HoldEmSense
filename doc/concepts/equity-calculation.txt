@@ -1,0 +1,80 @@
+# Equity Calculation
+
+## Overview
+
+Equity is calculated via Monte Carlo simulation: for a fixed hero hand and villain range,
+thousands of random runouts are sampled and the win rate is measured.
+
+The result is a number between 0 and 1 (e.g. 0.327 = 32.7% equity).
+Ties (split pots) count as 0.5 wins.
+
+
+## Algorithm (calculateEquity)
+
+Input:
+  - heroCards       — the hero's two hole cards
+  - villainRangePercent — e.g. 40 for "Top 40%"
+  - boardCards      — 0–4 community cards already dealt (empty for preflop)
+  - simulations     — number of Monte Carlo iterations (default 1 000, scripts use 100 000)
+
+Steps per call:
+  1. Resolve the range: convert villainRangePercent to a list of hand types
+     (e.g. ["AA","KK","AKs","AKo",...]) via getRangeForPercent().
+  2. Build valid villain combos: enumerate every suit-specific combo for each hand
+     type in the range, then remove any combo that conflicts with heroCards or boardCards.
+     Example: AKo produces 12 combos (4 suits for A × 3 remaining suits for K).
+     This list is computed once and reused across all simulations.
+  3. Per simulation:
+     a. Pick a villain hand: draw uniformly at random from the valid combo list.
+     b. Build remaining deck: all 52 cards minus hero, board, and villain cards.
+     c. Shuffle remaining deck and deal the missing community cards (5 − |boardCards|).
+     d. Evaluate both hands using bestHandScore() (best 5-card hand from 7 cards).
+     e. Award +1 for a hero win, +0.5 for a tie, +0 for a loss.
+  4. Return total wins / simulations.
+
+
+## Hand Evaluator
+
+bestHandScore() takes any number of cards (≥ 5), iterates all C(n,5) combinations,
+and returns the highest 5-card score. Scores are integers encoded as:
+
+  score = category × 15^5 + rank_1 × 15^4 + rank_2 × 15^3 + ...
+
+Categories (0–8): high card, one pair, two pair, three of a kind,
+straight, flush, full house, four of a kind, straight flush.
+
+Higher integer = stronger hand, so scores can be compared directly with >.
+
+
+## Range Definition
+
+All 169 starting hand types are ranked in HAND_RANKINGS (lib/range.ts),
+ordered by strength from strongest (AA) to weakest (72o).
+The ranking follows Sklansky's 10-player table win-rate order.
+
+getRangeForPercent(p) walks the list and accumulates combos until the target
+count (round(p/100 × 1326)) is reached. Combo counts: pairs = 6, suited = 4, offsuit = 12.
+
+Top 40% ≈ 530 combos, ending around 84s.
+
+
+## Pre-generated Hand Database
+
+Training hands are not computed live during a session. Instead, scripts
+pre-generate hands with 100 000 simulations each and store them in the database.
+The training UI serves hands from this pool.
+
+Scripts must be re-run whenever equity.ts or range.ts changes.
+
+
+## Relevant Files
+
+  lib/equity.ts        — calculateEquity(), buildValidVillainCombos()
+  lib/evaluator.ts     — bestHandScore(), evaluate5(), encodeScore()
+  lib/range.ts         — HAND_RANKINGS, getRangeForPercent(), isHandInRange()
+  lib/deck.ts          — Card type, RANKS, SUITS, createDeck(), drawCards()
+
+  scripts/generate-preflop-hands.ts  — generates preflop hands (no board)
+  scripts/generate-flop-hands.ts     — generates flop hands (3 board cards)
+  scripts/generate-turn-hands.ts     — generates turn hands (4 board cards)
+  scripts/generate-river-hands.ts    — generates river hands (5 board cards)
