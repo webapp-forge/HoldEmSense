@@ -1,3 +1,26 @@
+Hand Rankings aus Equilab:
+5,28%: 88+, AJs+, KQs, AKo (70)
+10%: 77+, A9s+, KTs+, QTs+, AJo+, KQo
+15%: 77+, A7s+, K9s+, QTs+, JTs, ATo+, KTo+, QJo
+20%: 66+, A4s+, K8s+, Q9s+, J9s+, T9s, A9o+, KTo+, QTo+, JTo
+25%: 66+, A2s+, K6s+, Q8s+, J8s+, T8s+, A7o+, K9o+, QTo+, JTo
+30%: 55+, A2s+, K5s+, Q7s+, J8s+, T8s+, 98s, A7o+, A5o, K9o+, Q9o+, J9o+, T9o
+35%: 55+, A2s+, K3s+, Q5s+, J7s+, T7s+, 97s+, 87s, A4o+, K8o+, Q9o+, J9o+, T9o
+40%: 44+, A2s+, K2s+, Q4s+, J7s+, T7s+, 97s+, 87s, A3o+, K7o+, Q8o+, J8o+, T8o+
+45%: 44+, A2s+, K2s+, Q4s+, J6s+, T6s+, 96s+, 86s+, 76s, A2o+, K6o+, Q8o+, J8o+, T8o+, 98o
+50%: 33+, A2s+, K2s+, Q2s+, J4s+, T6s+, 96s+, 86s+, 76s, 65s, A2o+, K5o+, Q7o+, J7o+, T7o+, 98o
+55%: 33+, A2s+, K2s+, Q2s+, J3s+, T5s+, 95s+, 85s+, 75s+, 65s, A2o+, K4o+, Q6o+, J7o+, T7o+, 97o+, 87o
+60%: 22+, A2s+, K2s+, Q2s+, J2s+, T3s+, 95s+, 85s+, 75s+, 64s+, 54s, A2o+, K2o+, Q5o+, J7o+, T7o+, 97o+, 87o
+65%: 22+, A2s+, K2s+, Q2s+, J2s+, T2s+, 94s+, 84s+, 74s+, 64s+, 54s, A2o+, K2o+, Q4o+, J6o+, T7o+, 97o+, 86o+, 76o
+70%: 22+, A2s+, K2s+, Q2s+, J2s+, T2s+, 93s+, 84s+, 74s+, 63s+, 53s+, 43s, A2o+, K2o+, Q3o+, J5o+, T6o+, 96o+, 86o+, 76o
+75%: 22+, A2s+, K2s+, Q2s+, J2s+, T2s+, 92s+, 83s+, 73s+, 63s+, 52s+, 43s, A2o+, K2o+, Q2o+, J4o+, T6o+, 96o+, 85o+, 75o+, 65o
+80%: 22+, A2s+, K2s+, Q2s+, J2s+, T2s+, 92s+, 82s+, 73s+, 62s+, 52s+, 43s, A2o+, K2o+, Q2o+, J3o+, T5o+, 95o+, 85o+, 75o+, 65o, 54o
+85%: 22+, A2s+, K2s+, Q2s+, J2s+, T2s+, 92s+, 82s+, 72s+, 62s+, 52s+, 42s+, 32s, A2o+, K2o+, Q2o+, J2o+, T3o+, 95o+, 85o+, 74o+, 64o+, 54o
+90%: 22+, A2s+, K2s+, Q2s+, J2s+, T2s+, 92s+, 82s+, 72s+, 62s+, 52s+, 42s+, 32s, A2o+, K2o+, Q2o+, J2o+, T2o+, 93o+, 84o+, 74o+, 64o+, 53o+
+95%: 22+, A2s+, K2s+, Q2s+, J2s+, T2s+, 92s+, 82s+, 72s+, 62s+, 52s+, 42s+, 32s, A2o+, K2o+, Q2o+, J2o+, T2o+, 92o+, 83o+, 73o+, 63o+, 52o+, 43o
+
+
+
 # Equity Calculation
 
 ## Overview
@@ -12,14 +35,15 @@ Ties (split pots) count as 0.5 wins.
 ## Algorithm (calculateEquity)
 
 Input:
-  - heroCards       — the hero's two hole cards
-  - villainRangePercent — e.g. 40 for "Top 40%"
-  - boardCards      — 0–4 community cards already dealt (empty for preflop)
-  - simulations     — number of Monte Carlo iterations (default 1 000, scripts use 100 000)
+  - heroCards           — the hero's two hole cards
+  - villainRangePercent — e.g. 40 for "Top 40%"; use 100 for a fully random villain
+  - boardCards          — 0–4 community cards already dealt (empty for preflop)
+  - simulations         — number of Monte Carlo iterations (default 1 000, scripts use 100 000–200 000)
 
 Steps per call:
   1. Resolve the range: convert villainRangePercent to a list of hand types
      (e.g. ["AA","KK","AKs","AKo",...]) via getRangeForPercent().
+     At 100% this returns all 169 hand types = fully random villain.
   2. Build valid villain combos: enumerate every suit-specific combo for each hand
      type in the range, then remove any combo that conflicts with heroCards or boardCards.
      Example: AKo produces 12 combos (4 suits for A × 3 remaining suits for K).
@@ -32,11 +56,23 @@ Steps per call:
      e. Award +1 for a hero win, +0.5 for a tie, +0 for a loss.
   4. Return total wins / simulations.
 
+The uniform draw over valid combos naturally weights each hand type by its combo count
+(pairs 6, suited 4, offsuit 12), so no extra frequency correction is needed.
 
-## Hand Evaluator
 
-bestHandScore() takes any number of cards (≥ 5), iterates all C(n,5) combinations,
-and returns the highest 5-card score. Scores are integers encoded as:
+## Hand Evaluator (bestHandScore)
+
+bestHandScore() takes any number of cards (≥ 5), finds the best 5-card hand, and returns
+an integer score. Higher = stronger.
+
+For exactly 7 cards it uses a tight double-loop (omit each pair of indices) to enumerate
+all C(7,5) = 21 combinations without allocating extra arrays.
+
+For exactly 5 cards it calls evaluate5() directly (no enumeration needed).
+
+For other lengths it uses a recursive backtracking picker (rarely needed).
+
+evaluate5() encodes the result as:
 
   score = category × 15^5 + rank_1 × 15^4 + rank_2 × 15^3 + ...
 
@@ -49,13 +85,76 @@ Higher integer = stronger hand, so scores can be compared directly with >.
 ## Range Definition
 
 All 169 starting hand types are ranked in HAND_RANKINGS (lib/range.ts),
-ordered by strength from strongest (AA) to weakest (72o).
-The ranking follows Sklansky's 10-player table win-rate order.
+ordered by strength from strongest (AA) to weakest (32o).
 
 getRangeForPercent(p) walks the list and accumulates combos until the target
 count (round(p/100 × 1326)) is reached. Combo counts: pairs = 6, suited = 4, offsuit = 12.
+Total combos: 1326.
 
-Top 40% ≈ 530 combos, ending around 84s.
+### Was wir selbst berechnen
+
+1. Hand-Evaluator (lib/evaluator.ts): eigener Code, berechnet den Score einer
+   5-Karten-Hand (Pair, Flush, Straight, etc.) via Integer-Encoding.
+
+2. Monte-Carlo-Simulation (lib/equity.ts): eigener Code, mischt Deck, zieht
+   zufällige Villain-Hand aus einer Range, vergleicht 7-Karten-Hände mit pokersolver.
+   Liefert z.B. "AKs hat 67% Equity gegen top-40%".
+
+3. getRangeForPercent() (lib/range.ts): eigener Code, liest HAND_RANKINGS von
+   oben und schiebt Hände in die Range bis die Combo-Zahl das Ziel erreicht.
+
+### Was wir von Equilab übernommen haben
+
+Nur die Reihenfolge in HAND_RANKINGS — also welche Hände zu "top 5%", "top 10%"
+usw. gehören. Equilab hat diese Grenzen in 5%-Schritten (5%–95%) veröffentlicht;
+wir haben HAND_RANKINGS daraus konstruiert:
+
+  - Bandzugehörigkeit: kommt 1:1 von Equilab (z.B. T7s ∈ top-40%, K4o nicht)
+  - Feinreihenfolge innerhalb eines Bandes: kommt von unserer eigenen HU-Equity-Simulation
+
+Equilab ist keine Dependency — wir haben ihre Referenz-Ranges einmalig als
+Kalibrierungs-Daten genutzt (see: scripts/rebuild-hand-rankings.ts).
+
+Genauigkeit vs. Equilab (Anzahl Hände pro %-Stufe): max. Δ = −2 bei 55%,
+sonst 0 oder −1. Kleinstmögliche Abweichung, da offsuit-Hände immer 12 Combos
+auf einmal addieren.
+
+### Zirkularität und Poker-Meta
+
+Hand-Rankings sind theoretisch zirkulär:
+  - "Gute Hände" = hohe Equity gegen die gegnerische Range
+  - Die gegnerische Range = die Hände die "gut genug" sind
+  → Fixed-Point-Problem
+
+GTO-Solver lösen das exakt: sie iterieren bis zur Nash-Gleichgewichts-Range,
+wo jede Hand genau so oft gespielt wird dass kein Spieler durch Abweichen gewinnt.
+Equilab's Ranges approximieren diesen Fixpunkt — deswegen übernehmen wir sie als
+Referenz statt selbst zu iterieren.
+
+Wenn die Meta sich ändert (z.B. alle spielen looser):
+  - Die Rankings würden sich leicht verschieben
+  - Suited connectors (T9s, 87s) gewinnen relativ zu High-Card-Händen (K4o, Q7o)
+    weil Nut-Potential gegen weite Ranges wertvoller wird
+  - Der Effekt ist klein für die obere Hälfte (AA bleibt AA)
+  - Die Unschärfe liegt im Mittelfeld (~30–60%), wo HU-Equity von Equilab abweicht
+
+
+## Hand Equity Matrix
+
+The HandEquityMatrix DB table stores pre-computed equity for each of the 169 hand types
+against a completely random villain (villainRangePercent = 100).
+
+This is used to power the range matrix UI where every cell shows the hand's equity
+vs. a random opponent — useful for calibrating the HAND_RANKINGS order.
+
+Each row:
+  - handType   — e.g. "AA", "AKs", "72o"
+  - equity     — equity vs. random villain (0–1)
+  - iterations — 200 000 simulations per hand type
+  - updatedAt  — last generated timestamp
+
+One representative combo is used per hand type (e.g. A♥A♠ for AA, A♥K♥ for AKs,
+A♥K♠ for AKo). Blocker effects are negligible at 200k iterations.
 
 
 ## Pre-generated Hand Database
@@ -64,7 +163,7 @@ Training hands are not computed live during a session. Instead, scripts
 pre-generate hands with 100 000 simulations each and store them in the database.
 The training UI serves hands from this pool.
 
-Scripts must be re-run whenever equity.ts or range.ts changes.
+Scripts must be re-run whenever equity.ts, evaluator.ts, or range.ts changes.
 
 
 ## Relevant Files
@@ -74,7 +173,9 @@ Scripts must be re-run whenever equity.ts or range.ts changes.
   lib/range.ts         — HAND_RANKINGS, getRangeForPercent(), isHandInRange()
   lib/deck.ts          — Card type, RANKS, SUITS, createDeck(), drawCards()
 
-  scripts/generate-preflop-hands.ts  — generates preflop hands (no board)
-  scripts/generate-flop-hands.ts     — generates flop hands (3 board cards)
-  scripts/generate-turn-hands.ts     — generates turn hands (4 board cards)
-  scripts/generate-river-hands.ts    — generates river hands (5 board cards)
+  scripts/generate-preflop-hands.ts  — generates preflop hands (no board), 100k sims
+  scripts/generate-flop-hands.ts     — generates flop hands (3 board cards), 100k sims
+  scripts/generate-turn-hands.ts     — generates turn hands (4 board cards), 100k sims
+  scripts/generate-river-hands.ts    — generates river hands (5 board cards), 100k sims
+  scripts/generate-hand-matrix.ts    — generates HandEquityMatrix (all 169 types vs random), 200k sims
+  scripts/calibrate-hand-rankings.ts — helper to measure per-hand equity and verify HAND_RANKINGS order

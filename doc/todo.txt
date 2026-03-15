@@ -1,3 +1,18 @@
+Idee: Hand Rankings in mehreren Iterationsschritten?
+1) hand vs random hand (=100%) (200k iterations?)
+    -> sort
+2) hand vs best 95% of previously sorted (200k iterations?)
+    -> resort
+3) hand vs best of 90% of previously sorted (200k iterations?)
+    -> resort
+... and so on
+
+
+Ok, Bevor ich jetzt neue Hände generiere lass uns bitte noch prüfen warum unsere Matrizen so stark von denen aus anderen Equity Tools abweichen. Da ist auch noch irgendwo der Wurm drin. Habe auch noch ein zweites Tool konsultiert, da kommt fast das gleiche heraus wie in dem ersten. Aber unsere Matrix weicht sehr stark ab., siehe Bild weiter oben.
+Vielleicht ist es der falsche Ansatz die Hände nur nach Stärke zu sortieren? Weil da ja manchmal welche dabei sind die quasi gleich stark sind, und zwischen anderen gibt es große Lücken? Vielleicht können wir uns die Matrizen stattdessen auch simulieren und ein paar vorgefertigte in die DB schreiben?
+Wir könnten immer wieder Zufallshand gegen Zufallshand spielen lassen und dann nach Erfolg sortieren?
+Die korrekte Häufigkeit (offsuit, suited, pair) muss ja berücksichtigt werden dabei.
+
 - Equities werden evtl. falsch berechnet
     - weichen stark ab von App
     - Matrix sieht ganz anders aus. 

@@ -1,10 +1,10 @@
 "use server";
 
 import { prisma } from "../prisma";
-import { drawCards } from "../deck";
+
 import { calculateEquity } from "../equity";
 import { auth } from "../auth";
-import { drawHeroCards, getProfileForModule, pickHandType } from "../heroProfiles";
+import { getProfileForModule, pickHandType } from "../heroProfiles";
 import { cookies } from "next/headers";
 import { getAppConfig } from "../config";
 import { checkAndGrantAchievements } from "./achievements";
@@ -90,7 +90,7 @@ type HandResult = {
 
 // Modules that have a pre-generated hand pool, mapped to their pool module name
 const PRE_GENERATED_MODULES: Record<string, string> = {
-  preflop: "hand-vs-range",
+  preflop: "preflop-equity",
   flop: "flop-equity",
   turn: "turn-equity",
   river: "river-equity",
@@ -160,9 +160,8 @@ export async function getOrCreateHand(difficulty: number, handModule: string): P
   const startOfToday = new Date();
   startOfToday.setUTCHours(0, 0, 0, 0);
 
-  const where = userId
-    ? { userId, difficulty, module: handModule, pointsScored: null, createdAt: { gte: startOfToday } }
-    : { guestId, difficulty, module: handModule, pointsScored: null, createdAt: { gte: startOfToday } };
+  const baseWhere = { difficulty, module: handModule, pointsScored: null, createdAt: { gte: startOfToday }, actualEquity: { not: null } };
+  const where = userId ? { userId, ...baseWhere } : { guestId, ...baseWhere };
 
   const existing = await prisma.trainingHand.findFirst({
     where,
@@ -199,17 +198,14 @@ export async function getOrCreateHand(difficulty: number, handModule: string): P
   const poolModule = PRE_GENERATED_MODULES[handModule];
   const preGen = poolModule ? await drawFromPreGeneratedPool(poolModule, handModule) : null;
 
-  const heroCards = preGen?.heroCards ?? drawHeroCards(getProfileForModule(handModule));
-  const villainRangeValue = preGen?.villainRange ?? [10, 15, 20, 25, 30, 40, 50][Math.floor(Math.random() * 7)];
+  if (poolModule && !preGen) throw new Error(`No pre-generated hands available for module "${handModule}". Run the generate script first.`);
 
-  const hasFlopModules = ["flop", "turn", "river"];
-  const flopCards = preGen?.flopCards ?? (hasFlopModules.includes(handModule) ? drawCards(3, heroCards) : undefined);
-  const turnCard = preGen?.turnCard ?? (["turn", "river"].includes(handModule)
-    ? drawCards(1, [...heroCards, ...(flopCards ?? [])])[0]
-    : undefined);
-  const riverCard = preGen?.riverCard ?? (handModule === "river"
-    ? drawCards(1, [...heroCards, ...(flopCards ?? []), ...(turnCard ? [turnCard] : [])])[0]
-    : undefined);
+  const heroCards = preGen!.heroCards;
+  const villainRangeValue = preGen!.villainRange;
+
+  const flopCards = preGen!.flopCards;
+  const turnCard = preGen!.turnCard;
+  const riverCard = preGen!.riverCard;
 
   const hand = await prisma.trainingHand.create({
     data: {
@@ -258,28 +254,10 @@ export async function submitGuess(handId: string, guess: number) {
     : guestId && hand.guestId === guestId;
   if (!isOwner) throw new Error("Unauthorized");
 
-  const heroCards = [
-    { rank: hand.heroCard1Rank!, suit: hand.heroCard1Suit! },
-    { rank: hand.heroCard2Rank!, suit: hand.heroCard2Suit! },
-  ];
+  if (hand.actualEquity === null || hand.actualEquity === undefined)
+    throw new Error(`Hand ${handId} has no pre-computed equity. Re-generate the hand pool.`);
 
-  const communityCards = hand.flopCard1Rank
-    ? [
-        { rank: hand.flopCard1Rank, suit: hand.flopCard1Suit! },
-        { rank: hand.flopCard2Rank!, suit: hand.flopCard2Suit! },
-        { rank: hand.flopCard3Rank!, suit: hand.flopCard3Suit! },
-        ...(hand.turnCardRank ? [{ rank: hand.turnCardRank, suit: hand.turnCardSuit! }] : []),
-        ...(hand.riverCardRank ? [{ rank: hand.riverCardRank, suit: hand.riverCardSuit! }] : []),
-      ]
-    : [];
-
-  const equity = hand.actualEquity !== null && hand.actualEquity !== undefined
-    ? hand.actualEquity
-    : (() => {
-        const simsByDifficulty: Record<number, number> = { 1: 1000, 2: 2000, 3: 5000, 4: 20000 };
-        const simulations = simsByDifficulty[hand.difficulty] ?? 1000;
-        return calculateEquity(heroCards, hand.villainRange!, communityCards, simulations);
-      })();
+  const equity = hand.actualEquity;
   const points = scoreGuess(guess, equity, hand.difficulty);
 
   const { progressWindowSize, unlockThreshold, maxProgressPoints, leakBaseMinutes } = await getAppConfig();
@@ -755,8 +733,8 @@ export async function getOrCreateCombinedHand(difficulty: number): Promise<HandR
   startOfToday.setUTCHours(0, 0, 0, 0);
 
   const where = userId
-    ? { userId, difficulty, module: "combined-pot-odds", pointsScored: null, createdAt: { gte: startOfToday } }
-    : { guestId, difficulty, module: "combined-pot-odds", pointsScored: null, createdAt: { gte: startOfToday } };
+    ? { userId, difficulty, module: "combined-pot-odds", pointsScored: null, createdAt: { gte: startOfToday }, actualEquity: { not: null } }
+    : { guestId, difficulty, module: "combined-pot-odds", pointsScored: null, createdAt: { gte: startOfToday }, actualEquity: { not: null } };
 
   const existing = await prisma.trainingHand.findFirst({ where, orderBy: { createdAt: "desc" } });
 
@@ -793,11 +771,13 @@ export async function getOrCreateCombinedHand(difficulty: number): Promise<HandR
   const streetHandModule = COMBINED_STREET_MODULES[streetIdx];
 
   const preGen = await drawFromPreGeneratedPool(poolModule, streetHandModule);
-  const heroCards = preGen?.heroCards ?? drawHeroCards(getProfileForModule(streetHandModule));
-  const villainRangeValue = preGen?.villainRange ?? [10, 15, 20, 25, 30, 40, 50][Math.floor(Math.random() * 7)];
-  const flopCards = preGen?.flopCards ?? drawCards(3, heroCards);
-  const turnCard = preGen?.turnCard ?? (streetIdx >= 1 ? drawCards(1, [...heroCards, ...flopCards])[0] : undefined);
-  const riverCard = preGen?.riverCard ?? (streetIdx >= 2 ? drawCards(1, [...heroCards, ...flopCards, ...(turnCard ? [turnCard] : [])])[0] : undefined);
+  if (!preGen) throw new Error(`No pre-generated hands available for pool "${poolModule}". Run the generate script first.`);
+
+  const heroCards = preGen.heroCards;
+  const villainRangeValue = preGen.villainRange;
+  const flopCards = preGen.flopCards!;
+  const turnCard = preGen.turnCard;
+  const riverCard = preGen.riverCard;
   const { potSize, betSize } = generatePotOddsScenario(difficulty);
 
   const hand = await prisma.trainingHand.create({
@@ -846,24 +826,10 @@ export async function submitCombinedGuess(handId: string, guessIndex: number): P
   const isOwner = userId ? hand.userId === userId : guestId && hand.guestId === guestId;
   if (!isOwner) throw new Error("Unauthorized");
 
-  const heroCards = [
-    { rank: hand.heroCard1Rank!, suit: hand.heroCard1Suit! },
-    { rank: hand.heroCard2Rank!, suit: hand.heroCard2Suit! },
-  ];
-  const communityCards = [
-    { rank: hand.flopCard1Rank!, suit: hand.flopCard1Suit! },
-    { rank: hand.flopCard2Rank!, suit: hand.flopCard2Suit! },
-    { rank: hand.flopCard3Rank!, suit: hand.flopCard3Suit! },
-    ...(hand.turnCardRank ? [{ rank: hand.turnCardRank, suit: hand.turnCardSuit! }] : []),
-    ...(hand.riverCardRank ? [{ rank: hand.riverCardRank, suit: hand.riverCardSuit! }] : []),
-  ];
+  if (hand.actualEquity === null || hand.actualEquity === undefined)
+    throw new Error(`Hand ${handId} has no pre-computed equity. Re-generate the hand pool.`);
 
-  const equity = hand.actualEquity !== null && hand.actualEquity !== undefined
-    ? hand.actualEquity
-    : (() => {
-        const simsByDifficulty: Record<number, number> = { 1: 1000, 2: 2000, 3: 5000, 4: 20000 };
-        return calculateEquity(heroCards, hand.villainRange!, communityCards, simsByDifficulty[hand.difficulty] ?? 1000);
-      })();
+  const equity = hand.actualEquity;
 
   const equityPoints = scoreCombinedEquityGuess(guessIndex, equity, hand.difficulty);
   const requiredEquity = hand.betSize / (hand.potSize + 2 * hand.betSize);

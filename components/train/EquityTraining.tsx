@@ -145,6 +145,7 @@ export default function EquityTraining({
   const [achievementQueue, setAchievementQueue] = useState<AchievementKey[]>([]);
   const [loading, setLoading] = useState(false);
   const [calculating, setCalculating] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
 
   useEffect(() => {
@@ -169,14 +170,20 @@ export default function EquityTraining({
   async function startNewHand(diff?: number) {
     const d = diff ?? difficulty;
     setLoading(true);
+    setLoadError(false);
     setGuessed(null);
     setActualEquity(null);
     setPointsScored(null);
     setNewUnlock(null);
     setSliderValue(0);
-    const result = await getOrCreateHand(d, handModule);
-    setHand({ ...result, difficulty: d });
-    setLoading(false);
+    try {
+      const result = await getOrCreateHand(d, handModule);
+      setHand({ ...result, difficulty: d });
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleGuess(classIndex: number) {
@@ -197,10 +204,17 @@ export default function EquityTraining({
     router.refresh();
   }
 
-  if (loading || !hand) return (
+  if (loading || (!hand && !loadError)) return (
     <>
       <AchievementToast queue={achievementQueue} onDismiss={(key) => setAchievementQueue((q) => q.filter((k) => k !== key))} />
       <div className="text-gray-400">{t("dealing")}</div>
+    </>
+  );
+
+  if (loadError) return (
+    <>
+      <AchievementToast queue={achievementQueue} onDismiss={(key) => setAchievementQueue((q) => q.filter((k) => k !== key))} />
+      <div className="text-red-400">{t("noHandsAvailable")}</div>
     </>
   );
 

@@ -1,6 +1,10 @@
 import { Card, RANKS, SUITS } from "./deck";
-import { bestHandScore } from "./evaluator";
+import { Hand } from "pokersolver";
 import { getRangeForPercent } from "./range";
+
+// Map our Unicode suit symbols to pokersolver's single-letter format
+const SUIT_MAP: Record<string, string> = { "♠": "s", "♥": "h", "♦": "d", "♣": "c" };
+const toPs = (c: Card) => c.rank + SUIT_MAP[c.suit];
 
 function buildDeck(excludedCards: Card[]): Card[] {
   const excluded = new Set(excludedCards.map(c => c.rank + c.suit));
@@ -88,11 +92,12 @@ export function calculateEquity(
       ...shuffle(buildDeck([...heroCards, ...boardCards, ...villainCards])).slice(0, communityNeeded),
     ];
 
-    const heroScore = bestHandScore([...heroCards, ...community]);
-    const villainScore = bestHandScore([...villainCards, ...community]);
+    const heroHand = Hand.solve([...heroCards, ...community].map(toPs));
+    const villainHand = Hand.solve([...villainCards, ...community].map(toPs));
+    const w = Hand.winners([heroHand, villainHand]);
 
-    if (heroScore > villainScore) wins += 1;
-    else if (heroScore === villainScore) wins += 0.5;
+    if (w.length === 2) wins += 0.5;
+    else if (w[0] === heroHand) wins += 1;
   }
 
   return wins / simulations;

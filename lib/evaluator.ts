@@ -50,17 +50,37 @@ function evaluate5(cards: Card[]): number {
   return encodeScore(0, ...ranks);
 }
 
-function combinations<T>(arr: T[], k: number): T[][] {
-  if (k === 0) return [[]];
-  if (arr.length < k) return [];
-  const [first, ...rest] = arr;
-  return [
-    ...combinations(rest, k - 1).map(c => [first, ...c]),
-    ...combinations(rest, k),
-  ];
-}
-
 export function bestHandScore(cards: Card[]): number {
   if (cards.length === 5) return evaluate5(cards);
-  return Math.max(...combinations(cards, 5).map(evaluate5));
+  // For 7 cards (standard): enumerate C(7,5)=21 combos by omitting each pair of indices.
+  // Avoids recursive allocation of all 21 arrays upfront.
+  if (cards.length === 7) {
+    let best = 0;
+    for (let i = 0; i < 7; i++) {
+      for (let j = i + 1; j < 7; j++) {
+        const five: Card[] = [];
+        for (let k = 0; k < 7; k++) {
+          if (k !== i && k !== j) five.push(cards[k]);
+        }
+        const s = evaluate5(five);
+        if (s > best) best = s;
+      }
+    }
+    return best;
+  }
+  // Fallback for other lengths
+  let best = 0;
+  const n = cards.length;
+  function pick(start: number, chosen: Card[]) {
+    if (chosen.length === 5) { const s = evaluate5(chosen); if (s > best) best = s; return; }
+    const remaining = n - start;
+    if (remaining < 5 - chosen.length) return;
+    for (let i = start; i < n; i++) {
+      chosen.push(cards[i]);
+      pick(i + 1, chosen);
+      chosen.pop();
+    }
+  }
+  pick(0, []);
+  return best;
 }

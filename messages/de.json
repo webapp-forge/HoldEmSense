@@ -137,7 +137,8 @@
     "readyToUnlock": "{name} kann jetzt freigeschaltet werden!",
     "ptsNeeded": "Noch {pts} Punkte zum Freischalten von {name}",
     "showMatrix": "Range Matrix",
-    "showInfo": "Info"
+    "showInfo": "Info",
+    "noHandsAvailable": "Keine Hände verfügbar. Bitte führe das Generate-Script aus, um den Hand-Pool zu befüllen."
   },
   "combinedPotOdds": {
     "title": "Hand vs Range + Pot Odds",

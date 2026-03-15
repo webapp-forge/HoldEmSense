@@ -1,0 +1,34 @@
+- Spielertypen können aus einer Art Baukasten erstellt werden
+- beginnen mit wichtigsten Daten, später beliebig verfeinern
+- vorgefertigte typische Spielertypen (Nit, Lag, Calling Station, Tag, ...) 
+    aus den Modulen bauen
+- damit early / middle pos etc nicht unterschiedlich sind bei verschiedenen 
+    Tischgrößen wird gezählt ab Platz 1 = BB, Platz 2 = SB, ...
+- Ziel: lernen, Spieler auf konkrete Ranges in bestimmten Situationen zu setzen
+- Merkmale schließen sich zum Teil gegenseitig aus
+- Merkmale als Baum, abhängig vom Flow
+
+MERKMALE
+- place 9: open raise with ...
+- place 8: open raise with ...
+...
+- place 3: open raise with ...
+
+Reaction to open raise: 1 player in position calls open raise
+- contibet
+    - everything
+    - under pair+
+    - bottom pair+
+    - middle pair+
+    - top pair+
+    - overpair+
+    - straight draw open ended
+    - straight draw gutshot
+    - flush draw
+    - high / nut flush draw
+    - monster draw
+
+
+Reaction to open raise: 1 player out of position (SB/BB) calls open raise
+
+

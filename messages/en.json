@@ -137,7 +137,8 @@
     "readyToUnlock": "Ready to unlock {name}!",
     "ptsNeeded": "{pts} more pts needed to unlock {name}",
     "showMatrix": "Range Matrix",
-    "showInfo": "Info"
+    "showInfo": "Info",
+    "noHandsAvailable": "No hands available. Please run the generate script to fill the hand pool."
   },
   "combinedPotOdds": {
     "title": "Hand vs Range + Pot Odds",

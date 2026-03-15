@@ -90,6 +90,13 @@ model PreGeneratedHand {
   @@index([module, heroHandType])
 }
 
+model HandEquityMatrix {
+  handType   String   @id
+  equity     Float
+  iterations Int
+  updatedAt  DateTime @updatedAt
+}
+
 model AppConfig {
   key       String   @id
   value     String

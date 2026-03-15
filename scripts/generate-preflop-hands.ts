@@ -63,7 +63,7 @@ async function main() {
 
     await prisma.preGeneratedHand.create({
       data: {
-        module: "hand-vs-range",
+        module: "preflop-equity",
         heroHandType: handType,
         heroCard1Rank: heroCards[0].rank,
         heroCard1Suit: heroCards[0].suit,
