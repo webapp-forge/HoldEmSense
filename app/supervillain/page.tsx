@@ -2,6 +2,7 @@ import { auth } from "../../lib/auth";
 import { notFound } from "next/navigation";
 import { getVillainConfig, saveVillainConfig, resetVillainConfig } from "../../lib/actions/villain";
 import { CONFIG_DEFAULTS, type ConfigKey } from "../../lib/config";
+import Link from "next/link";
 
 const CONFIG_LABELS: Record<ConfigKey, { label: string; description: string }> = {
   progressWindowSize: {
@@ -31,7 +32,22 @@ export default async function SuperVillainPage() {
   return (
     <main className="max-w-2xl mx-auto px-6 py-12">
       <h1 className="text-3xl font-bold text-white mb-2">Supervillain HQ</h1>
-      <p className="text-gray-500 text-sm mb-10">App-Konfiguration — nur für Admins sichtbar.</p>
+      <p className="text-gray-500 text-sm mb-6">App-Konfiguration — nur für Admins sichtbar.</p>
+
+      <div className="flex gap-3 mb-10">
+        <Link
+          href="/supervillain/matrix"
+          className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded text-sm text-gray-300 transition-colors"
+        >
+          Hand Equity Matrix
+        </Link>
+        <Link
+          href="/supervillain/profiles"
+          className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded text-sm text-gray-300 transition-colors"
+        >
+          Villain-Profile
+        </Link>
+      </div>
 
       <div className="flex flex-col gap-6">
         {(Object.keys(CONFIG_DEFAULTS) as ConfigKey[]).map((key) => {

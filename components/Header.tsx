@@ -3,13 +3,18 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import NavMenu from "@/components/NavMenu";
 import NavLinks from "@/components/NavLinks";
+import LeakNavBadge from "@/components/LeakNavBadge";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { getTranslations } from "next-intl/server";
-import { getDailyStreak } from "@/lib/actions/training";
+import { getDailyStreak, getOpenLeakCount } from "@/lib/actions/training";
 
 export default async function Header() {
   const [session, t] = await Promise.all([auth(), getTranslations("nav")]);
-  const { streak, trainedToday } = session?.user ? await getDailyStreak() : { streak: 0, trainedToday: false };
+  const isPremium = !!(session?.user as any)?.isPremium;
+  const [{ streak, trainedToday }, leakCount] = await Promise.all([
+    session?.user ? getDailyStreak() : Promise.resolve({ streak: 0, trainedToday: false }),
+    isPremium ? getOpenLeakCount() : Promise.resolve(0),
+  ]);
 
   const logoutAction = async () => {
     "use server";
@@ -63,6 +68,9 @@ export default async function Header() {
             ),
           },
         ]} />
+        {isPremium && (
+          <LeakNavBadge initialCount={leakCount} label={t("leakTraining")} />
+        )}
       </nav>
 
       {/* Right: Language + User */}
@@ -72,7 +80,7 @@ export default async function Header() {
             <LanguageSwitcher />
           </div>
         )}
-        <NavMenu username={session?.user?.name} logoutAction={logoutAction} streak={streak} trainedToday={trainedToday} />
+        <NavMenu username={session?.user?.name} logoutAction={logoutAction} streak={streak} trainedToday={trainedToday} isPremium={isPremium} leakCount={leakCount} />
       </div>
     </header>
   );

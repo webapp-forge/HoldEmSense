@@ -52,6 +52,8 @@ model TrainingHand {
   riverCardRank String?
   riverCardSuit String?
   villainRange       Int?
+  villainProfileId   String?
+  villainPosition    Int?
   potSize            Int?
   betSize            Int?
   equityGuessIndex   Int?
@@ -112,4 +114,28 @@ model UserProgress {
   unlockedAt  DateTime @default(now())
 
   @@unique([userId, module, difficulty])
+}
+
+model VillainProfile {
+  id          String                   @id @default(cuid())
+  name        String
+  slug        String                   @unique
+  description String                   @db.Text
+  isPublished Boolean                  @default(false)
+  sortOrder   Int                      @default(0)
+  traits      Json?
+  positions   VillainProfilePosition[]
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+}
+
+model VillainProfilePosition {
+  id        String         @id @default(cuid())
+  profileId String
+  profile   VillainProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  position  Int
+  hands     Json
+
+  @@unique([profileId, position])
+  @@index([profileId])
 }

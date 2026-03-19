@@ -48,7 +48,8 @@
     "hallOfFame": "Hall of Fame",
     "streakDays": "{days} days in a row",
     "streakKeep": "Train today to keep your streak alive",
-    "streakStart": "Train today to start your streak"
+    "streakStart": "Train today to start your streak",
+    "leakTraining": "Fix Leaks"
   },
   "glossary": {
     "drawerLabel": "Guide",
@@ -202,5 +203,42 @@
     "3": "Advanced",
     "4": "Expert",
     "locked": "Complete previous level to unlock"
+  },
+  "skillCards": {
+    "comingSoon": "Coming Soon",
+    "equityPreflop": "Equity vs Range",
+    "flopEquity": "Flop Equity",
+    "turnEquity": "Turn Equity",
+    "riverEquity": "River Equity",
+    "potOdds": "Pot Odds",
+    "potOddsCombined": "Equity + Decision",
+    "leakTraining": "Leak Training",
+    "preflopRanges": "Preflop Ranges",
+    "cbetBasics": "C-Bet Basics",
+    "opponentTypes": "Opponent Types",
+    "filter": {
+      "all": "All",
+      "preflop": "Pre-flop",
+      "flop": "Flop",
+      "turn": "Turn",
+      "river": "River",
+      "general": "General",
+      "hidePassed": "Hide passed"
+    }
+  },
+  "skillTree": {
+    "title": "Skill Tree",
+    "comingSoon": "Coming Soon",
+    "equityPreflop": "Equity vs Range",
+    "potOdds": "Pot Odds",
+    "potOddsCombined": "Equity + Decision",
+    "flopEquity": "Flop Equity",
+    "turnEquity": "Turn Equity",
+    "riverEquity": "River Equity",
+    "leakTraining": "Leak Training",
+    "preflopRanges": "Preflop Ranges",
+    "opponentTypes": "Opponent Types",
+    "cashGame": "Cash Game",
+    "tournament": "Tournament"
   }
 }

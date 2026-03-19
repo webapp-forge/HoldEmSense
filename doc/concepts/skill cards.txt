@@ -1,0 +1,28 @@
+Statt eines Sidemenus mit Lektionen gibt es "Skill Cards". Diese werden auf 
+der "train" Seite in einem Raster dargestellt, jede Lektion entspricht einer 
+Karte. 
+
+Raster Desktop: 3 oder 4 Karten pro Zeile, zentriert.
+
+Den Karten werden Tags zugeordnet, 1:n. Durch Filtermethoden kann der User
+die Sichtbarkeit der Karten sinnvoll einstellen.
+
+TAGS:
+street: pre-flop, flop, turn, river (exclusive)
+level: 0-4 (Einordnung der Schwierigkeit des Themas)
+    0 = Pokerregeln
+    1 = Basics
+    ...
+    4 = High Level Stuff
+game: cash game, mtt, single table
+table size: heads-up, six-max, 9-max
+BB klassen: <10BB, 11-20BB, ...
+
+Den streets könnte man eine Farbe zuordnen damit es schön bunt wird,
+außerdem verschiedene Helligkeiten für die levels (4 Stufen, Stufe 0 
+ist außen vor)
+
+Noch nicht freigeschaltete Karten sind ausgegraut.
+
+
+

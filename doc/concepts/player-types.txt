@@ -31,4 +31,8 @@ Reaction to open raise: 1 player in position calls open raise
 
 Reaction to open raise: 1 player out of position (SB/BB) calls open raise
 
+TODO
+- Wahrscheinlichkeiten für eine bestimmte Aktion, dann auch sich gegenseitig 
+    ausschließende möglich.
+
 

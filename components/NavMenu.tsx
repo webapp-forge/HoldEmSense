@@ -3,21 +3,39 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { trainNavSections } from "@/components/train/trainNavConfig";
+import { getOpenLeakCount } from "@/lib/actions/training";
+import { useEffect } from "react";
 
 type Props = {
   username?: string | null;
   logoutAction: () => Promise<void>;
   streak?: number;
   trainedToday?: boolean;
+  isPremium?: boolean;
+  leakCount?: number;
 };
 
-export default function NavMenu({ username, logoutAction, streak = 0, trainedToday = false }: Props) {
+export default function NavMenu({
+  username,
+  logoutAction,
+  streak = 0,
+  trainedToday = false,
+  isPremium = false,
+  leakCount: initialLeakCount = 0,
+}: Props) {
   const [open, setOpen] = useState(false);
+  const [leakCount, setLeakCount] = useState(initialLeakCount);
   const t = useTranslations("nav");
-  const tSidebar = useTranslations("sidebar");
-  type SidebarKey = Parameters<typeof tSidebar>[0];
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!isPremium) return;
+    const refresh = () => getOpenLeakCount().then(setLeakCount);
+    window.addEventListener("leak-processed", refresh);
+    return () => window.removeEventListener("leak-processed", refresh);
+  }, [isPremium]);
 
   return (
     <>
@@ -63,26 +81,28 @@ export default function NavMenu({ username, logoutAction, streak = 0, trainedTod
 
         {open && (
           <div className="absolute right-0 top-10 bg-gray-800 border border-gray-700 rounded-lg shadow-xl w-56 py-2 z-50">
+            <Link href="/train" onClick={() => setOpen(false)} className="block px-4 py-2 text-sm hover:bg-gray-700">{t("train")}</Link>
             <Link href="/glossary" onClick={() => setOpen(false)} className="block px-4 py-2 text-sm hover:bg-gray-700">{t("glossary")}</Link>
             <Link href="/hall-of-fame" onClick={() => setOpen(false)} className="block px-4 py-2 text-sm hover:bg-gray-700">{t("hallOfFame")}</Link>
-            {trainNavSections.map((section) => (
-              <div key={section.sectionKey}>
+
+            {isPremium && (
+              <>
                 <div className="border-t border-gray-700 my-1" />
-                <span className="block px-4 py-1 text-xs text-gray-400 uppercase tracking-wider">
-                  {tSidebar(section.sectionKey as SidebarKey)}
-                </span>
-                {section.links.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className="block px-4 py-2 text-sm hover:bg-gray-700"
-                  >
-                    {tSidebar(link.key as SidebarKey)}
-                  </Link>
-                ))}
-              </div>
-            ))}
+                <Link
+                  href="/train/leak-fixing/equity"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-between px-4 py-2 text-sm hover:bg-gray-700"
+                >
+                  {t("leakTraining")}
+                  {leakCount > 0 && (
+                    <span className="min-w-[1.25rem] h-5 px-1 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center">
+                      {leakCount}
+                    </span>
+                  )}
+                </Link>
+              </>
+            )}
+
             {!username && (
               <>
                 <div className="border-t border-gray-700 my-1" />
