@@ -19,7 +19,10 @@ import DifficultySelector from "./DifficultySelector";
 import GlossaryLink from "../glossary/GlossaryLink";
 import MatrixTip from "./MatrixTip";
 import EquityGuessPanel, { getCorrectIndex } from "./EquityGuessPanel";
-import { getSkillCardByModule, TEXT_COLOR } from "./skillCardConfig";
+import { getSkillCardByModule, getDependentCards, TEXT_COLOR, KEY_COLOR } from "./skillCardConfig";
+import KeyFoundToast from "../KeyFoundToast";
+import { detectThumbRules, type ThumbRule } from "../../lib/thumbRules";
+import HeroHand from "./HeroHand";
 
 type Role = "guest" | "registered" | "premium";
 
@@ -30,77 +33,88 @@ type HandState = {
   turnCard?: { rank: string; suit: string } | null;
   riverCard?: { rank: string; suit: string } | null;
   villainRange: number;
+  villainCards?: { rank: string; suit: string }[];
   difficulty: number;
 };
 
 
+function ThumbRulePanel({
+  heroCards,
+  villainCards,
+  revealed,
+}: {
+  heroCards: { rank: string; suit: string }[];
+  villainCards: { rank: string; suit: string }[];
+  revealed: boolean;
+}) {
+  const t = useTranslations("thumbRules");
+  if (!revealed) return null;
+  const rules = detectThumbRules(heroCards, villainCards);
+  if (rules.length === 0) {
+    return <p className="text-gray-500 text-sm italic">{t("noRule")}</p>;
+  }
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-gray-500 uppercase tracking-wider">{t("title")}</p>
+      {rules.map((rule) => (
+        <div key={rule.key} className="bg-gray-800 border border-gray-700 rounded p-3 text-sm flex justify-between items-center">
+          <span className="text-gray-200">{t(rule.key as Parameters<typeof t>[0])}</span>
+          <span className="text-white font-semibold ml-3">{rule.approxEquity}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ModuleExplanation({ handModule }: { handModule: string }) {
+  const t = useTranslations("moduleExplanation");
+
+  const glossary = {
+    equity: (chunks: React.ReactNode) => <GlossaryLink slug="equity/what-is-equity">{chunks}</GlossaryLink>,
+    range: (chunks: React.ReactNode) => <GlossaryLink slug="ranges/what-is-a-range">{chunks}</GlossaryLink>,
+    topX: (chunks: React.ReactNode) => <GlossaryLink slug="ranges/top-x-percent">{chunks}</GlossaryLink>,
+    eqRange: (chunks: React.ReactNode) => <GlossaryLink slug="equity/equity-vs-range">{chunks}</GlossaryLink>,
+  };
+
   switch (handModule) {
+    case "hand-vs-hand":
+      return (
+        <div className="space-y-2">
+          <p>{t.rich("handVsHand1", glossary)}</p>
+          <p>{t.rich("handVsHand2", glossary)}</p>
+          <p>{t.rich("handVsHand3", glossary)}</p>
+          <p>{t.rich("handVsHand4", glossary)}</p>
+        </div>
+      );
     case "preflop":
       return (
         <div className="space-y-2">
-          <p>
-            Du schätzt deine <GlossaryLink slug="equity/what-is-equity">Equity</GlossaryLink> gegen
-            die <GlossaryLink slug="ranges/what-is-a-range">Range</GlossaryLink> des Villains —
-            ausgedrückt als <GlossaryLink slug="ranges/top-x-percent">Top X%</GlossaryLink> seiner
-            möglichen Starthände.
-          </p>
-          <p>
-            Equity unter 50% bedeutet nicht automatisch folden — dafür braucht es die Pot Odds.
-            Ziel ist ein Zahlengefühl für{" "}
-            <GlossaryLink slug="equity/equity-vs-range">Equity gegen eine Range</GlossaryLink>,
-            kein exaktes Rechnen.
-          </p>
+          <p>{t.rich("preflop1", glossary)}</p>
+          <p>{t.rich("preflop2", glossary)}</p>
           <MatrixTip />
         </div>
       );
     case "flop":
       return (
         <div className="space-y-2">
-          <p>
-            Der Flop verändert die <GlossaryLink slug="equity/what-is-equity">Equity</GlossaryLink>{" "}
-            drastisch — Draws, Pair-Outs und Board-Texturen spielen jetzt eine große Rolle.
-          </p>
-          <p>
-            Die <GlossaryLink slug="ranges/top-x-percent">Top X%-Range</GlossaryLink> des Villains
-            ist eine Vereinfachung: In echten Spielen würde man sie nach dem Flop anpassen.
-            Hier trainierst du trotzdem ein wertvolles Gefühl — wie stark deine Hand gegen eine
-            typische Eröffnungsrange liegt.
-          </p>
+          <p>{t.rich("flop1", glossary)}</p>
+          <p>{t.rich("flop2", glossary)}</p>
           <MatrixTip />
         </div>
       );
     case "turn":
       return (
         <div className="space-y-2">
-          <p>
-            Auf dem Turn ist nur noch eine Karte offen — die{" "}
-            <GlossaryLink slug="equity/what-is-equity">Equity</GlossaryLink> ist konkreter, aber
-            auch volatiler: Ein River-Out kann sie komplett drehen.
-          </p>
-          <p>
-            Die gezeigte <GlossaryLink slug="ranges/what-is-a-range">Range</GlossaryLink> ist die
-            Preflop-Eröffnungsrange des Villains. Im echten Spiel wäre sie bis zum Turn schon
-            deutlich eingeengt — hier übst du das Grundgefühl, bevor du mit Range-Anpassung
-            arbeitest.
-          </p>
+          <p>{t.rich("turn1", glossary)}</p>
+          <p>{t.rich("turn2", glossary)}</p>
           <MatrixTip />
         </div>
       );
     case "river":
       return (
         <div className="space-y-2">
-          <p>
-            Auf dem River gibt es keine weiteren Karten — die{" "}
-            <GlossaryLink slug="equity/what-is-equity">Equity</GlossaryLink> ist entweder 0% oder
-            100%. Was du hier trainierst, ist die Frage: Wie oft liegt meine Hand vorne gegen eine
-            typische Villain-<GlossaryLink slug="ranges/what-is-a-range">Range</GlossaryLink>?
-          </p>
-          <p>
-            Die Preflop-Range ist hier natürlich am weitesten von der Realität entfernt. Trotzdem
-            schärft das Training dein Gefühl dafür, wie gut oder schlecht deine Hand
-            auf einem bestimmten Board steht.
-          </p>
+          <p>{t.rich("river1", glossary)}</p>
+          <p>{t.rich("river2", glossary)}</p>
           <MatrixTip />
         </div>
       );
@@ -140,6 +154,7 @@ export default function EquityTraining({
   } | null>(null);
   const [newUnlock, setNewUnlock] = useState<number | null>(null);
   const [achievementQueue, setAchievementQueue] = useState<AchievementKey[]>([]);
+  const [keyFound, setKeyFound] = useState<{ label: string; color: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [loadError, setLoadError] = useState(false);
@@ -197,6 +212,16 @@ export default function EquityTraining({
     const refreshed = await getUnlockedDifficulties(handModule);
     const newlyUnlocked = refreshed.find((d) => !unlockedDifficulties.includes(d));
     if (newlyUnlocked) setNewUnlock(newlyUnlocked);
+    if (newlyUnlocked === 2 && skillCard) {
+      const dependents = getDependentCards(skillCard.id);
+      if (dependents.length > 0) {
+        const dep = dependents[0];
+        setKeyFound({
+          label: tc(dep.labelKey as Parameters<typeof tc>[0]),
+          color: KEY_COLOR[dep.tags.street],
+        });
+      }
+    }
     setUnlockedDifficulties(refreshed);
     router.refresh();
   }
@@ -215,14 +240,31 @@ export default function EquityTraining({
     </>
   );
 
+  if (!hand) return null;
+
+  const isHandVsHand = handModule === "hand-vs-hand";
+
   return (
     <>
     <AchievementToast
       queue={achievementQueue}
       onDismiss={(key) => setAchievementQueue((q) => q.filter((k) => k !== key))}
     />
+    <KeyFoundToast
+      moduleLabel={keyFound?.label ?? null}
+      streetColor={keyFound?.color}
+      onDismiss={() => setKeyFound(null)}
+    />
     <TrainPageLayout
-      info={<RangeMatrix villainRange={hand.villainRange} heroCards={hand.heroCards} />}
+      info={
+        isHandVsHand
+          ? <ThumbRulePanel
+              heroCards={hand.heroCards}
+              villainCards={hand.villainCards!}
+              revealed={pointsScored !== null && !calculating}
+            />
+          : <RangeMatrix villainRange={hand.villainRange!} heroCards={hand.heroCards} />
+      }
       explanation={<ModuleExplanation handModule={handModule} />}
     >
       <div className="flex flex-col items-center gap-6 max-w-2xl w-full">
@@ -230,9 +272,11 @@ export default function EquityTraining({
           <h2 className={`text-xl font-bold ${skillCard ? TEXT_COLOR[skillCard.tags.street] : ""}`}>
             {skillCard ? tc(skillCard.labelKey as Parameters<typeof tc>[0]) : handModule}
           </h2>
-          <p className="text-gray-400 mt-1">
-            Villain range: Top <span className="text-white font-semibold">{hand.villainRange}%</span>
-          </p>
+          {!isHandVsHand && (
+            <p className="text-gray-400 mt-1">
+              Villain range: Top <span className="text-white font-semibold">{hand.villainRange}%</span>
+            </p>
+          )}
         </div>
 
         <DifficultySelector
@@ -322,15 +366,19 @@ export default function EquityTraining({
           </div>
         )}
 
-        {/* Hero cards */}
-        <div className="flex flex-col items-center">
-          <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Your hand</p>
-          <div className="flex gap-2">
-            {hand.heroCards.map((card, i) => (
-              <CardComponent key={i} rank={card.rank} suit={card.suit} fourColor={fourColor} size="lg" />
-            ))}
+        {/* Villain cards (hand-vs-hand module) */}
+        {isHandVsHand && hand.villainCards && (
+          <div className="flex flex-col items-center">
+            <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">{t("villainHand")}</p>
+            <div className="flex gap-2">
+              {hand.villainCards.map((card, i) => (
+                <CardComponent key={i} rank={card.rank} suit={card.suit} fourColor={fourColor} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        <HeroHand cards={hand.heroCards} fourColor={fourColor} />
 
         <EquityGuessPanel
           difficulty={difficulty}
@@ -360,6 +408,16 @@ export default function EquityTraining({
                 <span className="text-white font-medium">{(actualEquity! * 100).toFixed(1)}%</span>
               </span>
             </div>
+
+            {isHandVsHand && hand.villainCards && (
+              <div className="lg:hidden">
+                <ThumbRulePanel
+                  heroCards={hand.heroCards}
+                  villainCards={hand.villainCards}
+                  revealed
+                />
+              </div>
+            )}
 
             {newUnlock && (
               <div className="bg-lime-900 border border-lime-600 rounded p-3 text-lime-300 text-sm">

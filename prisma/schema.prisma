@@ -51,6 +51,10 @@ model TrainingHand {
   turnCardSuit  String?
   riverCardRank String?
   riverCardSuit String?
+  villainCard1Rank String?
+  villainCard1Suit String?
+  villainCard2Rank String?
+  villainCard2Suit String?
   villainRange       Int?
   villainProfileId   String?
   villainPosition    Int?
@@ -84,7 +88,11 @@ model PreGeneratedHand {
   turnCardSuit  String?
   riverCardRank String?
   riverCardSuit String?
-  villainRange  Int
+  villainCard1Rank String?
+  villainCard1Suit String?
+  villainCard2Rank String?
+  villainCard2Suit String?
+  villainRange  Int?
   equity        Float
   iterations    Int
   createdAt     DateTime @default(now())

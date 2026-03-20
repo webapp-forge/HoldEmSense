@@ -15,6 +15,7 @@ export const trainNavSections: NavSection[] = [
   {
     sectionKey: "equityTraining",
     links: [
+      { key: "handVsHand", href: "/train/equity/hand-vs-hand", minRole: "guest" },
       { key: "handVsRange", href: "/train/equity/hand-vs-range", minRole: "guest" },
       { key: "flopHandVsRange", href: "/train/equity/hand-vs-range-flop", minRole: "guest" },
       { key: "turnHandVsRange", href: "/train/equity/hand-vs-range-turn", minRole: "registered" },

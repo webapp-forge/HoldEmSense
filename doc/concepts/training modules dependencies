@@ -1,0 +1,30 @@
+Trainingskarten werden sequenziell freigeschaltet. Jede Karte hat eine optionale
+Precondition — die Vorgängerkarte muss auf Beginner bestanden (80%) werden.
+Zusätzlich können Karten durch eine Rollenanforderung (REG/PRO) gesperrt sein.
+
+Gesperrte Karten zeigen ein Schloss-Icon links und einen Tooltip mit dem nächsten
+nötigen Schritt (Kette wird zurückverfolgt zum ersten unerfüllten Vorgänger).
+
+Idee: Einblendung "Key collected" ähnlich wie Achievements. Auf der /train Seite
+dann eine Möglichkeit den Schlüssel einzusetzen (Schloss anders dargestellt).
+
+
+| # | Modul | Precondition | minRole |
+|---|-------|-------------|---------|
+| 1 | Preflop: Hand vs Hand | — | guest |
+| 2 | Preflop: Equity Hand vs Range | Hand vs Hand | guest |
+| 3 | Flop: Equity Hand vs Range | Equity Preflop | guest |
+| 4 | Turn: Equity Hand vs Range | Equity Flop | registered |
+| 5 | River: Equity Hand vs Range | Equity Turn | registered |
+| 6 | Pot Odds: Required Equity | Equity River | guest |
+| 7 | Pot Odds: Equity + Decision | Pot Odds | registered |
+
+
+## Relevante Dateien
+
+| Datei | Beschreibung |
+|-------|-------------|
+| components/train/skillCardConfig.ts | SkillCard-Typ mit precondition-Feld, Modulreihenfolge |
+| components/train/SkillCardGrid.tsx | Lock-Logik, Tooltip-Kettenrückverfolgung, Rendering |
+| lib/actions/skillTree.ts | Progress-Abfrage (Beginner bestanden = difficulty ≥ 2) |
+| messages/en.json + de.json | i18n-Keys unter „skillCards" inkl. lockTooltip |

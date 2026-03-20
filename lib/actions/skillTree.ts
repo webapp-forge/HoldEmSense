@@ -5,6 +5,7 @@ import { prisma } from "../prisma";
 import { getAppConfig } from "../config";
 
 const HAND_TO_PROGRESS: Record<string, string> = {
+  "hand-vs-hand": "hand-vs-hand",
   preflop: "hand-vs-range",
   flop: "hand-vs-range-flop",
   turn: "hand-vs-range-turn",

@@ -19,6 +19,7 @@ const PROGRESS_MODULE: Record<string, string> = {
   river: "hand-vs-range-river",
   "pot-odds": "pot-odds",
   "combined-pot-odds": "combined-pot-odds",
+  "hand-vs-hand": "hand-vs-hand",
 };
 
 function scoreGuess(guessIndex: number, actualEquity: number, difficulty: number): number {
@@ -81,6 +82,7 @@ type HandResult = {
   handId: string;
   heroCards: { rank: string; suit: string }[];
   villainRange: number;
+  villainCards?: { rank: string; suit: string }[];
   flopCards: { rank: string; suit: string }[] | undefined;
   turnCard: { rank: string; suit: string } | undefined;
   riverCard: { rank: string; suit: string } | undefined;
@@ -94,11 +96,13 @@ const PRE_GENERATED_MODULES: Record<string, string> = {
   flop: "flop-equity",
   turn: "turn-equity",
   river: "river-equity",
+  "hand-vs-hand": "hand-vs-hand-equity",
 };
 
 type PreGenResult = {
   heroCards: { rank: string; suit: string }[];
   villainRange: number;
+  villainCards?: { rank: string; suit: string }[];
   equity: number;
   flopCards?: { rank: string; suit: string }[];
   turnCard?: { rank: string; suit: string };
@@ -137,12 +141,20 @@ async function drawFromPreGeneratedPool(poolModule: string, handModule: string):
     ? { rank: hand.riverCardRank, suit: hand.riverCardSuit! }
     : undefined;
 
+  const villainCards = hand.villainCard1Rank
+    ? [
+        { rank: hand.villainCard1Rank, suit: hand.villainCard1Suit! },
+        { rank: hand.villainCard2Rank!, suit: hand.villainCard2Suit! },
+      ]
+    : undefined;
+
   return {
     heroCards: [
       { rank: hand.heroCard1Rank, suit: hand.heroCard1Suit },
       { rank: hand.heroCard2Rank, suit: hand.heroCard2Suit },
     ],
-    villainRange: hand.villainRange,
+    villainRange: hand.villainRange ?? 0,
+    villainCards,
     equity: hand.equity,
     flopCards,
     turnCard,
@@ -182,13 +194,20 @@ export async function getOrCreateHand(difficulty: number, handModule: string): P
     const riverCard = existing.riverCardRank
       ? { rank: existing.riverCardRank, suit: existing.riverCardSuit! }
       : undefined;
+    const existingVillainCards = existing.villainCard1Rank
+      ? [
+          { rank: existing.villainCard1Rank, suit: existing.villainCard1Suit! },
+          { rank: existing.villainCard2Rank!, suit: existing.villainCard2Suit! },
+        ]
+      : undefined;
     return {
       handId: existing.id,
       heroCards: [
         { rank: existing.heroCard1Rank!, suit: existing.heroCard1Suit! },
         { rank: existing.heroCard2Rank!, suit: existing.heroCard2Suit! },
       ],
-      villainRange: existing.villainRange!,
+      villainRange: existing.villainRange ?? 0,
+      villainCards: existingVillainCards,
       flopCards,
       turnCard,
       riverCard,
@@ -202,6 +221,7 @@ export async function getOrCreateHand(difficulty: number, handModule: string): P
 
   const heroCards = preGen!.heroCards;
   const villainRangeValue = preGen!.villainRange;
+  const villainCardsValue = preGen!.villainCards;
 
   const flopCards = preGen!.flopCards;
   const turnCard = preGen!.turnCard;
@@ -232,13 +252,19 @@ export async function getOrCreateHand(difficulty: number, handModule: string): P
         riverCardRank: riverCard.rank,
         riverCardSuit: riverCard.suit,
       }),
+      ...(villainCardsValue && {
+        villainCard1Rank: villainCardsValue[0].rank,
+        villainCard1Suit: villainCardsValue[0].suit,
+        villainCard2Rank: villainCardsValue[1].rank,
+        villainCard2Suit: villainCardsValue[1].suit,
+      }),
       villainRange: villainRangeValue,
       difficulty,
       ...(preGen && { actualEquity: preGen.equity }),
     },
   });
 
-  return { handId: hand.id, heroCards, flopCards, turnCard, riverCard, villainRange: villainRangeValue };
+  return { handId: hand.id, heroCards, flopCards, turnCard, riverCard, villainRange: villainRangeValue, villainCards: villainCardsValue };
 }
 
 export async function submitGuess(handId: string, guess: number) {

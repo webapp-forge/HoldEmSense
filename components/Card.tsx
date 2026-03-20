@@ -18,12 +18,13 @@ const suitColor4: Record<string, string> = {
   "♦": "text-blue-600",
 };
 
-type Size = "sm" | "md" | "lg";
+type Size = "sm" | "md" | "lg" | "xl";
 
 const SIZE_CLASSES: Record<Size, { card: string; text: string }> = {
   sm: { card: "w-10 h-14", text: "text-2xl" },
   md: { card: "w-10 h-14", text: "text-2xl" },
   lg: { card: "w-14 h-20", text: "text-3xl" },
+  xl: { card: "w-[4.5rem] h-[6.25rem]", text: "text-4xl" },
 };
 
 export default function Card({ rank, suit, fourColor = false, size = "md" }: CardProps & { size?: Size }) {

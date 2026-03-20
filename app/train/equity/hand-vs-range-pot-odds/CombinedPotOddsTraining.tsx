@@ -18,9 +18,11 @@ import TrainPageLayout from "../../../../components/train/TrainPageLayout";
 import RangeMatrix from "../../../../components/train/RangeMatrix";
 import DifficultySelector from "../../../../components/train/DifficultySelector";
 import EquityGuessPanel from "../../../../components/train/EquityGuessPanel";
+import HeroHand from "../../../../components/train/HeroHand";
 import GlossaryLink from "../../../../components/glossary/GlossaryLink";
 import { getMemoHint } from "../../../../components/train/potOddsHints";
-import { getSkillCardByModule, TEXT_COLOR } from "../../../../components/train/skillCardConfig";
+import { getSkillCardByModule, getDependentCards, TEXT_COLOR, KEY_COLOR } from "../../../../components/train/skillCardConfig";
+import KeyFoundToast from "../../../../components/KeyFoundToast";
 
 type Role = "guest" | "registered" | "premium";
 
@@ -79,6 +81,7 @@ export default function CombinedPotOddsTraining({
   } | null>(null);
   const [newUnlock, setNewUnlock] = useState<number | null>(null);
   const [achievementQueue, setAchievementQueue] = useState<AchievementKey[]>([]);
+  const [keyFound, setKeyFound] = useState<{ label: string; color: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
@@ -147,6 +150,16 @@ export default function CombinedPotOddsTraining({
     const refreshed = await getUnlockedDifficulties("combined-pot-odds");
     const newlyUnlocked = refreshed.find((d) => !unlockedDifficulties.includes(d));
     if (newlyUnlocked) setNewUnlock(newlyUnlocked);
+    if (newlyUnlocked === 2 && skillCard) {
+      const dependents = getDependentCards(skillCard.id);
+      if (dependents.length > 0) {
+        const dep = dependents[0];
+        setKeyFound({
+          label: tsc(dep.labelKey as Parameters<typeof tsc>[0]),
+          color: KEY_COLOR[dep.tags.street],
+        });
+      }
+    }
     setUnlockedDifficulties(refreshed);
     router.refresh();
     setSubmittingDecision(false);
@@ -163,6 +176,11 @@ export default function CombinedPotOddsTraining({
       <AchievementToast
         queue={achievementQueue}
         onDismiss={(key) => setAchievementQueue((q) => q.filter((k) => k !== key))}
+      />
+      <KeyFoundToast
+        moduleLabel={keyFound?.label ?? null}
+        streetColor={keyFound?.color}
+        onDismiss={() => setKeyFound(null)}
       />
       <TrainPageLayout
         info={<RangeMatrix villainRange={hand.villainRange} heroCards={hand.heroCards} />}
@@ -284,15 +302,7 @@ export default function CombinedPotOddsTraining({
             </div>
           )}
 
-          {/* Hero cards */}
-          <div className="flex flex-col items-center">
-            <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Your hand</p>
-            <div className="flex gap-2">
-              {hand.heroCards.map((card, i) => (
-                <CardComponent key={i} rank={card.rank} suit={card.suit} fourColor={fourColor} size="lg" />
-              ))}
-            </div>
-          </div>
+          <HeroHand cards={hand.heroCards} fourColor={fourColor} />
 
           {/* Step 1: equity guess */}
           <div>

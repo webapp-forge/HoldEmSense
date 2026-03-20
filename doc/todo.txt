@@ -1,3 +1,6 @@
+Integrieren:
+https://www.pokerzeit.com/pokerstrategien/pokermathematik/die-wichtigsten-wahrscheinlichkeiten-beim-texas-holdem
+
 - Bug: Als Gast Beginner durchgespielt, dann sollte sich der tooltip ändern: 
 "intermediate difficulty" only for registered users 
     + Unlock sollte erfolgen, nur noch REG Sperre

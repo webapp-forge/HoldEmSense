@@ -1,5 +1,5 @@
 - Hände aus dem Pool der vorgefertigten Karten
-- Die berechnete Equity wird aus der DB gezogen und bei Submit des Users 
+- Die berechnete Equity wird aus der DB gezogen und bei Submit des Users
     NICHT neu berechnet.
 - mehr stärkere als schwächere Hero Hands (Hero Profile realistic)
 
@@ -17,6 +17,66 @@ realistic:
   - ✅ Mobilansicht Matrix (Overlay-Button)
   - ✅ Mobilansicht Info-Panel (Overlay-Button)
 
+
+TRAININGSMODULE
+
+Hand vs Hand (Preflop)
+- Zwei konkrete Hände (Hero + Villain), User schätzt Equity
+- Kein Board, kein Villain-Range — reine Hand-vs-Hand Preflop-Equity
+- Nach dem Guess: passende Daumenregeln einblenden (immer aus Hero-Perspektive)
+- Eingeordnet vor allen anderen Equity-Modulen
+- Info-Panel: In der Praxis eher irrelevant (Gegnerhand erst am Showdown bekannt),
+  dennoch wichtig für das Verständnis relativer Handstärken
+
+Daumenregeln (alle aus Hero-Sicht):
+
+| Situation Hero | Situation Villain | Hero Equity |
+|----------------|-------------------|-------------|
+| Höheres Pair | Niedrigeres Pair | ≈ 80% |
+| Niedrigeres Pair | Höheres Pair | ≈ 20% |
+| Overpair | Zwei niedrigere Karten | ≈ 85% |
+| Zwei niedrigere Karten | Overpair | ≈ 15% |
+| Pair | Eine Overcard | ≈ 65% |
+| Eine Overcard | Pair | ≈ 35% |
+| Zwei Overcards | Pair (Coinflip) | ≈ 53% |
+| Pair | Zwei Overcards (Coinflip) | ≈ 47% |
+| Beide Overcards | Beide Undercards | ≈ 65% |
+| Beide Undercards | Beide Overcards | ≈ 35% |
+| Verschachtelt, höhere High Card | Verschachtelt, niedrigere High Card | ≈ 60% |
+| Verschachtelt, niedrigere High Card | Verschachtelt, höhere High Card | ≈ 40% |
+| Umschließend (Hero umklammert) | Umklammert | ≈ 55% |
+| Umklammert | Umschließend (Villain umklammert) | ≈ 45% |
+| Dominierende Hand (besserer Kicker) | Dominiert | ≈ 70% |
+| Dominierte Hand (schlechterer Kicker) | Dominiert | ≈ 30% |
+
+Equity-Verschieber: Suited (≈ +3%), Connected, Gaps, Blockers, Split Pot, Suit Domination
+
+Hand vs Range — Preflop
+- Hero-Hand gegen Villain Top-X%-Range
+- Range-Matrix zeigt 13×13 Grid mit Equity-Heatmap
+- Rein Preflop, keine Community Cards
+
+Hand vs Range — Flop
+- Wie Preflop, aber mit 3 Community Cards
+- Villain-Range bleibt die Preflop-Eröffnungsrange (Vereinfachung)
+
+Hand vs Range — Turn
+- 4 Community Cards, eine Karte offen
+- Equity konkreter aber volatiler (ein River-Out kann alles drehen)
+
+Hand vs Range — River
+- 5 Community Cards, keine weiteren Karten
+- Equity ist 0% oder 100% — trainiert: wie oft liegt meine Hand vorne?
+
+Pot Odds
+- Reine Pot-Odds-Berechnung ohne Hand/Equity
+- Pot + Bet gegeben, User berechnet benötigte Equity
+
+Hand vs Range + Pot Odds (Combined)
+- 2-Schritt: erst Equity schätzen, dann Call/Fold-Entscheidung
+- Kombiniert Equity-Schätzung mit Pot-Odds-Bewertung
+
+
 ## Relevante Dateien
 
 | Datei | Beschreibung |
@@ -28,9 +88,15 @@ realistic:
 | components/train/MatrixTip.tsx | Tipp-Hinweis zur Matrix im Info-Panel |
 | lib/actions/training.ts | Server Actions: getOrCreateHand, submitGuess, … |
 | lib/heroProfiles.ts | Gewichtung starker Hände (realistic profile) |
-| prisma/schema.prisma | PregeneratedHand-Tabelle mit equity-Feldern |
+| lib/equity.ts | Monte-Carlo-Equity: calculateEquity (vs Range), calculateHandVsHandEquity (vs Hand) |
+| lib/thumbRules.ts | Daumenregeln-Erkennung für Hand-vs-Hand |
+| prisma/schema.prisma | PregeneratedHand + TrainingHand mit Hero/Villain-Karten und equity-Feldern |
+| components/train/skillCardConfig.ts | Skill Cards: Modul-Metadaten, Farben, Progress-Mapping |
+| components/train/trainNavConfig.ts | Navigationsstruktur der Trainingsmodule |
+| app/train/equity/hand-vs-hand/page.tsx | Route: Hand vs Hand |
 | app/train/equity/hand-vs-range/page.tsx | Route: Preflop |
 | app/train/equity/hand-vs-range-flop/page.tsx | Route: Flop |
 | app/train/equity/hand-vs-range-turn/page.tsx | Route: Turn |
 | app/train/equity/hand-vs-range-river/page.tsx | Route: River |
-| messages/en.json + de.json | i18n-Keys unter „train" |
+| scripts/generate-hand-vs-hand.ts | Generierungsskript für Hand-vs-Hand Pool |
+| messages/en.json + de.json | i18n-Keys unter „train", „thumbRules", „skillCards" |

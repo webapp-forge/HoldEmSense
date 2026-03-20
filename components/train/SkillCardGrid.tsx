@@ -7,6 +7,8 @@ import {
   SKILL_CARDS,
   STRIP_COLOR,
   TEXT_COLOR,
+  KEY_COLOR,
+  KEY_PATH,
   type Street,
   type SkillCard,
 } from "./skillCardConfig";
@@ -16,6 +18,33 @@ const ROLE_RANK: Record<Role, number> = { guest: 0, registered: 1, premium: 2 };
 
 function hasAccess(userRole: Role, minRole: Role) {
   return ROLE_RANK[userRole] >= ROLE_RANK[minRole];
+}
+
+/** Check if precondition chain is satisfied (Beginner passed = difficulty >= 2) */
+function isPreconditionMet(
+  card: SkillCard,
+  progress: Record<string, number>
+): boolean {
+  if (!card.precondition) return true;
+  const preCard = SKILL_CARDS.find((c) => c.id === card.precondition);
+  if (!preCard?.progressModule) return false;
+  return (progress[preCard.progressModule] ?? 0) >= 2;
+}
+
+/** Trace back the precondition chain to find the first card the user should work on */
+function getNextStep(card: SkillCard, progress: Record<string, number>): SkillCard | null {
+  let current: SkillCard | undefined = card;
+  while (current?.precondition) {
+    const preCard = SKILL_CARDS.find((c) => c.id === current!.precondition);
+    if (!preCard) return null;
+    if (!preCard.progressModule || (progress[preCard.progressModule] ?? 0) < 2) {
+      // This precondition is not yet met — check if it has its own unmet precondition
+      current = preCard;
+      continue;
+    }
+    break;
+  }
+  return current === card ? null : current ?? null;
 }
 
 function diffAccessible(role: Role, diff: number): boolean {
@@ -31,6 +60,47 @@ const BAR_COLOR: Record<Street, string> = {
   river: "bg-orange-400",
   general: "bg-slate-400",
 };
+
+function playUnlockSound() {
+  try {
+    const ctx = new AudioContext();
+    const t = ctx.currentTime;
+
+    // Short metallic "click" — noise burst through a bandpass filter
+    const noise = ctx.createBufferSource();
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    noise.buffer = buf;
+
+    const bp = ctx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 3500;
+    bp.Q.value = 8;
+
+    const clickGain = ctx.createGain();
+    clickGain.gain.setValueAtTime(0.25, t);
+    clickGain.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+
+    noise.connect(bp).connect(clickGain).connect(ctx.destination);
+    noise.start(t);
+    noise.stop(t + 0.08);
+
+    // Subtle low "thunk" for body
+    const osc = ctx.createOscillator();
+    const thunkGain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(220, t);
+    osc.frequency.exponentialRampToValueAtTime(80, t + 0.06);
+    thunkGain.gain.setValueAtTime(0.15, t);
+    thunkGain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+    osc.connect(thunkGain).connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.1);
+  } catch {
+    // AudioContext not available
+  }
+}
 
 type CardProgress = {
   scores: Record<string, Record<number, { count: number; total: number }>>;
@@ -151,6 +221,18 @@ export default function SkillCardGrid({
   const [streetFilters, setStreetFilters] = useState<Set<Street>>(new Set());
   const [levelFilters, setLevelFilters] = useState<Set<number>>(new Set());
   const [hidePassed, setHidePassed] = useState(false);
+  const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(new Set());
+
+  function handleKeyClick(e: React.MouseEvent, cardId: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    playUnlockSound();
+    setDismissedKeys((prev) => {
+      const next = new Set(prev);
+      next.add(cardId);
+      return next;
+    });
+  }
 
   function toggleStreet(street: Street) {
     setStreetFilters((prev) => {
@@ -232,37 +314,99 @@ export default function SkillCardGrid({
       {/* ── Card grid ───────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {filtered.map((card) => {
-          const accessible = hasAccess(role, card.minRole);
+          const roleAccess = hasAccess(role, card.minRole);
+          const preconditionMet = isPreconditionMet(card, progress);
+          const isLocked = !preconditionMet;
+          const accessible = roleAccess && preconditionMet;
           const isComingSoon = !card.href;
-          const stripClass =
-            isComingSoon || !accessible
-              ? "bg-gray-700"
-              : STRIP_COLOR[card.tags.street][card.tags.level];
-          const textClass =
-            isComingSoon || !accessible
-              ? "text-gray-500"
-              : TEXT_COLOR[card.tags.street];
+
+          // Build tooltip for locked cards
+          let lockTooltip = "";
+          if (isLocked && !isComingSoon) {
+            const nextStep = getNextStep(card, progress);
+            if (nextStep) {
+              lockTooltip = t("lockTooltip" as Parameters<typeof t>[0], {
+                module: t(nextStep.labelKey as Parameters<typeof t>[0]),
+              });
+            }
+          }
+
+          // Card is "newly unlockable" — precondition met but Beginner not yet passed
+          const isNewlyUnlockable =
+            accessible &&
+            !isComingSoon &&
+            !!card.precondition &&
+            !!card.progressModule &&
+            (progress[card.progressModule] ?? 0) < 2;
+
+          const showKeyLock = isNewlyUnlockable && !dismissedKeys.has(card.id);
+
+          const dimmed = isComingSoon || !accessible;
+          const stripClass = dimmed
+            ? "bg-gray-700"
+            : STRIP_COLOR[card.tags.street][card.tags.level];
+          const textClass = dimmed
+            ? "text-gray-500"
+            : TEXT_COLOR[card.tags.street];
 
           const cardEl = (
             <div
-              className={`rounded-xl bg-gray-900 border overflow-hidden transition-all duration-150 ${
+              className={`rounded-xl bg-gray-900 border transition-all duration-150 relative ${
                 isComingSoon
                   ? "border-gray-800 opacity-40"
                   : accessible
                   ? "border-gray-800 hover:border-gray-600 hover:-translate-y-0.5"
-                  : "border-gray-800 opacity-50"
+                  : "border-gray-800"
               }`}
             >
+              {/* Lock icon on the left edge — tooltip appears on lock hover only */}
+              {isLocked && !isComingSoon && (
+                <div className="absolute left-0 inset-y-0 flex items-center pl-3 z-10">
+                  <div className="relative group/lock cursor-help">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" className="text-gray-400 drop-shadow">
+                      <path d="M18 10V7a6 6 0 0 0-12 0v3H4v14h16V10h-2zm-6 9a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm4-9H8V7a4 4 0 0 1 8 0v3z" />
+                    </svg>
+                    {lockTooltip && (
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-2 rounded-lg bg-gray-700 border border-gray-600 text-gray-200 text-xs font-medium whitespace-nowrap shadow-lg opacity-0 group-hover/lock:opacity-100 pointer-events-none transition-opacity duration-150 z-20">
+                        {lockTooltip}
+                        <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-[6px] border-x-transparent border-t-[6px] border-t-gray-700" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Key + lock overlay for newly unlockable cards */}
+              {showKeyLock && (
+                <div className="absolute left-0 inset-y-0 flex items-center pl-2 z-10">
+                  <button
+                    onClick={(e) => handleKeyClick(e, card.id)}
+                    className="relative w-10 h-10 flex items-center justify-center cursor-pointer"
+                    aria-label="Unlock"
+                  >
+                    {/* Dimmed lock background */}
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" className="text-gray-500/40">
+                      <path d="M18 10V7a6 6 0 0 0-12 0v3H4v14h16V10h-2zm-6 9a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm4-9H8V7a4 4 0 0 1 8 0v3z" />
+                    </svg>
+                    {/* Pulsing key on top */}
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" fillRule="evenodd"
+                      className={`${KEY_COLOR[card.tags.street]} drop-shadow-lg absolute inset-0 m-auto animate-pulse`}>
+                      <path d={KEY_PATH} />
+                    </svg>
+                  </button>
+                </div>
+              )}
+
               {/* Coloured top strip */}
-              <div className={`h-1.5 ${stripClass}`} />
+              <div className={`h-1.5 rounded-t-xl ${stripClass}`} />
 
               {/* Card body */}
-              <div className="p-4 flex flex-col justify-between min-h-[88px]">
+              <div className={`p-4 flex flex-col justify-between min-h-[88px] ${isLocked && !isComingSoon ? "pl-11 opacity-50" : showKeyLock ? "pl-11" : ""}`}>
                 <p className={`font-semibold text-sm leading-snug ${textClass}`}>
                   {t(card.labelKey as Parameters<typeof t>[0])}
                 </p>
 
-                {/* Bottom: progress bars OR lock/coming-soon badge */}
+                {/* Bottom: progress bars OR lock/coming-soon/role badge */}
                 {accessible && card.progressModule && !isComingSoon ? (
                   <DiffProgressBars
                     progressModule={card.progressModule}
@@ -278,7 +422,7 @@ export default function SkillCardGrid({
                         {t("comingSoon" as Parameters<typeof t>[0])}
                       </span>
                     )}
-                    {!accessible && !isComingSoon && (
+                    {!roleAccess && !isComingSoon && (
                       <span
                         className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                           card.minRole === "premium"

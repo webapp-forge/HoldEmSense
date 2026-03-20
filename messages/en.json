@@ -139,7 +139,47 @@
     "ptsNeeded": "{pts} more pts needed to unlock {name}",
     "showMatrix": "Range Matrix",
     "showInfo": "Info",
-    "noHandsAvailable": "No hands available. Please run the generate script to fill the hand pool."
+    "keyFound": "Key found!",
+    "keyFoundDetail": "You can now unlock: {module}",
+    "noHandsAvailable": "No hands available. Please run the generate script to fill the hand pool.",
+    "villainHand": "Villain's hand",
+    "yourHand": "Your hand"
+  },
+  "moduleExplanation": {
+    "handVsHand1": "You see two specific hands and estimate the <equity>equity</equity> of your hand against your opponent's — preflop, before any community cards are dealt.",
+    "handVsHand2": "Rarely directly relevant in practice since you usually don't see your opponent's hand until showdown. Still important for understanding relative hand strengths and building a foundation for range thinking.",
+    "handVsHand3": "Equity shifters to watch for: suited cards (≈ +3%), connected cards (straights possible), gaps in connectors (reduced straight potential), blockers (your cards reduce opponent's outs), shared ranks (split pot possible — shifts equity toward 50%), and suit domination (both suited in the same suit — the lower flush draw is nearly worthless).",
+    "handVsHand4": "Fun fact: The so-called \"coinflip\" (pair vs two overcards) is not really a coinflip — the pair is ahead ≈ 53% to 47%. That's a 6 percentage point difference, which adds up over many hands.",
+    "preflop1": "You estimate your <equity>equity</equity> against the villain's <range>range</range> — expressed as <topX>Top X%</topX> of their possible starting hands.",
+    "preflop2": "Equity below 50% doesn't automatically mean fold — you need pot odds for that. The goal is building number sense for <eqRange>equity vs a range</eqRange>, not exact calculation.",
+    "flop1": "The flop changes <equity>equity</equity> drastically — draws, pair outs, and board textures now play a major role.",
+    "flop2": "The villain's <topX>Top X% range</topX> is a simplification: in real games you'd adjust it post-flop. Here you're still training a valuable intuition — how strong your hand is against a typical opening range.",
+    "turn1": "On the turn only one card remains — <equity>equity</equity> is more concrete but also more volatile: a single river out can flip it completely.",
+    "turn2": "The shown <range>range</range> is the villain's preflop opening range. In a real game it would already be narrowed significantly by the turn — here you're practicing the fundamentals before working with range adjustments.",
+    "river1": "On the river there are no more cards — <equity>equity</equity> is either 0% or 100%. What you're training here is: how often is my hand ahead against a typical villain <range>range</range>?",
+    "river2": "The preflop range is of course the furthest from reality here. Still, this training sharpens your feel for how well or poorly your hand performs on a given board."
+  },
+  "thumbRules": {
+    "title": "Rules of Thumb",
+    "noRule": "No simple rule applies here",
+    "higherPairVsLowerPair": "Higher pair vs lower pair",
+    "lowerPairVsHigherPair": "Lower pair vs higher pair",
+    "overcardsVsPair": "Two overcards vs pair (Coinflip)",
+    "pairVsOvercards": "Pair vs two overcards (Coinflip)",
+    "overpairVsTwo": "Overpair vs two lower cards",
+    "twoVsOverpair": "Two lower cards vs overpair",
+    "pairVsOneOvercard": "Pair vs one overcard",
+    "oneOvercardVsPair": "One overcard vs pair",
+    "overcardsVsUndercards": "Both overcards vs both undercards",
+    "undercardsVsOvercards": "Both undercards vs both overcards",
+    "interleavedHigher": "Interleaved, higher high card",
+    "interleavedLower": "Interleaved, lower high card",
+    "wrappingHero": "Wrapping (hero brackets villain)",
+    "wrappingVillain": "Wrapping (villain brackets hero)",
+    "dominating": "Dominating hand (shared rank, better kicker)",
+    "dominated": "Dominated hand (shared rank, worse kicker)",
+    "suitedBonusHero": "Hero suited",
+    "suitedBonusVillain": "Villain suited"
   },
   "combinedPotOdds": {
     "title": "Hand vs Range + Pot Odds",
@@ -163,6 +203,7 @@
   "sidebar": {
     "equityTraining": "Equity & Pot Odds",
     "weaknessTraining": "Fix your leaks",
+    "handVsHand": "Hand vs Hand",
     "handVsRange": "Hand vs Range",
     "flopHandVsRange": "Flop: Hand vs Range",
     "turnHandVsRange": "Turn: Hand vs Range",
@@ -206,6 +247,7 @@
   },
   "skillCards": {
     "comingSoon": "Coming Soon",
+    "handVsHand": "Preflop: Hand vs Hand",
     "equityPreflop": "Preflop: Equity Hand vs Range",
     "flopEquity": "Flop: Equity Hand vs Range",
     "turnEquity": "Turn: Equity Hand vs Range",
@@ -216,6 +258,7 @@
     "preflopRanges": "Preflop Ranges",
     "cbetBasics": "C-Bet Basics",
     "opponentTypes": "Opponent Types",
+    "lockTooltip": "First pass \"{module}\" on Beginner",
     "filter": {
       "all": "All",
       "preflop": "Pre-flop",
@@ -229,6 +272,7 @@
   "skillTree": {
     "title": "Skill Tree",
     "comingSoon": "Coming Soon",
+    "handVsHand": "Hand vs Hand",
     "equityPreflop": "Equity vs Range",
     "potOdds": "Pot Odds",
     "potOddsCombined": "Equity + Decision",

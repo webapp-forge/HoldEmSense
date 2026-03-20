@@ -18,6 +18,7 @@ import RangeMatrix from "./RangeMatrix";
 import EquityGuessPanel from "./EquityGuessPanel";
 import { getMemoHint } from "./potOddsHints";
 import { getSkillCardByModule, TEXT_COLOR } from "./skillCardConfig";
+import HeroHand from "./HeroHand";
 
 // Beginner Pot Odds presets — must match BEGINNER_POT_ODDS_PRESETS in training.ts
 const BEGINNER_PRESET_LABELS = ["16,7%", "20,0%", "25,0%", "28,6%", "33,3%", "37,5%", "40,0%"];
@@ -265,16 +266,8 @@ export default function LeakTraining({ fourColor = false, isAdmin = false }: { f
           </div>
         )}
 
-        {/* Hero cards */}
         {(isCombined || !isPotOdds) && (
-          <div className="flex flex-col items-center">
-            <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Your hand</p>
-            <div className="flex gap-2">
-              {hand.heroCards.map((card, i) => (
-                <CardComponent key={i} rank={card.rank} suit={card.suit} fourColor={fourColor} size="lg" />
-              ))}
-            </div>
-          </div>
+          <HeroHand cards={hand.heroCards} fourColor={fourColor} />
         )}
 
         {/* Step 1 label for combined */}

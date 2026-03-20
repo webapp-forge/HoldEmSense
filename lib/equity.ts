@@ -102,3 +102,29 @@ export function calculateEquity(
 
   return wins / simulations;
 }
+
+export function calculateHandVsHandEquity(
+  heroCards: Card[],
+  villainCards: Card[],
+  boardCards: Card[] = [],
+  simulations = 1000
+): number {
+  const communityNeeded = 5 - boardCards.length;
+  let wins = 0;
+
+  for (let i = 0; i < simulations; i++) {
+    const community = [
+      ...boardCards,
+      ...shuffle(buildDeck([...heroCards, ...villainCards, ...boardCards])).slice(0, communityNeeded),
+    ];
+
+    const heroHand = Hand.solve([...heroCards, ...community].map(toPs));
+    const villainHand = Hand.solve([...villainCards, ...community].map(toPs));
+    const w = Hand.winners([heroHand, villainHand]);
+
+    if (w.length === 2) wins += 0.5;
+    else if (w[0] === heroHand) wins += 1;
+  }
+
+  return wins / simulations;
+}
