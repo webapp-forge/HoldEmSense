@@ -1,28 +1,72 @@
-Statt eines Sidemenus mit Lektionen gibt es "Skill Cards". Diese werden auf 
-der "train" Seite in einem Raster dargestellt, jede Lektion entspricht einer 
-Karte. 
+Statt eines Sidemenus mit Lektionen gibt es "Skill Cards". Diese werden auf
+der "train" Seite in einem Raster dargestellt, jede Lektion entspricht einer
+Karte.
 
-Raster Desktop: 3 oder 4 Karten pro Zeile, zentriert.
+Raster Desktop: 4 Karten pro Zeile (lg), 3 (md), 2 (sm), 1 (mobil), zentriert.
 
-Den Karten werden Tags zugeordnet, 1:n. Durch Filtermethoden kann der User
+Den Karten werden Tags zugeordnet. Durch Filtermethoden kann der User
 die Sichtbarkeit der Karten sinnvoll einstellen.
 
-TAGS:
-street: pre-flop, flop, turn, river (exclusive)
-level: 0-4 (Einordnung der Schwierigkeit des Themas)
-    0 = Pokerregeln
-    1 = Basics
-    ...
-    4 = High Level Stuff
-game: cash game, mtt, single table
-table size: heads-up, six-max, 9-max
-BB klassen: <10BB, 11-20BB, ...
+TAGS (aktuell implementiert):
+- street: preflop, flop, turn, river, general (exklusiv)
+- level: 1-4 (Einordnung der Schwierigkeit des Themas)
 
-Den streets könnte man eine Farbe zuordnen damit es schön bunt wird,
-außerdem verschiedene Helligkeiten für die levels (4 Stufen, Stufe 0 
-ist außen vor)
+Geplante Tags (noch nicht implementiert):
+- game: cash game, mtt, single table
+- table size: heads-up, six-max, 9-max
+- BB klassen: <10BB, 11-20BB, ...
 
-Noch nicht freigeschaltete Karten sind ausgegraut.
+FARBEN:
+Jede Street hat eine eigene Farbe, mit 4 Helligkeitsstufen je Level:
+- preflop: blau (blue-400 bis blue-800)
+- flop: grün (lime-400 bis lime-800)
+- turn: gelb (yellow-400 bis yellow-800)
+- river: orange (orange-400 bis orange-800)
+- general: grau (slate-400 bis slate-800)
+Die Farbe erscheint als schmaler Strip (h-1.5) am oberen Kartenrand.
 
+FILTER:
+- Street-Filter und Level-Filter als Chips dargestellt, zentriert
+- Innerhalb einer Gruppe: OR (Multiselect, z.B. Flop + Turn gleichzeitig)
+- Zwischen Gruppen: AND (Street UND Level müssen passen)
+- "All"-Chip pro Gruppe (aktiv wenn nichts ausgewählt = alles sichtbar)
+- Es werden nur Filter angezeigt für Tags die tatsächlich Karten haben
+- Level-Filter nur sichtbar wenn mehr als ein Level existiert
+- Zusätzlich: "Hide passed" Filter (blendet bestandene Trainings aus)
+  - Nur sichtbar wenn mindestens ein Training bestanden ist
 
+FORTSCHRITTSANZEIGE PRO KARTE:
+Jede Karte zeigt 4 Fortschrittsbalken (einen pro Schwierigkeitsgrad 1-4):
+- Balken zeigt den aktuellen Score im Rolling Window (letzte n Übungen)
+- Gesperrte Stufen zeigen "—"
+- Aktiver Fortschritt ohne Bestehen: Prozent-Wert unter dem Balken
+- Grüner Haken (✓): Stufe wurde einmalig bestanden (80% Threshold)
+  → bleibt auch wenn aktueller Wert wieder drunter fällt
+  → Erkennung: userProgress hat maxUnlocked >= diff+1
+- Goldener Stern (★): Aktuelles Rolling Window ist 100% perfekt
+  → alle Hände im Window korrekt (count >= windowSize && total >= maxPoints)
+
+ZUGANGSKONTROLLE:
+- Nicht freigeschaltete Karten (falscher Role) sind ausgegraut mit PRO/REG Badge
+- "Coming soon" Karten: reduzierte Opacity, kein Link
+- Schwierigkeitsgrade 3+4 nur für Premium-User zugänglich
+
+LEAK TRAINING:
+- Nicht im Skill Card Grid enthalten
+- Stattdessen im Header als "Fix Leaks" Link (rechts neben "Train")
+- Echtzeit-Badge mit Anzahl offener Leaks (rotes Kreis-Badge)
+- Badge aktualisiert sich per "leak-processed" DOM-Event
+
+RELEVANTE DATEIEN:
+- components/train/skillCardConfig.ts    — Card-Definitionen, Farb-Mappings, Types
+- components/train/SkillCardGrid.tsx     — Grid-Komponente mit Filtern und Fortschritt
+- lib/actions/skillTree.ts               — Server Actions: getSkillTreeProgress(),
+                                           getCompletedModules(), getSkillCardProgress()
+- app/train/page.tsx                     — Server Component, lädt Daten und rendert Grid
+- app/train/layout.tsx                   — Vereinfachtes Layout (nur Padding, kein Sidebar)
+- components/LeakNavBadge.tsx            — Leak-Badge im Header
+- components/Header.tsx                  — Header mit Fix-Leaks Link
+- components/NavMenu.tsx                 — Mobile Menu mit Fix-Leaks
+- messages/en.json (skillCards)          — i18n Keys englisch
+- messages/de.json (skillCards)          — i18n Keys deutsch
 

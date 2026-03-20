@@ -17,15 +17,7 @@ import TrainPageLayout from "./TrainPageLayout";
 import RangeMatrix from "./RangeMatrix";
 import EquityGuessPanel from "./EquityGuessPanel";
 import { getMemoHint } from "./potOddsHints";
-
-const MODULE_LABEL: Record<string, string> = {
-  preflop: "Hand vs Range",
-  flop: "Flop: Hand vs Range",
-  turn: "Turn: Hand vs Range",
-  river: "River: Hand vs Range",
-  "pot-odds": "Pot Odds",
-  "combined-pot-odds": "Hand vs Range + Pot Odds",
-};
+import { getSkillCardByModule, TEXT_COLOR } from "./skillCardConfig";
 
 // Beginner Pot Odds presets — must match BEGINNER_POT_ODDS_PRESETS in training.ts
 const BEGINNER_PRESET_LABELS = ["16,7%", "20,0%", "25,0%", "28,6%", "33,3%", "37,5%", "40,0%"];
@@ -68,6 +60,7 @@ export default function LeakTraining({ fourColor = false, isAdmin = false }: { f
   const t = useTranslations("train");
   const tc = useTranslations("combinedPotOdds");
   const tl = useTranslations("leakFixing");
+  const tsc = useTranslations("skillCards");
   const router = useRouter();
   const td = useTranslations("difficulty");
 
@@ -173,7 +166,7 @@ export default function LeakTraining({ fourColor = false, isAdmin = false }: { f
       <>
         {toast}
         <TrainPageLayout info={null} explanation={null}>
-          <div className="flex flex-col gap-4 max-w-2xl">
+          <div className="flex flex-col items-center gap-4 max-w-2xl w-full">
             <h2 className="text-xl font-bold">{tl("title")}</h2>
             <p className="text-gray-400">{tl("noLeaks")}</p>
           </div>
@@ -211,10 +204,14 @@ export default function LeakTraining({ fourColor = false, isAdmin = false }: { f
       info={isPotOdds ? null : <RangeMatrix villainRange={hand.villainRange} heroCards={hand.heroCards} />}
       explanation={null}
     >
-      <div className="flex flex-col gap-6 max-w-2xl">
-        <div>
-          <h2 className="text-xl font-bold">{tl("title")}</h2>
-          <p className="text-gray-500 text-sm mt-0.5">{MODULE_LABEL[hand.module] ?? hand.module}</p>
+      <div className="flex flex-col items-center gap-6 max-w-2xl w-full">
+        <div className="text-center">
+          {(() => {
+            const sc = getSkillCardByModule(hand.module);
+            return <h2 className={`text-xl font-bold ${sc ? TEXT_COLOR[sc.tags.street] : ""}`}>
+              {sc ? tsc(sc.labelKey as Parameters<typeof tsc>[0]) : hand.module}
+            </h2>;
+          })()}
           <div className="flex items-center gap-3 mt-1 text-sm text-gray-400">
             {(isCombined || !isPotOdds) && (
               <>
@@ -270,11 +267,11 @@ export default function LeakTraining({ fourColor = false, isAdmin = false }: { f
 
         {/* Hero cards */}
         {(isCombined || !isPotOdds) && (
-          <div>
+          <div className="flex flex-col items-center">
             <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Your hand</p>
             <div className="flex gap-2">
               {hand.heroCards.map((card, i) => (
-                <CardComponent key={i} rank={card.rank} suit={card.suit} fourColor={fourColor} />
+                <CardComponent key={i} rank={card.rank} suit={card.suit} fourColor={fourColor} size="lg" />
               ))}
             </div>
           </div>
@@ -400,7 +397,7 @@ export default function LeakTraining({ fourColor = false, isAdmin = false }: { f
             </div>
             <button
               onClick={loadNextHand}
-              className="self-start px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm"
+              className="self-center px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm"
             >
               {tl("nextHand")}
             </button>

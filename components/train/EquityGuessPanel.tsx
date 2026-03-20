@@ -56,8 +56,8 @@ export default function EquityGuessPanel({
     const correctIdx = actualEquity !== null ? getPresetCorrectIndex(actualEquity, presetEquities) : null;
     return (
       <div>
-        <p className="text-sm text-gray-400 mb-3">{prompt}</p>
-        <div className="flex flex-wrap gap-2">
+        <p className="text-sm text-gray-400 mb-3 text-center">{prompt}</p>
+        <div className="flex flex-wrap justify-center gap-2">
           {onAdminGuess && guessed === null && !calculating && (
             <button
               onClick={onAdminGuess}
@@ -98,10 +98,10 @@ export default function EquityGuessPanel({
 
   return (
     <div>
-      <p className="text-sm text-gray-400 mb-3">{prompt}</p>
+      <p className="text-sm text-gray-400 mb-3 text-center">{prompt}</p>
       {useSlider ? (
         <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col items-center gap-1 w-full max-w-md mx-auto">
             <input
               type="range"
               min={0}
@@ -110,9 +110,9 @@ export default function EquityGuessPanel({
               value={sliderValue}
               onChange={(e) => onSliderChange(Number(e.target.value))}
               disabled={guessed !== null}
-              className="flex-1 accent-lime-500"
+              className="w-full accent-lime-500"
             />
-            <span className="text-white font-medium w-20 text-right">
+            <span className="text-white font-medium">
               {equityClasses[sliderValue]}
             </span>
           </div>
@@ -152,7 +152,7 @@ export default function EquityGuessPanel({
           )}
         </div>
       ) : (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap justify-center gap-2">
           {onAdminGuess && guessed === null && !calculating && (
             <button
               onClick={onAdminGuess}

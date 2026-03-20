@@ -110,3 +110,17 @@ export const SKILL_CARDS: SkillCard[] = [
     tags: { street: "general", level: 2 },
   },
 ];
+
+/** Map handModule (used by EquityTraining) → progressModule (used by SKILL_CARDS) */
+const HAND_MODULE_TO_PROGRESS: Record<string, string> = {
+  preflop: "hand-vs-range",
+  flop: "hand-vs-range-flop",
+  turn: "hand-vs-range-turn",
+  river: "hand-vs-range-river",
+};
+
+/** Look up the SkillCard for a given handModule or progressModule */
+export function getSkillCardByModule(module: string): SkillCard | undefined {
+  const progressModule = HAND_MODULE_TO_PROGRESS[module] ?? module;
+  return SKILL_CARDS.find((c) => c.progressModule === progressModule);
+}

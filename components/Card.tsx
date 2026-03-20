@@ -18,14 +18,23 @@ const suitColor4: Record<string, string> = {
   "♦": "text-blue-600",
 };
 
-export default function Card({ rank, suit, fourColor = false }: CardProps) {
+type Size = "sm" | "md" | "lg";
+
+const SIZE_CLASSES: Record<Size, { card: string; text: string }> = {
+  sm: { card: "w-10 h-14", text: "text-2xl" },
+  md: { card: "w-10 h-14", text: "text-2xl" },
+  lg: { card: "w-14 h-20", text: "text-3xl" },
+};
+
+export default function Card({ rank, suit, fourColor = false, size = "md" }: CardProps & { size?: Size }) {
   const suitColor = fourColor ? suitColor4 : suitColor2;
+  const s = SIZE_CLASSES[size];
   return (
-    <div className="w-10 h-14 bg-gray-100 rounded-md flex flex-col items-center justify-center shadow-md">
-      <span className={`text-2xl font-bold leading-none ${suitColor[suit]}`}>
+    <div className={`${s.card} bg-gray-100 rounded-md flex flex-col items-center justify-center shadow-md`}>
+      <span className={`${s.text} font-bold leading-none ${suitColor[suit]}`}>
         {rank}
       </span>
-      <span className={`text-2xl leading-none ${suitColor[suit]}`}>
+      <span className={`${s.text} leading-none ${suitColor[suit]}`}>
         {suit}
       </span>
     </div>

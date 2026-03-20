@@ -10,6 +10,7 @@ import TrainPageLayout from "../../../../components/train/TrainPageLayout";
 import DifficultySelector from "../../../../components/train/DifficultySelector";
 import GlossaryLink from "../../../../components/glossary/GlossaryLink";
 import { getMemoHint } from "../../../../components/train/potOddsHints";
+import { getSkillCardByModule, TEXT_COLOR } from "../../../../components/train/skillCardConfig";
 
 type Role = "guest" | "registered" | "premium";
 
@@ -58,7 +59,9 @@ type HandState = { handId: string; potSize: number; betSize: number; difficulty:
 
 export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin: boolean }) {
   const t = useTranslations("train");
+  const tsc = useTranslations("skillCards");
   const td = useTranslations("difficulty");
+  const skillCard = getSkillCardByModule("pot-odds");
   const router = useRouter();
   const [difficulty, setDifficulty] = useState(1);
   const [unlockedDifficulties, setUnlockedDifficulties] = useState<number[]>([1]);
@@ -152,9 +155,11 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
         </div>
       }
     >
-      <div className="flex flex-col gap-6 max-w-2xl">
-        <div>
-          <h2 className="text-xl font-bold">Pot Odds</h2>
+      <div className="flex flex-col items-center gap-6 max-w-2xl w-full">
+        <div className="text-center">
+          <h2 className={`text-xl font-bold ${skillCard ? TEXT_COLOR[skillCard.tags.street] : ""}`}>
+            {skillCard ? tsc(skillCard.labelKey as Parameters<typeof tsc>[0]) : "Pot Odds"}
+          </h2>
           <p className="text-gray-400 mt-1 text-sm">Wie viel Equity brauchst du zum Callen?</p>
         </div>
 
@@ -171,7 +176,7 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
 
         {/* Progress bar */}
         {progress !== null && (
-          <div className="text-sm text-gray-400">
+          <div className="text-sm text-gray-400 w-full max-w-md">
             {progress.count < progress.windowSize ? (
               <>
                 <div className="flex justify-between mb-1">
@@ -221,7 +226,7 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
         )}
 
         {/* Scenario */}
-        <div className="bg-gray-900 border border-gray-700 rounded-lg px-5 py-4 flex flex-col gap-1 text-sm">
+        <div className="bg-gray-900 border border-gray-700 rounded-lg px-5 py-4 flex flex-col gap-1 text-sm w-full max-w-md">
           <div className="flex justify-between">
             <span className="text-gray-400">Pot (inkl. Bet)</span>
             <span className="text-white font-semibold">{hand.potSize + hand.betSize} BB</span>
@@ -234,9 +239,9 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
 
         {/* Guess buttons / slider */}
         <div>
-          <p className="text-sm text-gray-400 mb-3">Wie viel Equity brauchst du mindestens?</p>
+          <p className="text-sm text-gray-400 mb-3 text-center">Wie viel Equity brauchst du mindestens?</p>
           {difficulty === 1 ? (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap justify-center gap-2">
               {isAdmin && guessed === null && !calculating && (
                 <button
                   onClick={() => {
@@ -274,7 +279,7 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
             </div>
           ) : useSlider ? (
             <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col items-center gap-1 w-full max-w-md mx-auto">
                 <input
                   type="range"
                   min={0}
@@ -283,9 +288,9 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
                   value={sliderValue}
                   onChange={(e) => setSliderValue(Number(e.target.value))}
                   disabled={guessed !== null}
-                  className="flex-1 accent-lime-500"
+                  className="w-full accent-lime-500"
                 />
-                <span className="text-white font-medium w-20 text-right">
+                <span className="text-white font-medium">
                   {equityClasses[sliderValue]}
                 </span>
               </div>
@@ -324,7 +329,7 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
               )}
             </div>
           ) : (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap justify-center gap-2">
               {isAdmin && guessed === null && !calculating && (
                 <button
                   onClick={() => {
@@ -393,7 +398,7 @@ export default function PotOddsTraining({ role, isAdmin }: { role: Role; isAdmin
 
             <button
               onClick={() => startNewHand()}
-              className="self-start px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm"
+              className="self-center px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm"
             >
               {t("nextHand")}
             </button>

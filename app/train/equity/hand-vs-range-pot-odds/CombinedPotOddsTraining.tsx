@@ -20,6 +20,7 @@ import DifficultySelector from "../../../../components/train/DifficultySelector"
 import EquityGuessPanel from "../../../../components/train/EquityGuessPanel";
 import GlossaryLink from "../../../../components/glossary/GlossaryLink";
 import { getMemoHint } from "../../../../components/train/potOddsHints";
+import { getSkillCardByModule, TEXT_COLOR } from "../../../../components/train/skillCardConfig";
 
 type Role = "guest" | "registered" | "premium";
 
@@ -53,7 +54,9 @@ export default function CombinedPotOddsTraining({
 }) {
   const t = useTranslations("train");
   const tc = useTranslations("combinedPotOdds");
+  const tsc = useTranslations("skillCards");
   const td = useTranslations("difficulty");
+  const skillCard = getSkillCardByModule("combined-pot-odds");
   const router = useRouter();
 
   const [difficulty, setDifficulty] = useState(1);
@@ -183,9 +186,11 @@ export default function CombinedPotOddsTraining({
           </div>
         }
       >
-        <div className="flex flex-col gap-6 max-w-2xl">
-          <div>
-            <h2 className="text-xl font-bold">{tc("title")}</h2>
+        <div className="flex flex-col items-center gap-6 max-w-2xl w-full">
+          <div className="text-center">
+            <h2 className={`text-xl font-bold ${skillCard ? TEXT_COLOR[skillCard.tags.street] : ""}`}>
+              {skillCard ? tsc(skillCard.labelKey as Parameters<typeof tsc>[0]) : tc("title")}
+            </h2>
             <p className="text-gray-400 mt-1">
               Villain range: Top <span className="text-white font-semibold">{hand.villainRange}%</span>
             </p>
@@ -204,7 +209,7 @@ export default function CombinedPotOddsTraining({
 
           {/* Progress bar */}
           {progress !== null && (
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-gray-400 w-full max-w-md">
               {progress.count < progress.windowSize ? (
                 <>
                   <div className="flex justify-between mb-1">
@@ -280,18 +285,18 @@ export default function CombinedPotOddsTraining({
           )}
 
           {/* Hero cards */}
-          <div>
+          <div className="flex flex-col items-center">
             <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Your hand</p>
             <div className="flex gap-2">
               {hand.heroCards.map((card, i) => (
-                <CardComponent key={i} rank={card.rank} suit={card.suit} fourColor={fourColor} />
+                <CardComponent key={i} rank={card.rank} suit={card.suit} fourColor={fourColor} size="lg" />
               ))}
             </div>
           </div>
 
           {/* Step 1: equity guess */}
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">{tc("step1")}</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 text-center">{tc("step1")}</p>
             <EquityGuessPanel
               difficulty={difficulty}
               guessed={equityGuessed}
@@ -326,7 +331,7 @@ export default function CombinedPotOddsTraining({
 
               {/* Step 2: pot odds + call/fold */}
               <div className="border-t border-gray-700 pt-4 flex flex-col gap-4">
-                <p className="text-xs text-gray-500 uppercase tracking-wider">{tc("step2")}</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wider text-center">{tc("step2")}</p>
 
                 <div className="bg-gray-900 border border-gray-700 rounded-lg px-5 py-4 flex flex-col gap-1 text-sm">
                   <div className="flex justify-between">
@@ -340,7 +345,7 @@ export default function CombinedPotOddsTraining({
                 </div>
 
                 {callDecision === null ? (
-                  <div className="flex gap-3">
+                  <div className="flex justify-center gap-3">
                     <button
                       onClick={() => handleDecision("call")}
                       className="px-6 py-2 bg-gray-700 hover:bg-lime-700 rounded text-sm font-medium transition-colors"
@@ -402,7 +407,7 @@ export default function CombinedPotOddsTraining({
               {decisionResult !== null && (
                 <button
                   onClick={() => startNewHand()}
-                  className="self-start px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm"
+                  className="self-center px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm"
                 >
                   {t("nextHand")}
                 </button>

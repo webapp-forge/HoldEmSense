@@ -19,6 +19,7 @@ import DifficultySelector from "./DifficultySelector";
 import GlossaryLink from "../glossary/GlossaryLink";
 import MatrixTip from "./MatrixTip";
 import EquityGuessPanel, { getCorrectIndex } from "./EquityGuessPanel";
+import { getSkillCardByModule, TEXT_COLOR } from "./skillCardConfig";
 
 type Role = "guest" | "registered" | "premium";
 
@@ -32,12 +33,6 @@ type HandState = {
   difficulty: number;
 };
 
-const MODULE_TITLES: Record<string, string> = {
-  preflop: "Hand vs Range",
-  flop: "Flop: Hand vs Range",
-  turn: "Turn: Hand vs Range",
-  river: "River: Hand vs Range",
-};
 
 function ModuleExplanation({ handModule }: { handModule: string }) {
   switch (handModule) {
@@ -126,8 +121,10 @@ export default function EquityTraining({
   fourColor?: boolean;
 }) {
   const t = useTranslations("train");
+  const tc = useTranslations("skillCards");
   const td = useTranslations("difficulty");
   const router = useRouter();
+  const skillCard = getSkillCardByModule(handModule);
   const [difficulty, setDifficulty] = useState(1);
   const [unlockedDifficulties, setUnlockedDifficulties] = useState<number[]>([1]);
   const [hand, setHand] = useState<HandState | null>(null);
@@ -228,9 +225,11 @@ export default function EquityTraining({
       info={<RangeMatrix villainRange={hand.villainRange} heroCards={hand.heroCards} />}
       explanation={<ModuleExplanation handModule={handModule} />}
     >
-      <div className="flex flex-col gap-6 max-w-2xl">
-        <div>
-          <h2 className="text-xl font-bold">{MODULE_TITLES[handModule] ?? handModule}</h2>
+      <div className="flex flex-col items-center gap-6 max-w-2xl w-full">
+        <div className="text-center">
+          <h2 className={`text-xl font-bold ${skillCard ? TEXT_COLOR[skillCard.tags.street] : ""}`}>
+            {skillCard ? tc(skillCard.labelKey as Parameters<typeof tc>[0]) : handModule}
+          </h2>
           <p className="text-gray-400 mt-1">
             Villain range: Top <span className="text-white font-semibold">{hand.villainRange}%</span>
           </p>
@@ -248,7 +247,7 @@ export default function EquityTraining({
         />
 
         {progress !== null && (
-          <div className="text-sm text-gray-400">
+          <div className="text-sm text-gray-400 w-full max-w-md">
             {progress.count < progress.windowSize ? (
               <>
                 <div className="flex justify-between mb-1">
@@ -324,11 +323,11 @@ export default function EquityTraining({
         )}
 
         {/* Hero cards */}
-        <div>
+        <div className="flex flex-col items-center">
           <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">Your hand</p>
           <div className="flex gap-2">
             {hand.heroCards.map((card, i) => (
-              <CardComponent key={i} rank={card.rank} suit={card.suit} fourColor={fourColor} />
+              <CardComponent key={i} rank={card.rank} suit={card.suit} fourColor={fourColor} size="lg" />
             ))}
           </div>
         </div>
@@ -370,7 +369,7 @@ export default function EquityTraining({
 
             <button
               onClick={() => startNewHand()}
-              className="self-start px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm"
+              className="self-center px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm"
             >
               {t("nextHand")}
             </button>

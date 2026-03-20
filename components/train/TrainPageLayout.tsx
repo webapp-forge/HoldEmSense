@@ -15,9 +15,9 @@ export default function TrainPageLayout({ children, info, explanation }: Props) 
   const [mobileOverlay, setMobileOverlay] = useState<"matrix" | "info" | null>(null);
 
   return (
-    <div className="flex gap-6 items-start">
-      {/* Left: interactive */}
-      <div className="flex-none max-w-2xl w-full">
+    <div className="relative md:pt-8">
+      {/* Center: interactive — always centered on screen */}
+      <div className="max-w-2xl mx-auto flex flex-col items-center">
         {children}
 
         {/* Overlay buttons:
@@ -53,14 +53,14 @@ export default function TrainPageLayout({ children, info, explanation }: Props) 
         )}
       </div>
 
-      {/* Middle: matrix — inline from 1400px, all three panels from 1700px */}
-      <div className="hidden min-[1400px]:block flex-1 min-w-0">
+      {/* Left: matrix — absolutely positioned, doesn't affect centering */}
+      <div className="hidden min-[1400px]:block absolute top-0 left-0 md:top-8">
         {info}
       </div>
 
-      {/* Right: explanation — only when enough space for all three panels */}
+      {/* Right: explanation — absolutely positioned */}
       {explanation && (
-        <div className="hidden min-[1700px]:flex flex-none items-start">
+        <div className="hidden min-[1700px]:flex absolute top-0 right-0 md:top-8 items-start">
           <button
             onClick={() => setOpen(!open)}
             className="flex items-center justify-center w-5 self-stretch bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-l transition-colors"

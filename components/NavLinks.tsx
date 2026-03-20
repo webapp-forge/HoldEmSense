@@ -19,7 +19,7 @@ export default function NavLinks({ links }: Props) {
   return (
     <>
       {links.map(({ href, label, icon }) => {
-        const isActive = pathname === href || pathname.startsWith(href + "/");
+        const isActive = pathname === href || (pathname.startsWith(href + "/") && !pathname.startsWith(href + "/leak-fixing"));
         return (
           <Link
             key={href}
