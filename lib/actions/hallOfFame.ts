@@ -26,6 +26,7 @@ async function computeLeaderboard(
     where: {
       userId: { not: null },
       pointsScored: { not: null },
+      user: { deletedAt: null },
       ...(dateFilter ? { createdAt: dateFilter } : {}),
     },
     select: {

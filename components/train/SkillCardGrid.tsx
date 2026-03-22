@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import {
   SKILL_CARDS,
@@ -221,7 +221,20 @@ export default function SkillCardGrid({
   const [streetFilters, setStreetFilters] = useState<Set<Street>>(new Set());
   const [levelFilters, setLevelFilters] = useState<Set<number>>(new Set());
   const [hidePassed, setHidePassed] = useState(false);
-  const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(new Set());
+  const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem("dismissedKeys");
+      return stored ? new Set(JSON.parse(stored) as string[]) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("dismissedKeys", JSON.stringify([...dismissedKeys]));
+    } catch { /* quota exceeded or unavailable */ }
+  }, [dismissedKeys]);
 
   function handleKeyClick(e: React.MouseEvent, cardId: string) {
     e.preventDefault();
@@ -264,50 +277,62 @@ export default function SkillCardGrid({
   return (
     <div className="space-y-5">
       {/* ── Filter bar ──────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-2">
-        {/* Street filter — multi-select OR within group */}
-        <div className="flex flex-wrap gap-1.5">
-          <FilterChip
-            label={t("filter.all" as Parameters<typeof t>[0])}
-            active={streetFilters.size === 0}
-            onClick={() => setStreetFilters(new Set())}
-          />
-          {availableStreets.map((street) => (
-            <FilterChip
-              key={street}
-              label={t(`filter.${street}` as Parameters<typeof t>[0])}
-              active={streetFilters.has(street)}
-              onClick={() => toggleStreet(street)}
-            />
-          ))}
-        </div>
-
-        {/* Level filter — multi-select OR within group, only shown when multiple levels exist */}
-        {showLevelFilter && (
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center items-start sm:items-center gap-3 sm:gap-x-6 sm:gap-y-3">
+        {/* Street filter */}
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider w-12 shrink-0">
+            {t("filter.streetLabel" as Parameters<typeof t>[0])}
+          </span>
           <div className="flex flex-wrap gap-1.5">
             <FilterChip
               label={t("filter.all" as Parameters<typeof t>[0])}
-              active={levelFilters.size === 0}
-              onClick={() => setLevelFilters(new Set())}
+              active={streetFilters.size === 0}
+              onClick={() => setStreetFilters(new Set())}
             />
-            {availableLevels.map((level) => (
+            {availableStreets.map((street) => (
               <FilterChip
-                key={level}
-                label={`Level ${level}`}
-                active={levelFilters.has(level)}
-                onClick={() => toggleLevel(level)}
+                key={street}
+                label={t(`filter.${street}` as Parameters<typeof t>[0])}
+                active={streetFilters.has(street)}
+                onClick={() => toggleStreet(street)}
               />
             ))}
           </div>
+        </div>
+
+        {/* Level filter */}
+        {showLevelFilter && (
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider w-12 shrink-0">
+              {t("filter.levelLabel" as Parameters<typeof t>[0])}
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              <FilterChip
+                label={t("filter.all" as Parameters<typeof t>[0])}
+                active={levelFilters.size === 0}
+                onClick={() => setLevelFilters(new Set())}
+              />
+              {availableLevels.map((level) => (
+                <FilterChip
+                  key={level}
+                  label={`Level ${level}`}
+                  active={levelFilters.has(level)}
+                  onClick={() => toggleLevel(level)}
+                />
+              ))}
+            </div>
+          </div>
         )}
 
-        {/* Hide-passed toggle — only shown if user has completed at least one module */}
+        {/* Hide-passed toggle */}
         {completedModules.length > 0 && (
-          <FilterChip
-            label={t("filter.hidePassed" as Parameters<typeof t>[0])}
-            active={hidePassed}
-            onClick={() => setHidePassed(!hidePassed)}
-          />
+          <div className="flex items-center gap-2 sm:ml-auto">
+            <FilterChip
+              label={t("filter.hidePassed" as Parameters<typeof t>[0])}
+              active={hidePassed}
+              onClick={() => setHidePassed(!hidePassed)}
+            />
+          </div>
         )}
       </div>
 

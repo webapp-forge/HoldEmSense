@@ -1,0 +1,5 @@
+Domain: inwx.de (kgrimm@gmx.de)
+Server: hetzner.com / console.hetzner.com/
+Emails: resend.com (connected über GitHub / info@webapp-forge.de)
+
+

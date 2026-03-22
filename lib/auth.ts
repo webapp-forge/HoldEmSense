@@ -18,7 +18,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     where: { email: credentials.email as string },
                 });
 
-                if (!user) return null;
+                if (!user || user.deletedAt) return null;
 
                 const valid = await bcrypt.compare(
                     credentials.password as string,
@@ -30,7 +30,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 // Retroactively grant any achievements the user has earned but not yet received
                 checkAndGrantAchievements(user.id).catch(() => {});
 
-                return { id: user.id, email: user.email, name: user.username, isPremium: user.isPremium, isAdmin: user.isAdmin };
+                return {
+                    id: user.id,
+                    email: user.email,
+                    name: user.username,
+                    isPremium: user.isPremium,
+                    isAdmin: user.isAdmin,
+                    emailVerified: user.emailVerified,
+                };
             },
         }),
     ],

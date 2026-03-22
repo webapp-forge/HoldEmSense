@@ -9,7 +9,21 @@
     "comingSoon": "Coming soon",
     "noChipsYet": "No chips yet — start training!",
     "fourColorDeck": "4-Color Deck",
-    "fourColorDeckHint": "♠ black  ♥ red  ♦ blue  ♣ green"
+    "fourColorDeckHint": "♠ black  ♥ red  ♦ blue  ♣ green",
+    "accountSettings": "Account",
+    "appSettings": "App Settings",
+    "change": "Change",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "changePasswordSubmit": "Update Password",
+    "passwordChanged": "Password updated successfully.",
+    "wrongPassword": "Current password is incorrect.",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Delete your account?",
+    "deleteConfirmBody": "Your account and all personal data will be deleted. This cannot be undone.",
+    "deleteConfirmPassword": "Enter your password to confirm",
+    "deleteConfirmButton": "Permanently Delete Account",
+    "cancel": "Cancel"
   },
   "achievements": {
     "unlocked": "Achievement unlocked!",
@@ -46,7 +60,7 @@
     "logout": "Logout",
     "register": "Register",
     "hallOfFame": "Hall of Fame",
-    "streakDays": "{days} days in a row",
+    "streakDays": "{days} days trained in a row",
     "streakKeep": "Train today to keep your streak alive",
     "streakStart": "Train today to start your streak",
     "leakTraining": "Fix Leaks"
@@ -91,7 +105,10 @@
     "password": "Password",
     "submit": "Login",
     "noAccount": "No account?",
-    "register": "Register"
+    "register": "Register",
+    "invalidToken": "This verification link is invalid or has expired. Please request a new one.",
+    "forgotPassword": "Forgot your password?",
+    "resetSuccess": "Your password has been reset. Please log in."
   },
   "register": {
     "title": "Register",
@@ -255,7 +272,7 @@
     "potOdds": "Pot Odds: Required Equity",
     "potOddsCombined": "Pot Odds: Equity + Decision",
     "leakTraining": "Leak Training",
-    "preflopRanges": "Preflop Ranges",
+    "preflopRanges": "Preflop Ranges 6-max",
     "cbetBasics": "C-Bet Basics",
     "opponentTypes": "Opponent Types",
     "lockTooltip": "First pass \"{module}\" on Beginner",
@@ -266,8 +283,45 @@
       "turn": "Turn",
       "river": "River",
       "general": "General",
-      "hidePassed": "Hide passed"
+      "hidePassed": "Hide passed",
+      "streetLabel": "Street",
+      "levelLabel": "Level"
     }
+  },
+  "forgotPassword": {
+    "title": "Reset Password",
+    "email": "Email",
+    "submit": "Send reset link",
+    "sending": "Sending...",
+    "success": "If an account exists with that email, we sent a password reset link.",
+    "backToLogin": "Back to login",
+    "rateLimited": "Please wait before requesting another email."
+  },
+  "resetPassword": {
+    "title": "Set New Password",
+    "password": "New password",
+    "confirmPassword": "Confirm password",
+    "submit": "Reset password",
+    "mismatch": "Passwords do not match.",
+    "success": "Password reset successfully. You can now log in.",
+    "invalidToken": "This reset link is invalid or has expired.",
+    "requestNew": "Request a new link",
+    "backToLogin": "Back to login"
+  },
+  "emailVerification": {
+    "banner": "Please verify your email address. Check your inbox for a verification link.",
+    "resend": "Resend",
+    "sending": "Sending...",
+    "sent": "Verification email sent!",
+    "waitBeforeResend": "Please wait before requesting another email.",
+    "verified": "Your email has been verified successfully!",
+    "emailStatus": "Email Verification",
+    "unverified": "Unverified",
+    "verifiedLabel": "Verified"
+  },
+  "guestBanner": {
+    "message": "You are training as a guest. Register to save your progress permanently.",
+    "register": "Register for free"
   },
   "skillTree": {
     "title": "Skill Tree",
@@ -280,9 +334,36 @@
     "turnEquity": "Turn Equity",
     "riverEquity": "River Equity",
     "leakTraining": "Leak Training",
-    "preflopRanges": "Preflop Ranges",
+    "preflopRanges": "Preflop Ranges 6-max",
     "opponentTypes": "Opponent Types",
     "cashGame": "Cash Game",
     "tournament": "Tournament"
+  },
+  "rangeTraining": {
+    "dealing": "Dealing...",
+    "error": "Could not load round.",
+    "positionLabel": "Your position",
+    "positionUTG": "UTG — Under the Gun",
+    "positionMP": "MP — Middle Position",
+    "positionCO": "CO — Cutoff",
+    "positionBTN": "BTN — Button",
+    "positionSB": "SB — Small Blind",
+    "selectHands": "Select all hands you would open from this position.",
+    "play": "Play",
+    "fold": "Fold",
+    "shouldPlay": "Play",
+    "shouldFold": "Fold",
+    "submit": "Check",
+    "evaluating": "Evaluating...",
+    "nextRound": "Next Round",
+    "openingRange": "Opening range: Top {percent}%",
+    "warmup": "Warm-up: {count}/{window} rounds",
+    "last100": "Last {window} rounds",
+    "readyToUnlock": "Ready to unlock {name}!",
+    "ptsNeeded": "{pts} pts needed to unlock {name}",
+    "unlocked": "Unlocked",
+    "explanation1": "You see a table position and 5 starting hands. Mark which ones you would open (raise with) from that position.",
+    "explanation2": "Opening ranges vary by position. Under the Gun (first to act) needs much stronger hands because many players are still to act. The Button (last to act) can open very wide because positional advantage compensates for weaker hands.",
+    "explanation3": "These are standard TAG (Tight-Aggressive) opening ranges for 6-max. Real ranges vary by player type and table dynamics — but mastering these fundamentals is essential before adjusting."
   }
 }

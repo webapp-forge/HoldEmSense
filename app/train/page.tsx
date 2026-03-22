@@ -17,5 +17,7 @@ export default async function TrainPage() {
     ? "premium"
     : "registered";
 
-  return <SkillCardGrid role={role} progress={progress} completedModules={completedModules} cardProgress={cardProgress} />;
+  return (
+    <SkillCardGrid role={role} progress={progress} completedModules={completedModules} cardProgress={cardProgress} />
+  );
 }

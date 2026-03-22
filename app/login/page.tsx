@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { login } from "@/lib/actions/auth";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -8,6 +9,8 @@ import { useTranslations } from "next-intl";
 export default function LoginPage() {
   const [error, setError] = useState("");
   const t = useTranslations("login");
+  const searchParams = useSearchParams();
+  const tokenError = searchParams.get("error");
 
   async function handleSubmit(formData: FormData) {
     setError("");
@@ -19,6 +22,14 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-950">
       <div className="bg-gray-900 p-8 rounded-lg w-full max-w-sm">
         <h1 className="text-2xl font-bold text-white mb-6">{t("title")}</h1>
+
+        {tokenError === "invalid-token" && (
+          <p className="text-red-400 text-sm mb-4">{t("invalidToken")}</p>
+        )}
+
+        {searchParams.get("reset") === "1" && (
+          <p className="text-lime-400 text-sm mb-4">{t("resetSuccess")}</p>
+        )}
 
         <form action={handleSubmit} className="flex flex-col gap-4">
           <input
@@ -47,6 +58,12 @@ export default function LoginPage() {
         </form>
 
         <p className="text-gray-400 text-sm mt-4">
+          <Link href="/forgot-password" className="text-lime-400 hover:underline">
+            {t("forgotPassword")}
+          </Link>
+        </p>
+
+        <p className="text-gray-400 text-sm mt-2">
           {t("noAccount")}{" "}
           <Link href="/register" className="text-lime-400 hover:underline">
             {t("register")}

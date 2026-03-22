@@ -9,7 +9,21 @@
     "comingSoon": "Em breve",
     "noChipsYet": "Ainda sem fichas — comece a treinar!",
     "fourColorDeck": "Baralho de 4 cores",
-    "fourColorDeckHint": "♠ preto  ♥ vermelho  ♦ azul  ♣ verde"
+    "fourColorDeckHint": "♠ preto  ♥ vermelho  ♦ azul  ♣ verde",
+    "accountSettings": "Conta",
+    "appSettings": "Definições da app",
+    "change": "Alterar",
+    "currentPassword": "Palavra-passe actual",
+    "newPassword": "Nova palavra-passe",
+    "changePasswordSubmit": "Actualizar palavra-passe",
+    "passwordChanged": "Palavra-passe actualizada.",
+    "wrongPassword": "A palavra-passe actual está incorrecta.",
+    "delete": "Eliminar",
+    "deleteConfirmTitle": "Eliminar a sua conta?",
+    "deleteConfirmBody": "A sua conta e todos os dados pessoais serão eliminados. Isto não pode ser desfeito.",
+    "deleteConfirmPassword": "Introduza a sua palavra-passe para confirmar",
+    "deleteConfirmButton": "Eliminar conta permanentemente",
+    "cancel": "Cancelar"
   },
   "achievements": {
     "unlocked": "Conquista desbloqueada!",
@@ -41,7 +55,7 @@
     "logout": "Terminar sessão",
     "register": "Registar",
     "hallOfFame": "Salão da Fama",
-    "streakDays": "{days} dias seguidos",
+    "streakDays": "{days} dias treinados seguidos",
     "streakKeep": "Treine hoje para manter a sua sequência",
     "streakStart": "Treine hoje para começar a sua sequência"
   },
@@ -85,7 +99,10 @@
     "password": "Palavra-passe",
     "submit": "Iniciar sessão",
     "noAccount": "Sem conta?",
-    "register": "Registar"
+    "register": "Registar",
+    "invalidToken": "Este link de verificação é inválido ou expirou. Solicite um novo.",
+    "forgotPassword": "Esqueceu a palavra-passe?",
+    "resetSuccess": "A sua palavra-passe foi redefinida. Inicie sessão."
   },
   "register": {
     "title": "Registar",
@@ -171,11 +188,73 @@
     "you": "você",
     "footnote": "* Pontuação = soma das pontuações de mão × peso de dificuldade — Principiante ×1, Intermédio ×1,5, Avançado ×2, Especialista ×2,5"
   },
+  "forgotPassword": {
+    "title": "Redefinir palavra-passe",
+    "email": "E-mail",
+    "submit": "Enviar link",
+    "sending": "A enviar...",
+    "success": "Se existir uma conta com esse e-mail, enviámos um link para redefinir a palavra-passe.",
+    "backToLogin": "Voltar ao início de sessão",
+    "rateLimited": "Aguarde antes de solicitar outro e-mail."
+  },
+  "resetPassword": {
+    "title": "Nova palavra-passe",
+    "password": "Nova palavra-passe",
+    "confirmPassword": "Confirmar palavra-passe",
+    "submit": "Redefinir palavra-passe",
+    "mismatch": "As palavras-passe não coincidem.",
+    "success": "Palavra-passe redefinida. Pode iniciar sessão.",
+    "invalidToken": "Este link é inválido ou expirou.",
+    "requestNew": "Solicitar novo link",
+    "backToLogin": "Voltar ao início de sessão"
+  },
+  "emailVerification": {
+    "banner": "Por favor, verifique o seu e-mail. Consulte a sua caixa de entrada.",
+    "resend": "Reenviar",
+    "sending": "A enviar...",
+    "sent": "E-mail de verificação enviado!",
+    "waitBeforeResend": "Aguarde antes de solicitar outro e-mail.",
+    "verified": "O seu e-mail foi verificado com sucesso!",
+    "emailStatus": "Verificação de e-mail",
+    "unverified": "Não verificado",
+    "verifiedLabel": "Verificado"
+  },
+  "guestBanner": {
+    "message": "Está a treinar como convidado. Registe-se para guardar o seu progresso.",
+    "register": "Registar gratis"
+  },
   "difficulty": {
     "1": "Principiante",
     "2": "Intermédio",
     "3": "Avançado",
     "4": "Especialista",
     "locked": "Completa o nível anterior para desbloquear"
+  },
+  "rangeTraining": {
+    "dealing": "A distribuir...",
+    "error": "Não foi possível carregar a ronda.",
+    "positionLabel": "A sua posição",
+    "positionUTG": "UTG — Under the Gun",
+    "positionMP": "MP — Middle Position",
+    "positionCO": "CO — Cutoff",
+    "positionBTN": "BTN — Button",
+    "positionSB": "SB — Small Blind",
+    "selectHands": "Selecione todas as mãos que abriria a partir desta posição.",
+    "play": "Jogar",
+    "fold": "Fold",
+    "shouldPlay": "Jogar",
+    "shouldFold": "Fold",
+    "submit": "Verificar",
+    "evaluating": "A avaliar...",
+    "nextRound": "Próxima ronda",
+    "openingRange": "Range de abertura: Top {percent}%",
+    "warmup": "Aquecimento: {count}/{window} rondas",
+    "last100": "Últimas {window} rondas",
+    "readyToUnlock": "Pronto para desbloquear {name}!",
+    "ptsNeeded": "{pts} pts para desbloquear {name}",
+    "unlocked": "Desbloqueado",
+    "explanation1": "Vê uma posição na mesa e 5 mãos iniciais. Marque quais abriria (subiria) a partir dessa posição.",
+    "explanation2": "Os ranges de abertura variam conforme a posição. Under the Gun (primeiro a agir) precisa de mãos muito mais fortes porque ainda há muitos jogadores por agir. O Button (último a agir) pode abrir muito amplo porque a vantagem posicional compensa mãos mais fracas.",
+    "explanation3": "Estes são ranges padrão TAG (Tight-Aggressive) para 6-max. Os ranges reais variam conforme o tipo de jogador e a dinâmica da mesa, mas dominar estes fundamentos é essencial antes de ajustar."
   }
 }

@@ -42,6 +42,15 @@ export const TEXT_COLOR: Record<Street, string> = {
 };
 
 export const SKILL_CARDS: SkillCard[] = [
+  // ── Preflop Range Selection — Level 1 entry point ─────────────────────────
+  {
+    id: "preflop-ranges",
+    labelKey: "preflopRanges",
+    href: "/train/ranges/preflop",
+    progressModule: "preflop-ranges",
+    minRole: "guest",
+    tags: { street: "preflop", level: 1 },
+  },
   // ── Equity: Hand vs Hand ────────────────────────────────────────────────
   {
     id: "hand-vs-hand",
@@ -49,7 +58,8 @@ export const SKILL_CARDS: SkillCard[] = [
     href: "/train/equity/hand-vs-hand",
     progressModule: "hand-vs-hand",
     minRole: "guest",
-    tags: { street: "preflop", level: 1 },
+    precondition: "preflop-ranges",
+    tags: { street: "preflop", level: 2 },
   },
   // ── Equity: Street by Street ──────────────────────────────────────────────
   {
@@ -59,7 +69,7 @@ export const SKILL_CARDS: SkillCard[] = [
     progressModule: "hand-vs-range",
     minRole: "guest",
     precondition: "hand-vs-hand",
-    tags: { street: "preflop", level: 1 },
+    tags: { street: "preflop", level: 2 },
   },
   {
     id: "equity-flop",
@@ -68,7 +78,7 @@ export const SKILL_CARDS: SkillCard[] = [
     progressModule: "hand-vs-range-flop",
     minRole: "guest",
     precondition: "equity-preflop",
-    tags: { street: "flop", level: 1 },
+    tags: { street: "flop", level: 2 },
   },
   {
     id: "equity-turn",
@@ -77,7 +87,7 @@ export const SKILL_CARDS: SkillCard[] = [
     progressModule: "hand-vs-range-turn",
     minRole: "registered",
     precondition: "equity-flop",
-    tags: { street: "turn", level: 1 },
+    tags: { street: "turn", level: 2 },
   },
   {
     id: "equity-river",
@@ -86,7 +96,7 @@ export const SKILL_CARDS: SkillCard[] = [
     progressModule: "hand-vs-range-river",
     minRole: "registered",
     precondition: "equity-turn",
-    tags: { street: "river", level: 1 },
+    tags: { street: "river", level: 2 },
   },
   // ── Pot Odds ──────────────────────────────────────────────────────────────
   {
@@ -96,7 +106,7 @@ export const SKILL_CARDS: SkillCard[] = [
     progressModule: "pot-odds",
     minRole: "guest",
     precondition: "equity-river",
-    tags: { street: "general", level: 1 },
+    tags: { street: "general", level: 2 },
   },
   {
     id: "pot-odds-combined",
@@ -105,31 +115,26 @@ export const SKILL_CARDS: SkillCard[] = [
     progressModule: "combined-pot-odds",
     minRole: "registered",
     precondition: "pot-odds",
-    tags: { street: "general", level: 1 },
+    tags: { street: "general", level: 2 },
   },
   // ── Coming Soon ───────────────────────────────────────────────────────────
-  {
-    id: "preflop-ranges",
-    labelKey: "preflopRanges",
-    minRole: "guest",
-    tags: { street: "preflop", level: 2 },
-  },
   {
     id: "cbet-basics",
     labelKey: "cbetBasics",
     minRole: "guest",
-    tags: { street: "flop", level: 2 },
+    tags: { street: "flop", level: 3 },
   },
   {
     id: "opponent-types",
     labelKey: "opponentTypes",
     minRole: "guest",
-    tags: { street: "general", level: 2 },
+    tags: { street: "general", level: 3 },
   },
 ];
 
 /** Map handModule (used by EquityTraining) → progressModule (used by SKILL_CARDS) */
 const HAND_MODULE_TO_PROGRESS: Record<string, string> = {
+  "preflop-ranges": "preflop-ranges",
   "hand-vs-hand": "hand-vs-hand",
   preflop: "hand-vs-range",
   flop: "hand-vs-range-flop",

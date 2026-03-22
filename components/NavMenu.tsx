@@ -45,13 +45,16 @@ export default function NavMenu({
           <>
             <Link href="/account" className="text-gray-400 hover:text-white text-sm flex items-center gap-2">
               <span
-                title={streak === 0 ? t("streakStart") : trainedToday ? t("streakDays", { days: streak }) : t("streakKeep")}
-                className={`relative inline-flex items-end justify-center w-7 h-9 transition-all duration-700 ${trainedToday ? "" : "grayscale"}`}
+                className={`relative inline-flex items-end justify-center w-7 h-9 transition-all duration-700 group/streak ${trainedToday ? "" : "grayscale"}`}
               >
                 <span className="text-3xl leading-none absolute top-0">🔥</span>
                 {streak > 0 && (
                   <span className={`relative z-10 font-black text-base leading-none mb-3 ${trainedToday ? "text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.9),0_0_6px_rgba(0,0,0,0.7)]" : "text-black"}`}>{streak}</span>
                 )}
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-3 py-2 rounded-lg bg-gray-700 border border-gray-600 text-gray-200 text-xs font-medium whitespace-nowrap shadow-lg opacity-0 group-hover/streak:opacity-100 pointer-events-none transition-opacity duration-150 z-20">
+                  {streak === 0 ? t("streakStart") : trainedToday ? t("streakDays", { days: streak }) : t("streakKeep")}
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full w-0 h-0 border-x-[6px] border-x-transparent border-b-[6px] border-b-gray-700" />
+                </div>
               </span>
               {username}
             </Link>

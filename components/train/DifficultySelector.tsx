@@ -43,7 +43,7 @@ export default function DifficultySelector({
               onChange(level);
             }}
             title={!isUnlocked ? td("locked") : ""}
-            className={`flex items-center justify-center gap-1.5 min-w-[7.5rem] px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+            className={`flex items-center justify-center gap-1.5 min-w-[9rem] px-3 py-1.5 rounded text-sm font-medium transition-colors ${
               difficulty === level
                 ? "bg-lime-600 text-white"
                 : isUnlocked

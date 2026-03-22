@@ -1,0 +1,98 @@
+HoldEmSense — Roadmap
+=====================
+
+Stand: 21.03.2026
+Aktuell: 7 Equity-Module + Leak-Fixing, 4 Schwierigkeitsgrade, 4 Sprachen
+
+
+═══════════════════════════════════════════════════════════════
+PHASE 1 — Beta-Launch (zahlungsfähig)
+Ziel: Bezahl-Beta mit 8 bestehenden Modulen
+Zeitrahmen: ~2-3 Wochen
+═══════════════════════════════════════════════════════════════
+
+--- Blocker ---
+
+[ ] Paddle-Payment-Integration (Abo-Verwaltung: kündigen, upgraden)
+[x] E-Mail-Verifizierung bei Registrierung (Resend, Domain holdemsense.com verifiziert)
+[x] Passwort-Reset (Forgot-Password + Reset-Formular, 1h Token-Expiry)
+[ ] Impressum (vollständige Anbieterkennzeichnung)
+[ ] Datenschutzerklärung (DSGVO-konform)
+[ ] AGB mit Widerrufsbelehrung (14 Tage bei digitalen Diensten)
+[ ] Cookie-Consent-Banner
+
+--- Bugs fixen ---
+
+[x] Equity Leak: 33% richtig geklickt, aber Fehler angezeigt
+[ ] Zeitabstände im Leak-Training immer "1 hour" statt echte Werte
+[ ] Pot-Odds-Tooltip irreführend bei mehreren Gegnern
+[ ] Leak Training darf Score nicht verändern
+
+--- Wichtig ---
+
+[ ] Gast-Fortschritt bei Registrierung übernehmen
+[ ] Mobile: nach "Next Hand" nach oben scrollen
+[ ] Mobile: Matrix und Info-Panel als Overlay (Leaks)
+[ ] Onboarding-Leitfaden: Wo anfangen? Reihenfolge, Schwierigkeiten
+[ ] Error-Monitoring (Sentry o.ä.)
+[ ] DB-Backup-Strategie
+[ ] Mobile UX Gesamtcheck (Streaks-Platzierung, Drawer-Verhalten)
+
+--- Gast-Erlebnis ---
+
+[ ] Tooltip-Änderung nach Beginner-Durchspiel als Gast
+    ("Intermediate nur für registrierte User" + Registrierungs-Hinweis)
+[ ] Unlock als Gast: REG-Sperre statt erneuter Schwellen-Anzeige
+
+
+═══════════════════════════════════════════════════════════════
+PHASE 2 — Vollversion (10-12 Module)
+Ziel: Ganzheitlicher Poker-Grundlagen-Trainer
+Zeitrahmen: +4-6 Wochen nach Beta
+═══════════════════════════════════════════════════════════════
+
+--- Neue Trainingsmodule ---
+
+[ ] Odds & Outs — logische Erweiterung Pot Odds, hoher Lernwert
+[ ] Preflop Ranges — welche Hände in welcher Position spielen
+[ ] C-Bet Basics — Post-Flop-Entscheidungen
+[ ] Opponent Types — Spielertypen erkennen und anpassen
+
+--- Features ---
+
+[ ] Dashboard / Home mit Fortschrittsübersicht
+[ ] Startseite überarbeiten
+[ ] Pro-Pläne darstellen
+[ ] Schwierigkeiten-Wechsel: immer auf höchster freigeschalteter einsteigen
+[ ] Kartensortierung
+[ ] Fortschritt resetten (Account-Seite)
+[ ] Pot Odds für SB & BB
+
+
+═══════════════════════════════════════════════════════════════
+PHASE 3 — Polish & Wachstum
+═══════════════════════════════════════════════════════════════
+
+[ ] Sounds
+[ ] Avatar-System (als Belohnungen)
+[ ] Default-Sprache pro User
+[ ] Eigene Trainingsziele setzen
+[ ] Geschenkgutscheine
+[ ] Cheat Tools / Equity Calculator
+
+
+═══════════════════════════════════════════════════════════════
+Hinweise
+═══════════════════════════════════════════════════════════════
+
+Paddle als Merchant of Record:
+  - Übernimmt Umsatzsteuer, Compliance, Rechnungsstellung
+  - Keine eigene USt-Registrierung nötig
+  - Unterstützt monatliche und jährliche Abos
+
+Prinzip: Beta mit funktionierender Kernschleife launchen
+(trainieren → Fortschritt → Schwächen üben), dann iterieren.
+
+--- Deployment ---
+
+[ ] Cronjob: gelöschte Userdaten mailen, anonymisieren

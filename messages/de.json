@@ -9,7 +9,21 @@
     "comingSoon": "Demnächst",
     "noChipsYet": "Noch keine Chips — fang an zu trainieren!",
     "fourColorDeck": "4-Farben-Blatt",
-    "fourColorDeckHint": "♠ schwarz  ♥ rot  ♦ blau  ♣ grün"
+    "fourColorDeckHint": "♠ schwarz  ♥ rot  ♦ blau  ♣ grün",
+    "accountSettings": "Konto",
+    "appSettings": "App-Einstellungen",
+    "change": "Ändern",
+    "currentPassword": "Aktuelles Passwort",
+    "newPassword": "Neues Passwort",
+    "changePasswordSubmit": "Passwort aktualisieren",
+    "passwordChanged": "Passwort erfolgreich geändert.",
+    "wrongPassword": "Aktuelles Passwort ist falsch.",
+    "delete": "Löschen",
+    "deleteConfirmTitle": "Konto löschen?",
+    "deleteConfirmBody": "Dein Konto und alle persönlichen Daten werden gelöscht. Das kann nicht rückgängig gemacht werden.",
+    "deleteConfirmPassword": "Gib dein Passwort zur Bestätigung ein",
+    "deleteConfirmButton": "Konto endgültig löschen",
+    "cancel": "Abbrechen"
   },
   "achievements": {
     "unlocked": "Achievement freigeschaltet!",
@@ -46,7 +60,7 @@
     "logout": "Abmelden",
     "register": "Registrieren",
     "hallOfFame": "Hall of Fame",
-    "streakDays": "{days} Tage in Folge",
+    "streakDays": "{days} Tage in Folge erfolgreich trainiert",
     "streakKeep": "Trainiere heute um deinen Streak zu erhalten",
     "streakStart": "Trainiere heute um deinen Streak zu starten",
     "leakTraining": "Leaks fixen"
@@ -91,7 +105,10 @@
     "password": "Passwort",
     "submit": "Anmelden",
     "noAccount": "Noch kein Konto?",
-    "register": "Registrieren"
+    "register": "Registrieren",
+    "invalidToken": "Dieser Bestätigungslink ist ungültig oder abgelaufen. Bitte fordere einen neuen an.",
+    "forgotPassword": "Passwort vergessen?",
+    "resetSuccess": "Dein Passwort wurde zurückgesetzt. Bitte melde dich an."
   },
   "register": {
     "title": "Registrieren",
@@ -255,7 +272,7 @@
     "potOdds": "Pot Odds: Benötigte Equity",
     "potOddsCombined": "Pot Odds: Equity + Entscheidung",
     "leakTraining": "Leak-Training",
-    "preflopRanges": "Preflop-Ranges",
+    "preflopRanges": "Preflop-Ranges 6-max",
     "cbetBasics": "C-Bet Grundlagen",
     "opponentTypes": "Gegnertypen",
     "lockTooltip": "Zuerst \"{module}\" auf Beginner bestehen",
@@ -266,8 +283,45 @@
       "turn": "Turn",
       "river": "River",
       "general": "Allgemein",
-      "hidePassed": "Bestandene ausblenden"
+      "hidePassed": "Bestandene ausblenden",
+      "streetLabel": "Street",
+      "levelLabel": "Level"
     }
+  },
+  "forgotPassword": {
+    "title": "Passwort zurücksetzen",
+    "email": "E-Mail",
+    "submit": "Link senden",
+    "sending": "Wird gesendet...",
+    "success": "Falls ein Konto mit dieser E-Mail existiert, haben wir einen Link zum Zurücksetzen gesendet.",
+    "backToLogin": "Zurück zum Login",
+    "rateLimited": "Bitte warte, bevor du eine neue E-Mail anforderst."
+  },
+  "resetPassword": {
+    "title": "Neues Passwort setzen",
+    "password": "Neues Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "submit": "Passwort zurücksetzen",
+    "mismatch": "Passwörter stimmen nicht überein.",
+    "success": "Passwort erfolgreich zurückgesetzt. Du kannst dich jetzt anmelden.",
+    "invalidToken": "Dieser Link ist ungültig oder abgelaufen.",
+    "requestNew": "Neuen Link anfordern",
+    "backToLogin": "Zurück zum Login"
+  },
+  "emailVerification": {
+    "banner": "Bitte bestätige deine E-Mail-Adresse. Prüfe deinen Posteingang.",
+    "resend": "Erneut senden",
+    "sending": "Wird gesendet...",
+    "sent": "Bestätigungs-E-Mail gesendet!",
+    "waitBeforeResend": "Bitte warte, bevor du eine neue E-Mail anforderst.",
+    "verified": "Deine E-Mail wurde erfolgreich bestätigt!",
+    "emailStatus": "E-Mail-Verifizierung",
+    "unverified": "Nicht bestätigt",
+    "verifiedLabel": "Bestätigt"
+  },
+  "guestBanner": {
+    "message": "Du trainierst als Gast. Registriere dich, um deinen Fortschritt dauerhaft zu speichern.",
+    "register": "Jetzt kostenlos registrieren"
   },
   "skillTree": {
     "title": "Skill-Baum",
@@ -280,9 +334,36 @@
     "turnEquity": "Turn Equity",
     "riverEquity": "River Equity",
     "leakTraining": "Leak-Training",
-    "preflopRanges": "Preflop-Ranges",
+    "preflopRanges": "Preflop-Ranges 6-max",
     "opponentTypes": "Gegnertypen",
     "cashGame": "Cash Game",
     "tournament": "Turnier"
+  },
+  "rangeTraining": {
+    "dealing": "Wird ausgeteilt...",
+    "error": "Runde konnte nicht geladen werden.",
+    "positionLabel": "Deine Position",
+    "positionUTG": "UTG — Under the Gun",
+    "positionMP": "MP — Middle Position",
+    "positionCO": "CO — Cutoff",
+    "positionBTN": "BTN — Button",
+    "positionSB": "SB — Small Blind",
+    "selectHands": "Wähle alle Hände aus, die du von dieser Position eröffnen würdest.",
+    "play": "Spielen",
+    "fold": "Fold",
+    "shouldPlay": "Spielen",
+    "shouldFold": "Fold",
+    "submit": "Prüfen",
+    "evaluating": "Wird ausgewertet...",
+    "nextRound": "Nächste Runde",
+    "openingRange": "Opening Range: Top {percent}%",
+    "warmup": "Aufwärmen: {count}/{window} Runden",
+    "last100": "Letzte {window} Runden",
+    "readyToUnlock": "Bereit {name} freizuschalten!",
+    "ptsNeeded": "{pts} Punkte bis {name} freigeschaltet wird",
+    "unlocked": "Freigeschaltet",
+    "explanation1": "Du siehst eine Tischposition und 5 Starthände. Markiere, welche du von dieser Position eröffnen (raisen) würdest.",
+    "explanation2": "Opening Ranges variieren je nach Position. Under the Gun (erster Spieler) braucht viel stärkere Hände, weil noch viele Spieler dran sind. Der Button (letzter Spieler) kann sehr breit eröffnen, weil der Positionsvorteil schwächere Hände kompensiert.",
+    "explanation3": "Das sind Standard-TAG-Ranges (Tight-Aggressive) für 6-max. Echte Ranges variieren je nach Spielertyp und Tischdynamik — aber diese Grundlagen zu beherrschen ist essenziell, bevor man anpasst."
   }
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { login } from "@/lib/actions/auth";
 import Logo from "@/components/Logo";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 function Check() {
@@ -12,6 +13,7 @@ function Check() {
 export default function Home() {
   const [loginError, setLoginError] = useState("");
   const t = useTranslations("home");
+  const tl = useTranslations("login");
 
   async function handleLogin(formData: FormData) {
     setLoginError("");
@@ -121,6 +123,9 @@ export default function Home() {
           >
             {t("signIn")}
           </button>
+          <Link href="/forgot-password" className="text-lime-400 hover:underline text-sm text-center">
+            {tl("forgotPassword")}
+          </Link>
         </form>
       </div>
 

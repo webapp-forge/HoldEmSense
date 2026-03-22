@@ -12,12 +12,26 @@ model User {
   email         String          @unique
   username      String          @unique
   passwordHash  String
+  emailVerified DateTime?
   isPremium     Boolean         @default(false)
   isAdmin       Boolean         @default(false)
+  deletedAt     DateTime?
   createdAt     DateTime        @default(now())
   trainingHands TrainingHand[]
+  rangeRounds   RangeTrainingRound[]
   progress      UserProgress[]
   achievements  Achievement[]
+}
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  type      String   @default("email-verification")
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email, type])
 }
 
 model Achievement {
@@ -105,6 +119,25 @@ model HandEquityMatrix {
   equity     Float
   iterations Int
   updatedAt  DateTime @updatedAt
+}
+
+model RangeTrainingRound {
+  id             String   @id @default(cuid())
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id])
+  guestId        String?
+  module         String   @default("preflop-ranges")
+  difficulty     Int
+  position       String
+  handTypes      String
+  correctAnswers String
+  userAnswers    String?
+  pointsScored   Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId, module, difficulty])
+  @@index([guestId, module, difficulty])
 }
 
 model AppConfig {
